@@ -6,6 +6,6 @@ Team Members:
 Anthony Truong
 Hanu Mayilvahanan
 Kevin Le
-Adshayan Ahilan
+Akshayan Ahilan
 Januston Nicholas
 Haris Waheed

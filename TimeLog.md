@@ -5,3 +5,4 @@
 |05/31/2023       |  1              |  4              |  4              |  4              |  4              |  4              | Practicing App Presentation and Presenting to class
 |05/31/2023       |  3              |  3              |  3              |  3              |  3              |  3              | App Proposal
 |06/8/2023        |  2              |  2              |  2              |  2              |  2              |  2              | Project Setup and Init
+|08/8/2023        |                 |                 |                 |  5              |                 |                 | Navigation and Setup
