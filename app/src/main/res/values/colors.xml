@@ -7,4 +7,10 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    /* ShortEase Color Scheme*/
+    <color name="shortease_white">#FFFFFFFF</color>
+    <color name="shortease_red">#F63959</color>
+    <color name="shortease_grey">#F3F3F3</color>
+    <color name="shortease_black">#333333</color>
 </resources>
