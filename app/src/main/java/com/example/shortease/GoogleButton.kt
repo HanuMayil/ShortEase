@@ -22,18 +22,19 @@ import androidx.compose.ui.unit.dp
 import com.example.shortease.ui.theme.Shapes
 import com.example.shortease.ui.theme.ShortEaseTheme
 import com.example.shortease.ui.theme.colorPalette
+import com.google.firebase.auth.FirebaseAuth
 
 
 @ExperimentalMaterial3Api
 @Composable
 fun GoogleButton() {
     var clicked by remember { mutableStateOf(false) }
+
     ShortEaseTheme {
         Surface(
             onClick = { clicked = !clicked },
-            shape = Shapes.medium,
-            border = BorderStroke(1.dp, color = colorPalette.ShortEaseGrey),
-            color = colorPalette.ShortEaseRed
+            shape = Shapes.large,
+            color = colorPalette.ShortEaseRed,
         ) {
             Row (
                 modifier = Modifier.padding(
