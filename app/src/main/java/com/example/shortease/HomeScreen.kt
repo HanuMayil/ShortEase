@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.shortease.ui.theme.colorPalette
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +34,7 @@ fun HomeScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Surface(modifier = Modifier.fillMaxSize(), color = lightColorScheme().background) {
+        Surface(modifier = Modifier.fillMaxSize(), color = colorPalette.ShortEaseWhite) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

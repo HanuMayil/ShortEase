@@ -16,15 +16,15 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-        primary = ShortEaseRed,
-        secondary = ShortEaseGrey,
-        background = ShortEaseBlack
+        primary = colorPalette.ShortEaseRed,
+        secondary = colorPalette.ShortEaseGrey,
+        background = colorPalette.ShortEaseBlack
 )
 
 private val LightColorScheme = lightColorScheme(
-        primary = ShortEaseRed,
-        secondary = ShortEaseGrey,
-        background = ShortEaseWhite
+        primary = colorPalette.ShortEaseRed,
+        secondary = colorPalette.ShortEaseGrey,
+        background = colorPalette.ShortEaseWhite
 
         /* Other default colors to override
     surface = Color(0xFFFFFBFE),

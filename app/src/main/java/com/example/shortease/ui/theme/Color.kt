@@ -2,7 +2,16 @@ package com.example.shortease.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val ShortEaseRed = Color(0xF63959)
-val ShortEaseWhite = Color(0xFFFFFFFF)
-val ShortEaseGrey = Color(0xF3F3F3)
-val ShortEaseBlack = Color(0x333333)
+data class ColorPalette(
+    val ShortEaseRed: Color,
+    val ShortEaseWhite: Color,
+    val ShortEaseGrey: Color,
+    val ShortEaseBlack: Color
+)
+
+val colorPalette = ColorPalette(
+    ShortEaseRed = Color(0xFFEC405F),
+    ShortEaseWhite = Color(0xFFFFFFFF),
+    ShortEaseGrey = Color(0xEEFFFFFF),
+    ShortEaseBlack = Color(0xDF333333)
+)
