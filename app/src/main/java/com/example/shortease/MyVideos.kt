@@ -41,6 +41,6 @@ fun MyVideos(
 
 @Composable
 @Preview
-fun MyVideosPreview() {
+private fun MyVideosPreview() {
     MyVideos(navController = rememberNavController())
 }
