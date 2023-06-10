@@ -33,10 +33,10 @@ fun GoogleButton() {
     var clicked by remember { mutableStateOf(false) }
     ShortEaseTheme {
         Surface(
-            color = lightColorScheme().primary,
             onClick = { clicked = !clicked },
             shape = Shapes.medium,
-            border = BorderStroke(1.dp, color = lightColorScheme().secondary)
+            border = BorderStroke(1.dp, color = lightColorScheme().secondary),
+            color = darkColorScheme().primary
         ) {
             Row (
                 modifier = Modifier.padding(
@@ -62,7 +62,6 @@ fun GoogleButton() {
                             .width(16.dp),
                         strokeWidth = 2.dp,
                         color = lightColorScheme().background
-
                     )
                 }
             }
