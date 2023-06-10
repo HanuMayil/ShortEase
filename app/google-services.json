@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "738134261328",
+    "project_id": "shortease-fb843",
+    "storage_bucket": "shortease-fb843.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:738134261328:android:b2a02f84676ca85f825b55",
+        "android_client_info": {
+          "package_name": "com.example.shortease"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "738134261328-tfsbodjj6vr72js3cf9ak1tg2fimhstd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6p1QRGCj2rvVaOwe055M1fNS_swyzhlk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "738134261328-tfsbodjj6vr72js3cf9ak1tg2fimhstd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

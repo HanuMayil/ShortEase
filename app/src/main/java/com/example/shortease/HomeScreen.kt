@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -22,7 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.shortease.ui.theme.colorPalette
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     navController: NavController
@@ -31,9 +34,11 @@ fun HomeScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Surface(modifier = Modifier.fillMaxSize(), color = lightColorScheme().background) {
+        Surface(modifier = Modifier.fillMaxSize(), color = colorPalette.ShortEaseWhite) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(top = 150.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 150.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Image(
@@ -43,6 +48,7 @@ fun HomeScreen(
                         .size(320.dp)
                         .padding(bottom = 16.dp)
                 )
+                GoogleButton()
                 Text(
                     modifier = Modifier.clickable {
                         navController.navigate(route = Screen.MyVideos.route)
@@ -56,7 +62,7 @@ fun HomeScreen(
 
 @Composable
 @Preview
-fun HomeScreenPreview() {
+private fun HomeScreenPreview() {
     HomeScreen(
         navController = rememberNavController()
     )
