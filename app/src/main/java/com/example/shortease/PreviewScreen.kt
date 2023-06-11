@@ -66,7 +66,7 @@ fun PreviewScreen(
                         }
                     ) {
                         Image(
-                            painter = painterResource(R.drawable.arrow_pointing_right_in_a_circle__1__3),
+                            painter = painterResource(R.drawable.back_button),
                             contentDescription = "Back",
                         )
                     }
@@ -76,7 +76,7 @@ fun PreviewScreen(
                         navController.navigate(route = Screen.HomeScreen.route)
                     }) {
                         Image(
-                            painter = painterResource(R.drawable.home_1),
+                            painter = painterResource(R.drawable.home_button),
                             contentDescription = "Home button",
                         )
                     }
@@ -126,7 +126,7 @@ fun PreviewScreen(
 
                         ) {
                             Image(
-                                painter = painterResource(R.drawable.download),
+                                painter = painterResource(R.drawable.download_icon),
                                 contentDescription = "Download",
                             )
                         }
@@ -143,7 +143,7 @@ fun PreviewScreen(
                             )
                         ) {
                             Image(
-                                painter = painterResource(R.drawable.upload),
+                                painter = painterResource(R.drawable.upload_icon),
                                 contentDescription = "Upload",
                             )
                         }
