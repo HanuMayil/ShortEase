@@ -9,3 +9,4 @@
 | 09/8/2023  | 2    |         |       | 1        |          |       | Homepage UI Cleanup                                 |
 | 09/8/2023  | 4    |         |       | 1        |          |       | Adding Google Button for Login and Colour Pallete   |
 | 10/8/2023  | 4    |         |       | 5        |          |       | Clean Up UI and Start Google Auth                   |
+| 06/11/2023 |      |         |       |          |          | 5     | Initial creation of video page 
