@@ -32,9 +32,8 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun GoogleButton() {
     var clicked by remember { mutableStateOf(false) }
-    var signInActivityObject = SignInActivity()
     ShortEaseTheme {
-        val button = Button(
+        Button(
             onClick = { clicked = !clicked },
             shape = Shapes.large,
             colors = ButtonDefaults.buttonColors(

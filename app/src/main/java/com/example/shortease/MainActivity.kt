@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
                 navController.navigate(route = Screen.MyVideos.route)
             }
             else {
-                navController.navigate(route = Screen.HomeScreen.route)
+                navController.navigate(route = Screen.SignIn.route)
             }
         }, 1000)
     }
