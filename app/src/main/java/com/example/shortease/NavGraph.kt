@@ -7,7 +7,8 @@ import androidx.navigation.compose.composable
 
 @Composable
 fun SetupNavGraph(
-    navController: NavHostController
+    navController: NavHostController,
+    signInClicked: () -> Unit?
 ) {
     NavHost(
         navController = navController,
@@ -16,7 +17,7 @@ fun SetupNavGraph(
         composable(
             route = Screen.HomeScreen.route
         ) {
-            HomeScreen(navController)
+            HomeScreen(navController, signInClicked)
         }
         composable(
             route = Screen.MyVideos.route

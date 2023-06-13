@@ -63,6 +63,7 @@ dependencies {
     // Libraries
     implementation 'androidx.navigation:navigation-runtime-ktx:2.6.0'
     implementation 'com.google.firebase:firebase-auth-ktx:21.1.0'
+    implementation 'com.google.firebase:firebase-auth:21.1.0'
     def nav_version = '2.5.3'
     implementation "androidx.navigation:navigation-compose:$nav_version"
     implementation 'androidx.core:core-ktx:1.8.0'
