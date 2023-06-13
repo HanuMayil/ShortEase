@@ -11,3 +11,4 @@
 | 10/8/2023  | 4    |         |       | 5        |          |       | Clean Up UI and Start Google Auth                    |
 | 06/11/2023 |      |         |       |          |          | 5     | Initial creation of video page                       |
 | 06/11/2023 |      |         | 3     |          |          |       | Created UI for preview screen and added debug screen |
+| 06/12/2023 | 5    |         |       | 8        |          |       | Start creating Firebase Authentication workflows     |
