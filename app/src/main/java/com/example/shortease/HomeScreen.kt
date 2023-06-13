@@ -25,6 +25,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.shortease.ui.theme.colorPalette
 
+var signInActivityObj = SignInActivity()
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -48,7 +49,7 @@ fun HomeScreen(
                         .size(320.dp)
                         .padding(bottom = 16.dp)
                 )
-                GoogleButton()
+                signInActivityObj.GoogleButton()
                 Text(
                     modifier = Modifier.clickable {
                         navController.navigate(route = Screen.MyVideos.route)

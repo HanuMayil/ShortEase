@@ -1,12 +1,15 @@
 package com.example.shortease
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -29,12 +32,14 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun GoogleButton() {
     var clicked by remember { mutableStateOf(false) }
-
+    var signInActivityObject = SignInActivity()
     ShortEaseTheme {
-        Surface(
+        val button = Button(
             onClick = { clicked = !clicked },
             shape = Shapes.large,
-            color = colorPalette.ShortEaseRed,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorPalette.ShortEaseRed
+            )
         ) {
             Row (
                 modifier = Modifier.padding(
@@ -63,7 +68,6 @@ fun GoogleButton() {
                     )
                 }
             }
-
         }
     }
 }
