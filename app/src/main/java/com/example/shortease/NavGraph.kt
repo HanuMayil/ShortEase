@@ -23,5 +23,10 @@ fun SetupNavGraph(
         ) {
             MyVideos(navController)
         }
+        composable(
+            route = Screen.Generate.route
+        ) {
+            Generate(navController)
+        }
     }
 }
