@@ -33,6 +33,7 @@ import com.example.shortease.ui.theme.colorPalette
 import java.nio.file.Files.size
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 
 
 @Composable
@@ -48,15 +49,16 @@ fun Generate( navController: NavController) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 245.dp),
+                        .padding(top = 300.dp, bottom = 40.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                     Image(
-                        painter = painterResource(R.drawable.spinner_loading_1),
-                        contentDescription = "Loading Icon",
+                    CircularProgressIndicator(
                         modifier = Modifier
-                            .size(190.dp)
-                            .padding(vertical = 16.dp)
+                            .height(55.dp)
+                            .width(40.dp),
+                        strokeWidth = 2.dp,
+                        color = colorPalette.ShortEaseRed
+
                     )
                     Text(message(navController), color = colorPalette.ShortEaseRed,
                         fontSize = 22.sp)
