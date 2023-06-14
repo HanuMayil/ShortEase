@@ -2,8 +2,6 @@ package com.example.shortease
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -22,11 +20,9 @@ class MainActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
-
     companion object {
         const val RC_SIGN_IN = 100
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,29 +36,49 @@ class MainActivity : ComponentActivity() {
             .build()
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
+        firebaseAuth = FirebaseAuth.getInstance()
+        val user = firebaseAuth.currentUser
 
         setContent {
             ShortEaseTheme {
                 navController = rememberNavController()
-                SetupNavGraph(navController = navController) { signIn() }
+                    SetupNavGraph(
+                        navController = navController,
+                        startDestination = if(user != null) Screen.MyVideos.route else Screen.HomeScreen.route,
+                        signInClicked = { signIn() },
+                        signOutClicked = { signOut() }
+                    )
+                }
             }
         }
-
-        firebaseAuth = FirebaseAuth.getInstance()
-        val user = firebaseAuth.currentUser
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (user != null) {
-                navController.navigate(route = Screen.MyVideos.route)
-            } else {
-                navController.navigate(route = Screen.HomeScreen.route)
-            }
-        }, 1000)
-    }
 
     private fun signIn() {
         val signInIntent = googleSignInClient.signInIntent
         startActivityForResult(signInIntent, RC_SIGN_IN)
+    }
+
+    private fun signOut() {
+        // get the google account
+        val googleSignInClient: GoogleSignInClient
+
+        // configure Google SignIn
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
+
+        // Sign Out of all accounts
+        firebaseAuth.signOut()
+        googleSignInClient.signOut()
+            .addOnSuccessListener {
+                Toast.makeText(this, "Sign Out Successful", Toast.LENGTH_SHORT).show()
+                navController.navigate(Screen.HomeScreen.route)
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Sign Out Failed", Toast.LENGTH_SHORT).show()
+            }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -73,7 +89,7 @@ class MainActivity : ComponentActivity() {
             val exception = task.exception
             if (task.isSuccessful) {
                 try {
-                    //sign in successful firebase authhentication
+                    //sign in successful firebase authentication
                     val account = task.getResult(ApiException::class.java)!!
                     firebaseAuthWithGoogle(account.idToken!!)
                 } catch (e: Exception) {
@@ -85,16 +101,17 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         firebaseAuth.signInWithCredential(credential)
             .addOnCompleteListener(this) {task ->
                 if(task.isSuccessful) {
-                    Toast.makeText(this, "SignIn Successful", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Sign In Successful", Toast.LENGTH_SHORT).show()
+                    navController.navigate(Screen.MyVideos.route)
                 } else {
-                    Toast.makeText(this, "SignIn Failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Sign In Failed", Toast.LENGTH_SHORT).show()
                 }
-
             }
     }
 }

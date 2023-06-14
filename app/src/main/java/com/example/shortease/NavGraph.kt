@@ -8,11 +8,13 @@ import androidx.navigation.compose.composable
 @Composable
 fun SetupNavGraph(
     navController: NavHostController,
-    signInClicked: () -> Unit?
+    startDestination: String,
+    signInClicked: () -> Unit,
+    signOutClicked: () -> Unit
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.HomeScreen.route,
+        startDestination = startDestination,
     ) {
         composable(
             route = Screen.HomeScreen.route
@@ -22,7 +24,7 @@ fun SetupNavGraph(
         composable(
             route = Screen.MyVideos.route
         ) {
-            MyVideos(navController)
+            MyVideos(navController, signOutClicked)
         }
     }
 }

@@ -17,7 +17,8 @@ import com.example.shortease.ui.theme.ShortEaseTheme
 
 @Composable
 fun MyVideos(
-    navController: NavController
+    navController: NavController,
+    signOutClicked: () -> Unit?
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -29,7 +30,7 @@ fun MyVideos(
                     Text(text = "My Videos")
                     Text(
                         modifier = Modifier.clickable {
-                            navController.popBackStack()
+                            signOutClicked()
                         },
                         text = "Go Back To HomePage"
                     )
@@ -42,5 +43,8 @@ fun MyVideos(
 @Composable
 @Preview
 private fun MyVideosPreview() {
-    MyVideos(navController = rememberNavController())
+    MyVideos(
+        navController = rememberNavController(),
+        signOutClicked = { Unit }
+    )
 }
