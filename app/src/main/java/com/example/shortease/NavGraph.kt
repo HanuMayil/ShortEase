@@ -1,5 +1,6 @@
 package com.example.shortease
 
+import PreviewScreen
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -27,6 +28,16 @@ fun SetupNavGraph(
             route = Screen.Generate.route
         ) {
             Generate(navController)
+        } 
+        composable(
+            route = Screen.PreviewScreen.route
+        ) {
+            PreviewScreen(navController)
+        }
+        composable(
+            route = Screen.DebugScreen.route
+        ) {
+            DebugScreen(navController)
         }
     }
 }
