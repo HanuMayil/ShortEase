@@ -13,4 +13,5 @@
 | 06/11/2023 |      |         | 3     |          |          |       | Created UI for preview screen and added debug screen |
 | 06/12/2023 | 5    |         |       | 8        |          |       | Start creating Firebase Authentication workflows     |
 | 06/12/2023 |      | 4       |       |          |          |       | Create UI for video editor                           |
-| 06/13/2023 |      | 2       |       |          |          |       | Create UI for video editor                           |  
+| 06/13/2023 |      | 2       |       |          |          |       | Create UI for video editor                           |
+| 06/13/2023 | 4    |         |       | 5        |          |       | Finish Authentication Workflow                       |  
