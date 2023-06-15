@@ -39,5 +39,10 @@ fun SetupNavGraph(
         ) {
             DebugScreen(navController)
         }
+        composable(
+            route = Screen.VideoEditorScreen.route
+        ) {
+            VideoEditorScreen(navController)
+        }
     }
 }
