@@ -1,5 +1,5 @@
 | Date       | Hanu | Anthony | Kevin | Januston | Akshayan | Haris | Task                                                 |
-| ---------- | ---- | ------- |-------| -------- | -------- |-------|------------------------------------------------------|
+| ---------- | ---- | ------- | ----- | -------- | -------- | ----- | ---------------------------------------------------- |
 | 05/26/2023 | 1    | 1       | 1     | 1        | 1        | 1     | Initial Group Meeting / Planning                     |
 | 05/26/2023 | 4    | 4       | 4     | 4        | 4        | 4     | Work On App Presentation                             |
 | 05/31/2023 | 4    | 4       | 4     | 4        | 4        | 4     | Practicing App Presentation and Presenting to class  |
@@ -15,5 +15,6 @@
 | 06/12/2023 |      | 4       |       |          |          |       | Create UI for video editor                           |
 | 06/13/2023 |      | 2       |       |          |          |       | Create UI for video editor                           |
 | 06/13/2023 | 4    |         |       | 5        |          |       | Finish Authentication Workflow                       |
-| 06/13/2023 | 2    | 2       | 2     | 2        | 2        | 2     | Work on D2 Report                                    |  
-| 06/14/2023 |      |         |       |          | 6        |       | Finish Generating Page                               |    
+| 06/13/2023 | 2    | 2       | 2     | 2        | 2        | 2     | Work on D2 Report                                    |
+| 06/14/2023 |      |         |       |          | 6        |       | Finish Generating Page                               |
+| 06/15/2023 | 5    |         |       | 5        |          |       | Finished homescreen, fixed and merged all changes    |
