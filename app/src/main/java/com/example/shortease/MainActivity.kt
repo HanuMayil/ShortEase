@@ -97,6 +97,7 @@ class MainActivity : ComponentActivity() {
                     Log.d("Sign in", "Google Sign In Failed ")
                 }
             } else {
+                Toast.makeText(this, "Unexpected Error Occurred", Toast.LENGTH_SHORT).show()
                 Log.d("SignIN", exception.toString())
             }
         }
