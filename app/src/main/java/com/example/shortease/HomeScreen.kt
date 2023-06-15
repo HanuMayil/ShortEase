@@ -11,17 +11,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.shortease.ui.theme.ShortEaseTheme
-import androidx.compose.material3.Text
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.shortease.ui.theme.colorPalette
 
@@ -54,6 +51,12 @@ fun HomeScreen(
                         navController.navigate(route = Screen.MyVideos.route)
                     },
                     text = "Login With Google"
+                )
+                Text(
+                    modifier = Modifier.clickable {
+                        navController.navigate(route = Screen.DebugScreen.route)
+                    },
+                    text = "Debug"
                 )
             }
         }
