@@ -28,6 +28,11 @@ fun SetupNavGraph(
             MyVideos(navController, signOutClicked)
         }
         composable(
+            route = Screen.Generate.route
+        ) {
+            Generate(navController)
+        } 
+        composable(
             route = Screen.PreviewScreen.route
         ) {
             PreviewScreen(navController)
@@ -36,6 +41,11 @@ fun SetupNavGraph(
             route = Screen.DebugScreen.route
         ) {
             DebugScreen(navController)
+        }
+        composable(
+            route = Screen.VideoEditorScreen.route
+        ) {
+            VideoEditorScreen(navController)
         }
     }
 }

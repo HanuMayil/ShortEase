@@ -55,12 +55,6 @@ fun HomeScreen(
                 GoogleButton(signInClicked)
                 Text(
                     modifier = Modifier.clickable {
-                        navController.navigate(route = Screen.MyVideos.route)
-                    },
-                    text = "Login With Google"
-                )
-                Text(
-                    modifier = Modifier.clickable {
                         navController.navigate(route = Screen.DebugScreen.route)
                     },
                     text = "Debug"
