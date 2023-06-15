@@ -14,4 +14,6 @@
 | 06/12/2023 | 5    |         |       | 8        |          |       | Start creating Firebase Authentication workflows     |
 | 06/12/2023 |      | 4       |       |          |          |       | Create UI for video editor                           |
 | 06/13/2023 |      | 2       |       |          |          |       | Create UI for video editor                           |
-| 06/13/2023 | 4    |         |       | 5        |          |       | Finish Authentication Workflow                       |  
+| 06/13/2023 | 4    |         |       | 5        |          |       | Finish Authentication Workflow                       |
+| 06/13/2023 | 2    | 2       | 2     | 2        | 2        | 2     | Work on D2 Report                                    |  
+| 06/14/2023 |      |         |       |          | 6        |       | Finish Generating Page                               |    
