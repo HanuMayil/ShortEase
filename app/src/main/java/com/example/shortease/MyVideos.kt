@@ -13,11 +13,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,10 +44,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.shortease.ui.theme.ShortEaseTheme
 import com.example.shortease.ui.theme.colorPalette
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyVideos(
-    navController: NavController
+    navController: NavController,
+    signOutClicked: () -> Unit?
 ) {
     var selected by remember { mutableStateOf(0) }
     Box(
@@ -51,28 +59,42 @@ fun MyVideos(
             ShortEaseTheme {
                 Column(modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.SpaceBetween) {
-                    Row {
-                        Surface(modifier = Modifier
-                            .fillMaxWidth()
-                            .height(70.dp), color = colorPalette.ShortEaseRed) {
-                            Box(contentAlignment = Alignment.Center){
-                                Text(text = "My Videos",
-                                    color = colorPalette.ShortEaseWhite,
-                                    fontSize = 25.sp,
-                                    textAlign = TextAlign.Center, fontWeight = FontWeight.Bold
+                    TopAppBar(
+                        colors = TopAppBarDefaults.largeTopAppBarColors(
+                            containerColor = colorPalette.ShortEaseRed,
+                            titleContentColor = colorPalette.ShortEaseWhite,
+                        ),
+                        title = {
+                            Text(
+                                text = "My Videos",
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth(),
+                                style = TextStyle(
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.SansSerif,
+                                    fontSize = 32.sp
                                 )
-                            }
-                            Box(contentAlignment = Alignment.CenterStart){
+                            )
+                        },
+                        navigationIcon = {
                                 Image(
                                     painter = painterResource(R.drawable.search),
                                     contentDescription = "Search Icon",
-                                    modifier = Modifier
-                                        .size(50.dp)
-                                        .padding(start = 20.dp)
+                                    Modifier.padding(start = 10.dp).size(30.dp)
+                                )
+                        },
+                        actions = {
+                            IconButton(onClick = {
+                                navController.navigate(route = Screen.HomeScreen.route)
+                            }) {
+                                Image(
+                                    painter = painterResource(R.drawable.home_button),
+                                    contentDescription = "Profile",
+                                    Modifier.clickable { signOutClicked() }
                                 )
                             }
                         }
-                    }
+                    )
                     Row (modifier = Modifier
                         .weight(1f, false), horizontalArrangement = Arrangement.SpaceBetween){
                         Surface(modifier = Modifier
@@ -160,5 +182,8 @@ fun MyVideos(
 @Composable
 @Preview
 private fun MyVideosPreview() {
-    MyVideos(navController = rememberNavController())
+    MyVideos(
+        navController = rememberNavController(),
+        signOutClicked = { Unit }
+    )
 }
