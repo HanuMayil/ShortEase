@@ -33,12 +33,6 @@ fun MyVideos(
                         },
                         text = "Go Back To HomePage"
                     )
-                    Text(
-                        modifier = Modifier.clickable {
-                            navController.navigate(Screen.Generate.route)
-                        },
-                        text = "Generate"
-                    )
                 }
             }
         }
