@@ -96,8 +96,7 @@ fun MyVideos(
                                     colorFilter = if(selected == 0) ColorFilter.tint(colorPalette.ShortEaseWhite)
                                     else ColorFilter.tint(colorPalette.ShortEaseRed),
                                     modifier = Modifier
-                                        .size(50.dp)
-                                        .padding(start = 20.dp)
+                                        .size(30.dp)
                                 )
                             }
                         }
@@ -122,8 +121,7 @@ fun MyVideos(
                                     colorFilter = if(selected == 1) ColorFilter.tint(colorPalette.ShortEaseWhite)
                                     else ColorFilter.tint(colorPalette.ShortEaseRed),
                                     modifier = Modifier
-                                        .size(50.dp)
-                                        .padding(start = 20.dp)
+                                        .size(30.dp)
                                 )
                             }
                         }
@@ -148,9 +146,7 @@ fun MyVideos(
                                     colorFilter = if(selected == 2) ColorFilter.tint(colorPalette.ShortEaseWhite)
                                     else ColorFilter.tint(colorPalette.ShortEaseRed),
                                     modifier = Modifier
-                                        .size(50.dp)
-                                        .padding(start = 20.dp)
-                                        .fillMaxSize()
+                                        .size(30.dp)
                                 )
                             }
                         }
