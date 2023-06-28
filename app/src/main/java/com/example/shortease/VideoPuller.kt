@@ -11,7 +11,7 @@ import com.google.api.services.youtube.model.Thumbnail
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class YouTubeApiClient(private val context: Context, private val apiKey: String) {
+class YouTubeApiClient(private val apiKey: String) {
     private val HTTP_TRANSPORT: NetHttpTransport = NetHttpTransport()
     private val JSON_FACTORY: JsonFactory = GsonFactory.getDefaultInstance()
     private val TAG = "YouTubeApiClient"
@@ -35,7 +35,7 @@ class YouTubeApiClient(private val context: Context, private val apiKey: String)
         for (item in items) {
             val snippet = item.snippet
             val title = snippet.title
-            val thumbnails: Thumbnail? = snippet.thumbnails?.default
+            val thumbnails: Thumbnail? = snippet.thumbnails?.high
             val thumbnailUrl: String? = thumbnails?.url
             if (thumbnailUrl != null) {
                 thumbnailItems.add(ThumbnailItem(title, thumbnailUrl))

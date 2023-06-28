@@ -61,18 +61,10 @@ class MainActivity : ComponentActivity() {
     private fun signIn() {
         val signInIntent = googleSignInClient.signInIntent
         startActivityForResult(signInIntent, RC_SIGN_IN)
-        test()
     }
 
     // Button click listener
-    private fun test() {
-        val channelId = "UClAEe-zD6upAEZjyug4g7SA"
-        val y = YouTubeApiClient(this, "AIzaSyCZ1aVkQw5j_ljA-AesWfHh0c6lnGQIq-A")
-        lifecycleScope.launch(Dispatchers.Main) {
-            val thumbnailItems = y.fetchVideoThumbnails(channelId)
-            // Process the thumbnailItems as needed
-        }
-    }
+
 
     private fun signOut() {
         // get the google account
