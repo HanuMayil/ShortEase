@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -44,6 +43,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.shortease.ui.theme.ShortEaseTheme
 import com.example.shortease.ui.theme.colorPalette
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.gson.GsonFactory
+import com.google.api.services.youtube.YouTube
+import com.google.firebase.auth.FirebaseAuth
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyVideos(
@@ -57,8 +61,10 @@ fun MyVideos(
     ) {
         Surface(modifier = Modifier.fillMaxSize(), color = colorPalette.ShortEaseWhite) {
             ShortEaseTheme {
-                Column(modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.SpaceBetween) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
                     TopAppBar(
                         colors = TopAppBarDefaults.largeTopAppBarColors(
                             containerColor = colorPalette.ShortEaseRed,
@@ -77,11 +83,11 @@ fun MyVideos(
                             )
                         },
                         navigationIcon = {
-                                Image(
-                                    painter = painterResource(R.drawable.search),
-                                    contentDescription = "Search Icon",
-                                    Modifier.padding(start = 10.dp).size(30.dp)
-                                )
+                            Image(
+                                painter = painterResource(R.drawable.search),
+                                contentDescription = "Search Icon",
+                                Modifier.padding(start = 10.dp).size(30.dp)
+                            )
                         },
                         actions = {
                             IconButton(onClick = {
@@ -95,14 +101,18 @@ fun MyVideos(
                             }
                         }
                     )
-                    Row (modifier = Modifier
-                        .weight(1f, false), horizontalArrangement = Arrangement.SpaceBetween){
-                        Surface(modifier = Modifier
-                            .weight(1f)
-                            .height(70.dp), border = BorderStroke(width = 1.dp, color = colorPalette.ShortEaseRed),
+                    Row(
+                        modifier = Modifier
+                            .weight(1f, false), horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Surface(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(70.dp),
+                            border = BorderStroke(width = 1.dp, color = colorPalette.ShortEaseRed),
                         ) {
                             Button(
-                                onClick = {selected = 0},
+                                onClick = { selected = 0 },
                                 shape = RoundedCornerShape(50),
                                 colors = ButtonDefaults.buttonColors(Color.Transparent),
                                 modifier = Modifier
@@ -111,23 +121,25 @@ fun MyVideos(
                                         if (selected == 0) colorPalette.ShortEaseRed
                                         else colorPalette.ShortEaseWhite
                                     ),
-                            ){
+                            ) {
                                 Image(
                                     painter = painterResource(R.drawable.edit),
                                     contentDescription = "Edit Icon",
-                                    colorFilter = if(selected == 0) ColorFilter.tint(colorPalette.ShortEaseWhite)
+                                    colorFilter = if (selected == 0) ColorFilter.tint(colorPalette.ShortEaseWhite)
                                     else ColorFilter.tint(colorPalette.ShortEaseRed),
                                     modifier = Modifier
                                         .size(30.dp)
                                 )
                             }
                         }
-                        Surface(modifier = Modifier
-                            .weight(1f)
-                            .height(70.dp), border = BorderStroke(width = 1.dp, color = colorPalette.ShortEaseRed),
+                        Surface(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(70.dp),
+                            border = BorderStroke(width = 1.dp, color = colorPalette.ShortEaseRed),
                         ) {
                             Button(
-                                onClick = {selected = 1},
+                                onClick = { selected = 1 },
                                 shape = RoundedCornerShape(50),
                                 colors = ButtonDefaults.buttonColors(Color.Transparent),
                                 modifier = Modifier
@@ -136,23 +148,25 @@ fun MyVideos(
                                         if (selected == 1) colorPalette.ShortEaseRed
                                         else colorPalette.ShortEaseWhite
                                     ),
-                            ){
+                            ) {
                                 Image(
                                     painter = painterResource(R.drawable.save),
                                     contentDescription = "App Logo",
-                                    colorFilter = if(selected == 1) ColorFilter.tint(colorPalette.ShortEaseWhite)
+                                    colorFilter = if (selected == 1) ColorFilter.tint(colorPalette.ShortEaseWhite)
                                     else ColorFilter.tint(colorPalette.ShortEaseRed),
                                     modifier = Modifier
                                         .size(30.dp)
                                 )
                             }
                         }
-                        Surface(modifier = Modifier
-                            .weight(1f)
-                            .height(70.dp), border = BorderStroke(width = 1.dp, color = colorPalette.ShortEaseRed),
+                        Surface(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(70.dp),
+                            border = BorderStroke(width = 1.dp, color = colorPalette.ShortEaseRed),
                         ) {
                             Button(
-                                onClick = {selected = 2},
+                                onClick = { selected = 2 },
                                 shape = RoundedCornerShape(50),
                                 colors = ButtonDefaults.buttonColors(Color.Transparent),
                                 modifier = Modifier
@@ -161,11 +175,11 @@ fun MyVideos(
                                         if (selected == 2) colorPalette.ShortEaseRed
                                         else colorPalette.ShortEaseWhite
                                     ),
-                            ){
+                            ) {
                                 Image(
                                     painter = painterResource(R.drawable.share),
                                     contentDescription = "Share Logo",
-                                    colorFilter = if(selected == 2) ColorFilter.tint(colorPalette.ShortEaseWhite)
+                                    colorFilter = if (selected == 2) ColorFilter.tint(colorPalette.ShortEaseWhite)
                                     else ColorFilter.tint(colorPalette.ShortEaseRed),
                                     modifier = Modifier
                                         .size(30.dp)
@@ -177,6 +191,25 @@ fun MyVideos(
             }
         }
     }
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    val fireBaseToken = currentUser?.getIdToken(false)?.result?.token
+
+    val googleCredentials = GoogleCredentials.fromStream(serviceAccountKeyInputStream)
+        .createScoped(listOf("https://www.googleapis.com/auth/youtube.readonly"))
+
+    val requestInitializer = HttpCredentialsAdapter(googleCredentials)
+
+    val youtube = YouTube.Builder(
+        NetHttpTransport(),
+        GsonFactory.getDefaultInstance(),
+        requestInitializer
+    ).setApplicationName("YourAppName").build()
+
+// Fetch the YouTube OAuth token
+    val tokenResponse = googleCredentials.refreshAccessToken()
+    val youtubeAccessToken = tokenResponse.accessToken
+
+
 }
 
 @Composable
@@ -187,3 +220,4 @@ private fun MyVideosPreview() {
         signOutClicked = { Unit }
     )
 }
+
