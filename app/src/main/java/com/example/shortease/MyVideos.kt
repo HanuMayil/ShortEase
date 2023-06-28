@@ -191,26 +191,8 @@ fun MyVideos(
             }
         }
     }
-    val currentUser = FirebaseAuth.getInstance().currentUser
-    val fireBaseToken = currentUser?.getIdToken(false)?.result?.token
-
-    val googleCredentials = GoogleCredentials.fromStream(serviceAccountKeyInputStream)
-        .createScoped(listOf("https://www.googleapis.com/auth/youtube.readonly"))
-
-    val requestInitializer = HttpCredentialsAdapter(googleCredentials)
-
-    val youtube = YouTube.Builder(
-        NetHttpTransport(),
-        GsonFactory.getDefaultInstance(),
-        requestInitializer
-    ).setApplicationName("YourAppName").build()
-
-// Fetch the YouTube OAuth token
-    val tokenResponse = googleCredentials.refreshAccessToken()
-    val youtubeAccessToken = tokenResponse.accessToken
-
-
 }
+
 
 @Composable
 @Preview

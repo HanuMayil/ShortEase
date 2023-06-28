@@ -1,11 +1,13 @@
 package com.example.shortease
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.shortease.ui.theme.ShortEaseTheme
@@ -15,6 +17,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
@@ -55,6 +61,17 @@ class MainActivity : ComponentActivity() {
     private fun signIn() {
         val signInIntent = googleSignInClient.signInIntent
         startActivityForResult(signInIntent, RC_SIGN_IN)
+        test()
+    }
+
+    // Button click listener
+    private fun test() {
+        val channelId = "UClAEe-zD6upAEZjyug4g7SA"
+        val y = YouTubeApiClient(this, "AIzaSyCZ1aVkQw5j_ljA-AesWfHh0c6lnGQIq-A")
+        lifecycleScope.launch(Dispatchers.Main) {
+            val thumbnailItems = y.fetchVideoThumbnails(channelId)
+            // Process the thumbnailItems as needed
+        }
     }
 
     private fun signOut() {
