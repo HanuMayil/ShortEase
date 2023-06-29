@@ -8,8 +8,11 @@ import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.SearchListResponse
 import com.google.api.services.youtube.model.SearchResult
 import com.google.api.services.youtube.model.Thumbnail
+import com.google.api.services.youtube.model.Video
+import com.google.api.services.youtube.model.VideoListResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.math.BigInteger
 
 class YouTubeApiClient(private val apiKey: String) {
     private val HTTP_TRANSPORT: NetHttpTransport = NetHttpTransport()
@@ -22,23 +25,39 @@ class YouTubeApiClient(private val apiKey: String) {
             .setApplicationName("YourAppName")
             .build()
 
-        val request = youtube.search().list(mutableListOf("snippet"))
-        request.key = apiKey
-        request.channelId = channelId
-        request.type = mutableListOf("video")
-        request.maxResults = 100000  // Adjust as per your requirements
+        val searchRequest = youtube.search().list(mutableListOf("snippet"))
+        searchRequest.key = apiKey
+        searchRequest.channelId = channelId
+        searchRequest.type = mutableListOf("video")  // Only retrieve videos
+        searchRequest.videoDuration = "medium"  // Include videos of any duration
+        searchRequest.maxResults = 10  // Adjust as per your requirements
 
-        val response: SearchListResponse = request.execute()
-        val items: List<SearchResult> = response.items
+        val searchResponse: SearchListResponse = searchRequest.execute()
+        val searchItems: List<SearchResult> = searchResponse.items
 
         val thumbnailItems = mutableListOf<ThumbnailItem>()
-        for (item in items) {
-            val snippet = item.snippet
-            val title = snippet.title
-            val thumbnails: Thumbnail? = snippet.thumbnails?.high
-            val thumbnailUrl: String? = thumbnails?.url
-            if (thumbnailUrl != null) {
-                thumbnailItems.add(ThumbnailItem(title, thumbnailUrl))
+        for (searchItem in searchItems) {
+            val videoId = searchItem.id.videoId
+
+            // Fetch video details including view count
+            val videosRequest = youtube.videos().list(mutableListOf("statistics"))
+            videosRequest.key = apiKey
+            videosRequest.id = mutableListOf(videoId)
+            val videosResponse: VideoListResponse = videosRequest.execute()
+            val videoItems: List<Video> = videosResponse.items
+
+            // Process video details
+            if (videoItems.isNotEmpty()) {
+                val video = videoItems[0]
+                val snippet = searchItem.snippet
+                val title = snippet.title
+                val thumbnails: Thumbnail? = snippet.thumbnails?.high
+                val thumbnailUrl: String? = thumbnails?.url
+                val viewCount = video.statistics.viewCount
+
+                if (thumbnailUrl != null) {
+                    thumbnailItems.add(ThumbnailItem(title, thumbnailUrl, viewCount))
+                }
             }
         }
 
@@ -46,4 +65,4 @@ class YouTubeApiClient(private val apiKey: String) {
     }
 }
 
-data class ThumbnailItem(val title: String, val thumbnailUrl: String)
+data class ThumbnailItem(val title: String, val thumbnailUrl: String, val viewCount: BigInteger)

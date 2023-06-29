@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -26,7 +28,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -44,22 +45,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.shortease.ui.theme.ShortEaseTheme
 import com.example.shortease.ui.theme.colorPalette
-import com.google.api.client.http.javanet.NetHttpTransport
-import com.google.api.client.json.gson.GsonFactory
-import com.google.api.services.youtube.YouTube
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.remember
 import coil.compose.rememberImagePainter
-import com.google.accompanist.coil.rememberCoilPainter
+import java.math.BigInteger
+import java.text.NumberFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,15 +63,12 @@ fun MyVideos(
     navController: NavController,
     signOutClicked: () -> Unit?
 ) {
-
     val thumbnailItems = remember { mutableStateListOf<ThumbnailItem>() }
-
 
     DisposableEffect(Unit) {
         val scope = CoroutineScope(Dispatchers.Main)
-        val channelId = "UClAEe-zD6upAEZjyug4g7SA"
+        val channelId = "UCX6OQ3DkcsbYNE6H8uQQuVA"
         val y = YouTubeApiClient("AIzaSyCZ1aVkQw5j_ljA-AesWfHh0c6lnGQIq-A") // Replace with your API key
-
         val job = scope.launch {
             val fetchedThumbnailItems = y.fetchVideoThumbnails(channelId)
             thumbnailItems.addAll(fetchedThumbnailItems)
@@ -134,35 +127,51 @@ fun MyVideos(
                         }
                     )
 
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                    Box(modifier = Modifier.weight(1f)
                     ) {
                         // Display the thumbnails in a LazyColumn
                         LazyColumn(
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            itemsIndexed(thumbnailItems) { index, thumbnailItem ->
-                                // Display each thumbnail item
-                                Image(
-                                    painter = rememberImagePainter(thumbnailItem.thumbnailUrl),
-                                    contentDescription = thumbnailItem.title,
+                            modifier = Modifier
+                                .fillMaxSize())
+                                 {
+                            itemsIndexed(thumbnailItems) { _, thumbnailItem ->
+                                Column(
                                     modifier = Modifier
+                                        .padding(vertical = 8.dp)
                                         .fillMaxWidth()
-                                        .height(200.dp)
-                                )
-                                Text(
-                                    text = thumbnailItem.title,
-                                    modifier = Modifier.padding(16.dp),
-                                    style = TextStyle(fontWeight = FontWeight.Bold)
-                                )
+                                ) {
+                                    Image(
+
+                                        painter = rememberImagePainter(thumbnailItem.thumbnailUrl),
+                                        contentDescription = thumbnailItem.title,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(272.dp)
+                                    )
+                                    Text(
+                                        text = thumbnailItem.title,
+                                        style = TextStyle(
+                                            color = colorPalette.ShortEaseRed,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 16.sp
+                                        ),
+                                        modifier = Modifier.padding(horizontal = 16.dp)
+                                    )
+                                    Text(
+                                        text = "Views: ${formatViewCount(thumbnailItem.viewCount)}",
+                                        style = TextStyle(color = colorPalette.ShortEaseRed, fontSize = 14.sp),
+                                        modifier = Modifier.padding(horizontal = 16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Divider(color = colorPalette.ShortEaseRed, thickness = 1.dp)
+                                }
                             }
                         }
                     }
-
                     Row(
-                        modifier = Modifier
-                            .weight(1f, false), horizontalArrangement = Arrangement.SpaceBetween
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Surface(
                             modifier = Modifier
@@ -252,22 +261,18 @@ fun MyVideos(
     }
 }
 
-//fun test(lifecycleScope: LifecycleCoroutineScope) {
-//    val channelId = "UClAEe-zD6upAEZjyug4g7SA"
-//    val y = YouTubeApiClient("AIzaSyCZ1aVkQw5j_ljA-AesWfHh0c6lnGQIq-A")
-//    lifecycleScope.launch(Dispatchers.Main) {
-//        val thumbnailItems = y.fetchVideoThumbnails(channelId)
-//        // Process the thumbnailItems as needed
-//    }
-//}
-
+// Function to format the view count with comma separators
+fun formatViewCount(viewCount: BigInteger): String {
+    val numberFormat = NumberFormat.getNumberInstance(Locale.US)
+    return numberFormat.format(viewCount.toLong())
+}
 
 @Composable
 @Preview
 private fun MyVideosPreview() {
     MyVideos(
         navController = rememberNavController(),
-        signOutClicked = { Unit }
+        signOutClicked = {  }
     )
 }
 
