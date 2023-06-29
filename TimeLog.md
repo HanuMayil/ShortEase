@@ -18,3 +18,4 @@
 | 06/13/2023 | 2    | 2       | 2     | 2        | 2        | 2     | Work on D2 Report                                    |
 | 06/14/2023 |      |         |       |          | 6        |       | Finish Generating Page                               |
 | 06/15/2023 | 5    |         |       | 5        |          |       | Finished homescreen, fixed and merged all changes    |
+| 06/28/2023 |      | 10      | 10    |          |          |       | Worked on pulling video from youtube api and showing |
