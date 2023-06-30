@@ -20,3 +20,4 @@
 | 06/15/2023 | 5    |         |       | 5        |          |       | Finished homescreen, fixed and merged all changes    |
 | 06/28/2023 |      | 10      | 10    |          |          |       | Worked on pulling video from youtube api and showing |
 | 06/29/2023 |      |         |       |          |          | 5     | Worked on adding permissions to app                  |
+| 06/30/2023 | 4    | 4       | 4     | 4        | 4        | 4     | Work on D3 report                                    |
