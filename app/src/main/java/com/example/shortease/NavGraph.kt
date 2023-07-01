@@ -1,5 +1,6 @@
 package com.example.shortease
 
+import Permissions
 import PreviewScreen
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -46,6 +47,11 @@ fun SetupNavGraph(
             route = Screen.VideoEditorScreen.route
         ) {
             VideoEditorScreen(navController)
+        }
+        composable(
+            route = Screen.Permissions.route
+        ) {
+            Permissions(navController)
         }
     }
 }
