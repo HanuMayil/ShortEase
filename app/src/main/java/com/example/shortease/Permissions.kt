@@ -9,24 +9,24 @@ import androidx.navigation.NavController
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun Permissions(navController: NavController) {
-    val cameraPermissionState = rememberMultiplePermissionsState(
+    val storagePermissionState = rememberMultiplePermissionsState(
         permissions = listOf(
-            android.Manifest.permission.RECORD_AUDIO,
+            android.Manifest.permission.READ_MEDIA_VIDEO,
         )
     )
 
-    if (cameraPermissionState.allPermissionsGranted) {
-        Text("Camera permission Granted")
+    if (storagePermissionState.allPermissionsGranted) {
+        Text("Video storage granted")
     } else {
         Column {
-            val textToShow = if (cameraPermissionState.allPermissionsGranted) {
-                "The camera is important for this app. Please grant the permission."
+            val textToShow = if (storagePermissionState.allPermissionsGranted) {
+                "Video storage is important for this app. Please grant the permission."
             } else {
-                "Camera permission required for this feature to be available. " +
+                "Video Storage permission required for this feature to be available. " +
                         "Please grant the permission"
             }
             Text(textToShow)
-            Button(onClick = { cameraPermissionState.launchMultiplePermissionRequest() }) {
+            Button(onClick = { storagePermissionState.launchMultiplePermissionRequest() }) {
                 Text("Request permission")
             }
         }
