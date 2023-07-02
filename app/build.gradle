@@ -62,6 +62,11 @@ dependencies {
     // Also add the dependency for the Google Play services library and specify its version
     implementation 'com.google.android.gms:play-services-auth:20.5.0'
 
+    // Youtube DL
+    implementation ('com.github.bawaviki.youtube-dl-android:library:0.7.+') {
+        exclude group: 'androidx.appcompat', module: 'appcompat'
+        exclude group: 'androidx.appcompat', module: 'appcompat-resources'
+    }
 
     // Libraries
     implementation 'androidx.navigation:navigation-runtime-ktx:2.6.0'

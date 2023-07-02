@@ -1,5 +1,6 @@
 package com.example.shortease
 
+import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -37,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -53,6 +55,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import coil.compose.rememberImagePainter
+import com.example.shortease.youtube.DownloadActivity
 import java.math.BigInteger
 import java.text.NumberFormat
 import java.util.Locale
@@ -126,7 +129,12 @@ fun MyVideos(
                             }
                         }
                     )
-
+                    val context = LocalContext.current
+                    Button(onClick = {
+                        context.startActivity(Intent(context, DownloadActivity::class.java))
+                    }) {
+                        Text(text = "Show List")
+                    }
                     Box(modifier = Modifier.weight(1f)
                     ) {
                         // Display the thumbnails in a LazyColumn
