@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "ShortEase"
 include ':app'
+include ':app:assets'
