@@ -23,4 +23,6 @@
 | 06/29/2023 |      | 2       |       |          |          |       | Worked on getting channel id from google login       |
 | 06/29/2023 |      |         |       |          |          | 5     | Worked on adding permissions to app                  |
 | 06/30/2023 | 4    | 4       | 4     | 4        | 4        | 4     | Work on D3 report                                    |
-| 07/2/2023  | 3    |         |       | 4        |          |       | Work on Youtube Download                             |
+| 07/02/2023 | 3    |         |       | 4        |          |       | Work on Youtube Download                             |
+| 07/04/2023 | 6    |         |       | 6        |          |       | Work on Youtube Download                             |
+| 07/05/2023 | 3    |         |       | 3        |          |       | Work on Youtube Download                             |
