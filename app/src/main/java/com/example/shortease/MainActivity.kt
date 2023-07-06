@@ -1,6 +1,5 @@
 package com.example.shortease
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -15,12 +14,16 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.Scope
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.gson.GsonFactory
+import com.google.api.services.youtube.YouTube
+import com.google.api.services.youtube.YouTubeScopes
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
@@ -39,6 +42,7 @@ class MainActivity : ComponentActivity() {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.web_client_id))
             .requestEmail()
+            .requestScopes(Scope(YouTubeScopes.YOUTUBE_READONLY),Scope(YouTubeScopes.YOUTUBE_FORCE_SSL))
             .build()
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
@@ -123,5 +127,45 @@ class MainActivity : ComponentActivity() {
                     Toast.makeText(this, "Sign In Failed", Toast.LENGTH_SHORT).show()
                 }
             }
+        val account = GoogleSignIn.getLastSignedInAccount(this)
+        if (account != null) {
+            fetchYouTubeChannelId(account.idToken!!)
+        } else {
+            Toast.makeText(this, "Failed to retrieve Google account information", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun fetchYouTubeChannelId(idToken: String) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val httpTransport = NetHttpTransport()
+                val jsonFactory = GsonFactory()
+
+                val youtube = YouTube.Builder(httpTransport, jsonFactory, null)
+                    .setApplicationName("YourAppName")
+                    .build()
+
+                val credential = GoogleCredential().setAccessToken(idToken)
+
+                val channels = youtube.channels().list(mutableListOf("id"))
+                    .setMine(true)
+                    .setKey("API KEY")
+                    .setFields("items(id)")
+                    .setOauthToken(credential.accessToken)
+                    .execute()
+
+                val channelId = channels.items[0].id
+
+                // Use the channelId as needed in your app
+                Log.d("YouTube Channel ID", channelId)
+
+                // Continue navigating to the desired screen, passing the channelId if needed
+                navController.navigate(Screen.MyVideos.route)
+            } catch (e: Exception) {
+                // Handle any exceptions that occur during the YouTube channel ID retrieval
+                Log.e("Fetch YouTube Channel ID", "Error: ${e.message}")
+                Toast.makeText(this@MainActivity, "Failed to fetch YouTube channel ID", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }
