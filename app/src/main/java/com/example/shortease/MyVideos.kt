@@ -1,6 +1,8 @@
 package com.example.shortease
 
 import android.content.Intent
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -55,7 +57,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import coil.compose.rememberImagePainter
-import com.example.shortease.youtube.DownloadActivity
+import com.example.shortease.youtube.YouTubeDownloader
 import java.math.BigInteger
 import java.text.NumberFormat
 import java.util.Locale
@@ -67,6 +69,7 @@ fun MyVideos(
     signOutClicked: () -> Unit?
 ) {
     val thumbnailItems = remember { mutableStateListOf<ThumbnailItem>() }
+    val youtubeDownloader = YouTubeDownloader(LocalContext.current)
 
     DisposableEffect(Unit) {
         val scope = CoroutineScope(Dispatchers.Main)
@@ -130,11 +133,6 @@ fun MyVideos(
                         }
                     )
                     val context = LocalContext.current
-                    Button(onClick = {
-                        context.startActivity(Intent(context, DownloadActivity::class.java))
-                    }) {
-                        Text(text = "Show List")
-                    }
                     Box(modifier = Modifier.weight(1f)
                     ) {
                         // Display the thumbnails in a LazyColumn
@@ -156,20 +154,45 @@ fun MyVideos(
                                             .fillMaxWidth()
                                             .height(272.dp)
                                     )
-                                    Text(
-                                        text = thumbnailItem.title,
-                                        style = TextStyle(
-                                            color = colorPalette.ShortEaseRed,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 16.sp
-                                        ),
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier.padding(horizontal = 16.dp)
-                                    )
-                                    Text(
-                                        text = "Views: ${formatViewCount(thumbnailItem.viewCount)}",
-                                        style = TextStyle(color = colorPalette.ShortEaseRed, fontSize = 14.sp),
-                                        modifier = Modifier.padding(horizontal = 16.dp)
-                                    )
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = thumbnailItem.title,
+                                                style = TextStyle(
+                                                    color = colorPalette.ShortEaseRed,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 16.sp
+                                                ),
+                                                modifier = Modifier.padding(end = 8.dp)
+                                            )
+                                            Text(
+                                                text = "Views: ${formatViewCount(thumbnailItem.viewCount)}",
+                                                style = TextStyle(color = colorPalette.ShortEaseRed, fontSize = 14.sp),
+                                                modifier = Modifier.padding(end = 8.dp)
+                                            )
+                                        }
+                                        Image(
+                                            painter = painterResource(R.drawable.download_icon),
+                                            contentDescription = "Download Icon",
+                                            colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .align(Alignment.CenterVertically)
+                                                .clickable {
+                                                    var videoId = extractVideoId(thumbnailItem.thumbnailUrl)
+                                                    if(videoId != null) {
+                                                        CoroutineScope(Dispatchers.Main).launch {
+                                                            youtubeDownloader.downloadYouTubeVideo(videoId = videoId, videoTitle = thumbnailItem.title)
+                                                        }
+                                                    }
+                                                    else Toast.makeText(context, "Cannot download this video", Toast.LENGTH_SHORT).show()
+                                                }
+                                            ,
+                                        )
+                                    }
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Divider(color = colorPalette.ShortEaseRed, thickness = 1.dp)
                                 }
@@ -273,6 +296,15 @@ fun MyVideos(
 fun formatViewCount(viewCount: BigInteger): String {
     val numberFormat = NumberFormat.getNumberInstance(Locale.US)
     return numberFormat.format(viewCount.toLong())
+}
+
+fun extractVideoId(url: String): String? {
+    val startIndex = url.indexOf("vi/") + 3
+    val endIndex = url.indexOf("/", startIndex)
+    if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
+        return url.substring(startIndex, endIndex)
+    }
+    return null
 }
 
 @Composable
