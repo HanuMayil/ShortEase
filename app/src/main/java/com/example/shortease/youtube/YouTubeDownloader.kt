@@ -34,7 +34,8 @@ class YouTubeDownloader(private val context: Context) {
         val response = downloader.getVideoInfo(request)
         val video = response.data() ?: return
 
-        val outputDir = File(context.filesDir, videoId)
+        val videoDir = File(context.filesDir, "videos")
+        val outputDir = File(videoDir, videoId)
         if (!outputDir.exists()) {
             if (outputDir.mkdirs()) {
                 val format = video.bestVideoWithAudioFormat()

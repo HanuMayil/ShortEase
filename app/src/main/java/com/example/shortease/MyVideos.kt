@@ -85,7 +85,7 @@ fun MyVideos(
         }
     }
 
-    var selected by remember { mutableStateOf(0) }
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -183,6 +183,7 @@ fun MyVideos(
                                                 .align(Alignment.CenterVertically)
                                                 .clickable {
                                                     var videoId = extractVideoId(thumbnailItem.thumbnailUrl)
+//                                                    var videoId = "CH50zuS8DD0"
                                                     if(videoId != null) {
                                                         CoroutineScope(Dispatchers.Main).launch {
                                                             youtubeDownloader.downloadYouTubeVideo(videoId = videoId, videoTitle = thumbnailItem.title)
@@ -211,21 +212,18 @@ fun MyVideos(
                             border = BorderStroke(width = 1.dp, color = colorPalette.ShortEaseRed),
                         ) {
                             Button(
-                                onClick = { selected = 0 },
+                                onClick = {  },
                                 shape = RoundedCornerShape(50),
                                 colors = ButtonDefaults.buttonColors(Color.Transparent),
                                 modifier = Modifier
-                                    .clickable { selected = 0 }
                                     .background(
-                                        if (selected == 0) colorPalette.ShortEaseRed
-                                        else colorPalette.ShortEaseWhite
+                                        colorPalette.ShortEaseRed
                                     ),
                             ) {
                                 Image(
                                     painter = painterResource(R.drawable.edit),
                                     contentDescription = "Edit Icon",
-                                    colorFilter = if (selected == 0) ColorFilter.tint(colorPalette.ShortEaseWhite)
-                                    else ColorFilter.tint(colorPalette.ShortEaseRed),
+                                    colorFilter = ColorFilter.tint(colorPalette.ShortEaseWhite),
                                     modifier = Modifier
                                         .size(30.dp)
                                 )
@@ -238,21 +236,15 @@ fun MyVideos(
                             border = BorderStroke(width = 1.dp, color = colorPalette.ShortEaseRed),
                         ) {
                             Button(
-                                onClick = { selected = 1 },
+                                onClick = {
+                                    navController.navigate(route = Screen.SavedVideos.route) },
                                 shape = RoundedCornerShape(50),
                                 colors = ButtonDefaults.buttonColors(Color.Transparent),
-                                modifier = Modifier
-                                    .clickable { selected = 1 }
-                                    .background(
-                                        if (selected == 1) colorPalette.ShortEaseRed
-                                        else colorPalette.ShortEaseWhite
-                                    ),
                             ) {
                                 Image(
                                     painter = painterResource(R.drawable.save),
                                     contentDescription = "App Logo",
-                                    colorFilter = if (selected == 1) ColorFilter.tint(colorPalette.ShortEaseWhite)
-                                    else ColorFilter.tint(colorPalette.ShortEaseRed),
+                                    colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
                                     modifier = Modifier
                                         .size(30.dp)
                                 )
@@ -265,21 +257,18 @@ fun MyVideos(
                             border = BorderStroke(width = 1.dp, color = colorPalette.ShortEaseRed),
                         ) {
                             Button(
-                                onClick = { selected = 2 },
+                                onClick = {  },
                                 shape = RoundedCornerShape(50),
                                 colors = ButtonDefaults.buttonColors(Color.Transparent),
                                 modifier = Modifier
-                                    .clickable { selected = 2 }
                                     .background(
-                                        if (selected == 2) colorPalette.ShortEaseRed
-                                        else colorPalette.ShortEaseWhite
+                                        colorPalette.ShortEaseWhite
                                     ),
                             ) {
                                 Image(
                                     painter = painterResource(R.drawable.share),
                                     contentDescription = "Share Logo",
-                                    colorFilter = if (selected == 2) ColorFilter.tint(colorPalette.ShortEaseWhite)
-                                    else ColorFilter.tint(colorPalette.ShortEaseRed),
+                                    colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
                                     modifier = Modifier
                                         .size(30.dp)
                                 )
