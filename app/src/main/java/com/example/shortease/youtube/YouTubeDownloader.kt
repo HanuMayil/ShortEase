@@ -9,17 +9,15 @@ import com.github.kiulian.downloader.downloader.YoutubeCallback
 import com.github.kiulian.downloader.downloader.YoutubeProgressCallback
 import com.github.kiulian.downloader.downloader.request.RequestVideoFileDownload
 import com.github.kiulian.downloader.downloader.request.RequestVideoInfo
-import com.github.kiulian.downloader.downloader.response.Response
 import com.github.kiulian.downloader.model.videos.VideoInfo
+import com.github.kiulian.downloader.model.videos.formats.VideoFormat
+import com.github.kiulian.downloader.model.videos.formats.VideoWithAudioFormat
 import java.io.File
 
 class YouTubeDownloader(private val context: Context) {
     private var downloaderProgress = 0
     val downloader = YoutubeDownloader()
-
-    fun downloadYouTubeVideo(videoId: String, videoTitle: String) {
-        downloader.config.maxRetries = 1000000
-
+    fun requestVideoDetail(videoId: String): List<VideoWithAudioFormat> {
         val request = RequestVideoInfo(videoId)
             .callback(object : YoutubeCallback<VideoInfo?> {
                 override fun onFinished(videoInfo: VideoInfo?) {
@@ -32,13 +30,16 @@ class YouTubeDownloader(private val context: Context) {
             })
             .async()
         val response = downloader.getVideoInfo(request)
-        val video = response.data() ?: return
+        val video = response.data() ?: return emptyList()
+        return video.videoWithAudioFormats()
+    }
 
-        val outputDir = File(context.filesDir, videoId)
+    fun downloadYouTubeVideo(videoId: String, videoTitle: String, format: VideoFormat) {
+        downloader.config.maxRetries = 1000000
+        val videoDir = File(context.filesDir, "videos")
+        val outputDir = File(videoDir, videoId)
         if (!outputDir.exists()) {
             if (outputDir.mkdirs()) {
-                val format = video.bestVideoWithAudioFormat()
-
                 val downloadRequest = RequestVideoFileDownload(format)
                     .callback(object : YoutubeProgressCallback<File> {
                         override fun onDownloading(progress: Int) {

@@ -1,6 +1,5 @@
 package com.example.shortease
 
-import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -20,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -51,13 +51,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberImagePainter
 import com.example.shortease.ui.theme.ShortEaseTheme
 import com.example.shortease.ui.theme.colorPalette
+import com.example.shortease.youtube.YouTubeDownloader
+import com.github.kiulian.downloader.model.videos.formats.VideoWithAudioFormat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import coil.compose.rememberImagePainter
-import com.example.shortease.youtube.YouTubeDownloader
 import java.math.BigInteger
 import java.text.NumberFormat
 import java.util.Locale
@@ -70,7 +71,6 @@ fun MyVideos(
 ) {
     val thumbnailItems = remember { mutableStateListOf<ThumbnailItem>() }
     val youtubeDownloader = YouTubeDownloader(LocalContext.current)
-
     DisposableEffect(Unit) {
         val scope = CoroutineScope(Dispatchers.Main)
         val channelId = "UCX6OQ3DkcsbYNE6H8uQQuVA"
@@ -147,7 +147,6 @@ fun MyVideos(
                                         .fillMaxWidth()
                                 ) {
                                     Image(
-
                                         painter = rememberImagePainter(thumbnailItem.thumbnailUrl),
                                         contentDescription = thumbnailItem.title,
                                         modifier = Modifier
@@ -174,24 +173,67 @@ fun MyVideos(
                                                 modifier = Modifier.padding(end = 8.dp)
                                             )
                                         }
-                                        Image(
-                                            painter = painterResource(R.drawable.download_icon),
-                                            contentDescription = "Download Icon",
-                                            colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
-                                            modifier = Modifier
-                                                .size(24.dp)
-                                                .align(Alignment.CenterVertically)
-                                                .clickable {
-                                                    var videoId = extractVideoId(thumbnailItem.thumbnailUrl)
-                                                    if(videoId != null) {
-                                                        CoroutineScope(Dispatchers.Main).launch {
-                                                            youtubeDownloader.downloadYouTubeVideo(videoId = videoId, videoTitle = thumbnailItem.title)
+                                        val isPopupOpen = remember { mutableStateOf(false) }
+                                        var videoId = remember { mutableStateOf("") }
+                                        var formats = remember { mutableStateOf(emptyList<VideoWithAudioFormat>()) }
+                                        Column(
+                                            verticalArrangement = Arrangement.Center,
+                                            modifier = Modifier.clickable {
+                                                videoId.value = extractVideoId(thumbnailItem.thumbnailUrl)
+                                                if (videoId.value != "") {
+                                                    formats.value = youtubeDownloader.requestVideoDetail(videoId.value)
+                                                    if (formats != null) {
+                                                        isPopupOpen.value = true
+                                                    }
+                                                } else {
+                                                    Toast.makeText(context, "Cannot download this video", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
+                                        ) {
+                                            Image(
+                                                painter = painterResource(R.drawable.download_icon),
+                                                contentDescription = "Download Icon",
+                                                colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
+                                                modifier = Modifier
+                                                    .size(24.dp)
+                                            )
+                                        }
+
+                                        if (isPopupOpen.value) {
+                                            AlertDialog(
+                                                onDismissRequest = { isPopupOpen.value = false },
+                                                title = { Text(text = "Select Format") },
+                                                confirmButton = {},
+                                                text = {
+                                                    Column {
+                                                        formats.value.forEach { format ->
+                                                            Button(
+                                                                onClick = {
+                                                                    CoroutineScope(Dispatchers.Main).launch {
+                                                                        youtubeDownloader.downloadYouTubeVideo(videoId = videoId.value, videoTitle = thumbnailItem.title, format = format)
+                                                                    }
+                                                                    isPopupOpen.value = false
+                                                                },
+                                                                modifier = Modifier
+                                                                    .padding(16.dp)
+                                                                    .height(64.dp)
+                                                                    .fillMaxWidth(),
+                                                                shape = RoundedCornerShape(8.dp),
+                                                                colors = ButtonDefaults.buttonColors(
+                                                                    containerColor = colorPalette.ShortEaseRed,
+                                                                    contentColor = colorPalette.ShortEaseWhite
+                                                                )
+
+                                                            ) {
+                                                                Text(
+                                                                    text = format.videoQuality().toString()
+                                                                )
+                                                            }
                                                         }
                                                     }
-                                                    else Toast.makeText(context, "Cannot download this video", Toast.LENGTH_SHORT).show()
                                                 }
-                                            ,
-                                        )
+                                            )
+                                        }
                                     }
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Divider(color = colorPalette.ShortEaseRed, thickness = 1.dp)
@@ -298,13 +340,17 @@ fun formatViewCount(viewCount: BigInteger): String {
     return numberFormat.format(viewCount.toLong())
 }
 
-fun extractVideoId(url: String): String? {
+fun extractVideoId(url: String): String {
     val startIndex = url.indexOf("vi/") + 3
     val endIndex = url.indexOf("/", startIndex)
     if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
         return url.substring(startIndex, endIndex)
     }
-    return null
+    return ""
+}
+@Composable
+fun YourComposableFunction() {
+
 }
 
 @Composable
