@@ -1,7 +1,10 @@
 package com.example.shortease.youtube
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
+import android.media.ThumbnailUtils
 import android.util.Log
 import android.widget.Toast
 import com.github.kiulian.downloader.YoutubeDownloader
@@ -13,6 +16,11 @@ import com.github.kiulian.downloader.model.videos.VideoInfo
 import com.github.kiulian.downloader.model.videos.formats.VideoFormat
 import com.github.kiulian.downloader.model.videos.formats.VideoWithAudioFormat
 import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.lang.Exception
+import java.net.HttpURLConnection
+import java.net.URL
 
 class YouTubeDownloader(private val context: Context) {
     private var downloaderProgress = 0
@@ -34,7 +42,7 @@ class YouTubeDownloader(private val context: Context) {
         return video.videoWithAudioFormats()
     }
 
-    fun downloadYouTubeVideo(videoId: String, videoTitle: String, format: VideoFormat) {
+    fun downloadYouTubeVideo(videoId: String, videoTitle: String, format: VideoFormat, thumbnailURL: String) {
         downloader.config.maxRetries = 1000000
         val videoDir = File(context.filesDir, "videos")
         val outputDir = File(videoDir, videoId)
@@ -48,8 +56,23 @@ class YouTubeDownloader(private val context: Context) {
                         }
 
                         override fun onFinished(videoInfo: File) {
-                            Log.d("youtube init", "FINISHED DONE")
+                            try {
+                                val url = URL(thumbnailURL)
+                                val connection = url.openConnection() as HttpURLConnection
+                                connection.doInput = true
+                                connection.connect()
+                                val input: InputStream = connection.inputStream
+                                val bitmap: Bitmap = BitmapFactory.decodeStream(input)
 
+                                val file = File(outputDir, "thumbnail.jpg")
+                                val fos = FileOutputStream(file)
+                                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+                                fos.flush()
+                                fos.close()
+                            } catch (e: Exception) {
+                                Log.d("youtube init", "Thumbnail could not be saved")
+                            }
+                            Log.d("youtube init", "FINISHED DONE")
                         }
 
                         override fun onError(throwable: Throwable) {

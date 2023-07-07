@@ -16,12 +16,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -59,6 +61,7 @@ import com.github.kiulian.downloader.model.videos.formats.VideoWithAudioFormat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 import java.math.BigInteger
 import java.text.NumberFormat
 import java.util.Locale
@@ -71,19 +74,31 @@ fun MyVideos(
 ) {
     val thumbnailItems = remember { mutableStateListOf<ThumbnailItem>() }
     val youtubeDownloader = YouTubeDownloader(LocalContext.current)
-    DisposableEffect(Unit) {
-        val scope = CoroutineScope(Dispatchers.Main)
-        val channelId = "UCX6OQ3DkcsbYNE6H8uQQuVA"
-        val y = YouTubeApiClient("AIzaSyCZ1aVkQw5j_ljA-AesWfHh0c6lnGQIq-A") // Replace with your API key
-        val job = scope.launch {
-            val fetchedThumbnailItems = y.fetchVideoThumbnails(channelId)
-            thumbnailItems.addAll(fetchedThumbnailItems)
-        }
-
-        onDispose {
-            job.cancel()
-        }
-    }
+//    DisposableEffect(Unit) {
+//        val scope = CoroutineScope(Dispatchers.Main)
+//        val channelId = "UCX6OQ3DkcsbYNE6H8uQQuVA"
+//        val y = YouTubeApiClient("AIzaSyCZ1aVkQw5j_ljA-AesWfHh0c6lnGQIq-A") // Replace with your API key
+//        val job = scope.launch {
+//            val fetchedThumbnailItems = y.fetchVideoThumbnails(channelId)
+//            thumbnailItems.addAll(fetchedThumbnailItems)
+//        }
+//
+//        onDispose {
+//            job.cancel()
+//        }
+//    }
+    val fakeThumbnailItem: ThumbnailItem = ThumbnailItem(
+        "10 Sec Timer",
+        "https://i.ytimg.com/vi/zU9y354XAgM/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyiceF5hUqg8CSc85pQwJuvOxXkQ",
+        BigInteger("1234567890")
+    )
+    val fakeThumbnailItem2: ThumbnailItem = ThumbnailItem(
+        "Donkey Kong Gets Sturdy",
+        "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
+        BigInteger("1234567890")
+    )
+    thumbnailItems.add(fakeThumbnailItem)
+    thumbnailItems.add(fakeThumbnailItem2)
 
     var selected by remember { mutableStateOf(0) }
     Box(
@@ -174,29 +189,49 @@ fun MyVideos(
                                             )
                                         }
                                         val isPopupOpen = remember { mutableStateOf(false) }
-                                        var videoId = remember { mutableStateOf("") }
+                                        var videoId = remember { mutableStateOf(extractVideoId(thumbnailItem.thumbnailUrl)) }
                                         var formats = remember { mutableStateOf(emptyList<VideoWithAudioFormat>()) }
                                         Column(
                                             verticalArrangement = Arrangement.Center,
-                                            modifier = Modifier.clickable {
-                                                videoId.value = extractVideoId(thumbnailItem.thumbnailUrl)
-                                                if (videoId.value != "") {
-                                                    formats.value = youtubeDownloader.requestVideoDetail(videoId.value)
-                                                    if (formats != null) {
-                                                        isPopupOpen.value = true
-                                                    }
-                                                } else {
-                                                    Toast.makeText(context, "Cannot download this video", Toast.LENGTH_SHORT).show()
+                                        ) {
+                                            var videoDir = File("${context.filesDir}/videos/${videoId.value}")
+                                            if(videoDir.isDirectory) {
+                                                Log.d("youtube init", videoDir.toString())
+                                                var finishedDownload = remember { mutableStateOf(File(videoDir, "thumbnail.jpg")) }
+                                                if(finishedDownload.value.exists()) {
+                                                    Image(
+                                                        painter = painterResource(R.drawable.check),
+                                                        contentDescription = "Check Icon",
+                                                        colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
+                                                        modifier = Modifier.size(24.dp)
+                                                    )
+                                                }
+                                                else {
+                                                    CircularProgressIndicator(
+                                                        modifier = Modifier
+                                                            .size(24.dp),
+                                                        strokeWidth = 2.dp,
+                                                        color = colorPalette.ShortEaseRed
+
+                                                    )
                                                 }
                                             }
-                                        ) {
-                                            Image(
-                                                painter = painterResource(R.drawable.download_icon),
-                                                contentDescription = "Download Icon",
-                                                colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
-                                                modifier = Modifier
-                                                    .size(24.dp)
-                                            )
+                                            else {
+                                                Image(
+                                                    painter = painterResource(R.drawable.download_icon),
+                                                    contentDescription = "Download Icon",
+                                                    colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
+                                                    modifier = Modifier.clickable {
+                                                        if (videoId.value != "") {
+                                                            formats.value = youtubeDownloader.requestVideoDetail(videoId.value)
+                                                            isPopupOpen.value = true
+                                                        } else {
+                                                            Toast.makeText(context, "Cannot download this video", Toast.LENGTH_SHORT).show()
+                                                        }
+                                                    }
+                                                        .size(24.dp)
+                                                )
+                                            }
                                         }
 
                                         if (isPopupOpen.value) {
@@ -210,7 +245,7 @@ fun MyVideos(
                                                             Button(
                                                                 onClick = {
                                                                     CoroutineScope(Dispatchers.Main).launch {
-                                                                        youtubeDownloader.downloadYouTubeVideo(videoId = videoId.value, videoTitle = thumbnailItem.title, format = format)
+                                                                        youtubeDownloader.downloadYouTubeVideo(videoId = videoId.value, videoTitle = thumbnailItem.title, format = format, thumbnailURL = thumbnailItem.thumbnailUrl)
                                                                     }
                                                                     isPopupOpen.value = false
                                                                 },
