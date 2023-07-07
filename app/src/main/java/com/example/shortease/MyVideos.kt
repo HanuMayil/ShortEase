@@ -1,5 +1,3 @@
-package com.example.shortease
-
 import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -60,7 +58,10 @@ import java.util.Locale
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-
+import com.example.shortease.R
+import com.example.shortease.Screen
+import com.example.shortease.ThumbnailItem
+import com.example.shortease.YouTubeApiClient
 
 
 @SuppressLint("SuspiciousIndentation")
@@ -103,7 +104,7 @@ fun MyVideos(
                         colors = TopAppBarDefaults.largeTopAppBarColors(
                             containerColor = colorPalette.ShortEaseRed,
                             titleContentColor = colorPalette.ShortEaseWhite,
-                    ),
+                        ),
                         title = {
                             Text(
                                 text = "My Videos",
@@ -141,11 +142,11 @@ fun MyVideos(
                                     modifier = Modifier.background(color = colorPalette.ShortEaseWhite)
 
                                 ) {
-                                     DropdownMenuItem(
+                                    DropdownMenuItem(
                                         text = { Text("Sign Out", textAlign = TextAlign.Center,
                                             style = TextStyle(color = colorPalette.ShortEaseRed, fontSize = 14.sp),
                                             modifier = Modifier.padding(horizontal = 20.dp))},
-                                         onClick = {
+                                        onClick = {
                                             navController.navigate(route = Screen.HomeScreen.route)
                                             signOutClicked()
                                         }
@@ -162,7 +163,7 @@ fun MyVideos(
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxSize())
-                                 {
+                        {
                             itemsIndexed(thumbnailItems) { _, thumbnailItem ->
                                 Column(
                                     modifier = Modifier
@@ -307,4 +308,5 @@ private fun MyVideosPreview() {
         signOutClicked = {  }
     )
 }
+
 
