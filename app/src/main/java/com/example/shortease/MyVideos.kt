@@ -56,8 +56,10 @@ import java.math.BigInteger
 import java.text.NumberFormat
 import java.util.Locale
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.ui.draw.clip
 import com.example.shortease.R
 import com.example.shortease.Screen
 import com.example.shortease.ThumbnailItem
@@ -129,11 +131,13 @@ fun MyVideos(
                                 modifier = Modifier
                                     .wrapContentSize(Alignment.TopEnd)
                             ) {
-                                IconButton(onClick = { expanded = !expanded }) {
+                                IconButton(
+                                    onClick = { expanded = !expanded }
+                                ) {
                                     Image(
                                         painter = rememberImagePainter(channelIconUrl.value),
                                         contentDescription = "Channel Icon",
-                                        modifier = Modifier.size(36.dp)
+                                        modifier = Modifier.size(36.dp).clip(CircleShape)
                                     )
                                 }
                                 DropdownMenu(
