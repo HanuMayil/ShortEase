@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -44,6 +45,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -269,6 +271,35 @@ fun VideoItem(video: File) {
     val title =   video.toString().substringAfterLast("/").substringBeforeLast(".mp4")
     Log.d("youtube init","Video ID: ${videoId}")
     var thumbnail_pic = File(context.filesDir, "videos/${videoId}/thumbnail.jpg");
+    val showDialog = remember { mutableStateOf(false) }
+
+    // Show confirmation dialog
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text(text = "Delete Video?") },
+            text = { Text(text =  "Are you sure you want to delete: \n \"${title}\"?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog.value = false
+                        var fileDirectory = File(context.filesDir, "videos/${videoId}")
+                        fileDirectory.deleteRecursively()
+                    },
+                    colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
+                ) {
+                    Text(text = "Confirm")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDialog.value = false },
+                    colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
+                ) {
+                    Text(text = "Cancel")
+                }
+            }
+        )
+    }
     if(thumbnail_pic.isFile) {
         Log.d("youtube init","thumbail_pic: ${thumbnail_pic}")
         Column(
@@ -307,8 +338,7 @@ fun VideoItem(video: File) {
                         modifier = Modifier.size(24.dp)
                             .align(Alignment.CenterVertically)
                             .clickable {
-                                var fileDirectory = File(context.filesDir, "videos/${videoId}")
-                                fileDirectory.deleteRecursively()
+                                showDialog.value = true
                             }
                     )
                     Spacer(modifier = Modifier.width(10.dp))
