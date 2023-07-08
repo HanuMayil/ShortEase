@@ -2,6 +2,7 @@ package com.example.shortease
 
 import android.util.Log
 import android.widget.Toast
+import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -69,14 +70,28 @@ import java.math.BigInteger
 import java.text.NumberFormat
 import java.util.Locale
 import java.util.concurrent.Executors
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.ui.draw.clip
+import coil.annotation.ExperimentalCoilApi
+import com.example.shortease.R
+import com.example.shortease.Screen
+import com.example.shortease.ThumbnailItem
+import com.example.shortease.YouTubeApiClient
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+@SuppressLint("SuspiciousIndentation")
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
 @Composable
 fun MyVideos(
     navController: NavController,
     signOutClicked: () -> Unit?
 ) {
     val thumbnailItems = remember { mutableStateListOf<ThumbnailItem>() }
+    //tmp image
+    val channelIconUrl = remember { mutableStateOf("https://www.digitary.net/wp-content/uploads/2021/07/Generic-Profile-Image.png") }
     val youtubeDownloader = YouTubeDownloader(LocalContext.current)
     val context = LocalContext.current
     DisposableEffect(Unit) {
@@ -84,10 +99,9 @@ fun MyVideos(
 //        val channelId = "UCX6OQ3DkcsbYNE6H8uQQuVA"
 //        val y = YouTubeApiClient("AIzaSyCZ1aVkQw5j_ljA-AesWfHh0c6lnGQIq-A") // Replace with your API key
 //        val job = scope.launch {
-//            val fetchedThumbnailItems = y.fetchVideoThumbnails(channelId)
+//            val fetchedThumbnailItems = y.fetchVideoThumbnails(channelId, channelIconUrl)
 //            thumbnailItems.addAll(fetchedThumbnailItems)
 //        }
-//
 //        onDispose {
 //            job.cancel()
 //        }
@@ -105,7 +119,9 @@ fun MyVideos(
         thumbnailItems.add(fakeThumbnailItem2)
         onDispose {}
     }
-    var selected by remember { mutableStateOf(0) }
+
+    var expanded by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -141,14 +157,35 @@ fun MyVideos(
                             )
                         },
                         actions = {
-                            IconButton(onClick = {
-                                navController.navigate(route = Screen.HomeScreen.route)
-                            }) {
-                                Image(
-                                    painter = painterResource(R.drawable.home_button),
-                                    contentDescription = "Profile",
-                                    Modifier.clickable { signOutClicked() }
-                                )
+                            Box(
+                                modifier = Modifier
+                                    .wrapContentSize(Alignment.TopEnd)
+                            ) {
+                                IconButton(
+                                    onClick = { expanded = !expanded }
+                                ) {
+                                    Image(
+                                        painter = rememberImagePainter(channelIconUrl.value),
+                                        contentDescription = "Channel Icon",
+                                        modifier = Modifier.size(36.dp).clip(CircleShape)
+                                    )
+                                }
+                                DropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false },
+                                    modifier = Modifier.background(color = colorPalette.ShortEaseWhite)
+
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("Sign Out", textAlign = TextAlign.Center,
+                                            style = TextStyle(color = colorPalette.ShortEaseRed, fontSize = 14.sp),
+                                            modifier = Modifier.padding(horizontal = 20.dp))},
+                                        onClick = {
+                                            navController.navigate(route = Screen.HomeScreen.route)
+                                            signOutClicked()
+                                        }
+                                    )
+                                }
                             }
                         }
                     )
@@ -380,6 +417,8 @@ fun MyVideos(
         }
     }
 }
+
+
 
 // Function to format the view count with comma separators
 fun formatViewCount(viewCount: BigInteger): String {
