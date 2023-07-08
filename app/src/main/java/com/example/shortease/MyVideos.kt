@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,7 +31,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -58,13 +56,18 @@ import com.example.shortease.ui.theme.ShortEaseTheme
 import com.example.shortease.ui.theme.colorPalette
 import com.example.shortease.youtube.YouTubeDownloader
 import com.github.kiulian.downloader.model.videos.formats.VideoWithAudioFormat
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.math.BigInteger
 import java.text.NumberFormat
 import java.util.Locale
+import java.util.concurrent.Executors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -191,14 +194,18 @@ fun MyVideos(
                                         val isPopupOpen = remember { mutableStateOf(false) }
                                         var videoId = remember { mutableStateOf(extractVideoId(thumbnailItem.thumbnailUrl)) }
                                         var formats = remember { mutableStateOf(emptyList<VideoWithAudioFormat>()) }
+                                        var finishedDownload = remember { mutableStateOf(false) }
+                                        var videoDirExists = remember {mutableStateOf(false)}
                                         Column(
                                             verticalArrangement = Arrangement.Center,
                                         ) {
                                             var videoDir = File("${context.filesDir}/videos/${videoId.value}")
-                                            if(videoDir.isDirectory) {
+                                            videoDirExists.value = videoDir.exists()
+
+                                            if(videoDirExists.value) {
                                                 Log.d("youtube init", videoDir.toString())
-                                                var finishedDownload = remember { mutableStateOf(File(videoDir, "thumbnail.jpg")) }
-                                                if(finishedDownload.value.exists()) {
+                                                finishedDownload.value = File(videoDir, "thumbnail.jpg").exists()
+                                                if(finishedDownload.value) {
                                                     Image(
                                                         painter = painterResource(R.drawable.check),
                                                         contentDescription = "Check Icon",
@@ -244,8 +251,24 @@ fun MyVideos(
                                                         formats.value.forEach { format ->
                                                             Button(
                                                                 onClick = {
+                                                                    videoDirExists.value = true
+                                                                    val backgroundDispatcher: CoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
                                                                     CoroutineScope(Dispatchers.Main).launch {
-                                                                        youtubeDownloader.downloadYouTubeVideo(videoId = videoId.value, videoTitle = thumbnailItem.title, format = format, thumbnailURL = thumbnailItem.thumbnailUrl)
+                                                                        withContext(backgroundDispatcher) {
+                                                                            val deferred = CompletableDeferred<Unit>()
+                                                                            youtubeDownloader.downloadYouTubeVideo(
+                                                                                videoId = videoId.value,
+                                                                                videoTitle = thumbnailItem.title,
+                                                                                format = format,
+                                                                                thumbnailURL = thumbnailItem.thumbnailUrl,
+                                                                                completionCallback = {
+                                                                                    deferred.complete(Unit)
+                                                                                }
+                                                                            )
+                                                                            deferred.await()
+                                                                        }
+                                                                    }.invokeOnCompletion {
+                                                                        finishedDownload.value = true
                                                                     }
                                                                     isPopupOpen.value = false
                                                                 },
@@ -382,10 +405,6 @@ fun extractVideoId(url: String): String {
         return url.substring(startIndex, endIndex)
     }
     return ""
-}
-@Composable
-fun YourComposableFunction() {
-
 }
 
 @Composable

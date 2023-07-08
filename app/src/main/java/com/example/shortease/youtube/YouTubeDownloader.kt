@@ -3,8 +3,6 @@ package com.example.shortease.youtube
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.MediaMetadataRetriever
-import android.media.ThumbnailUtils
 import android.util.Log
 import android.widget.Toast
 import com.github.kiulian.downloader.YoutubeDownloader
@@ -42,7 +40,13 @@ class YouTubeDownloader(private val context: Context) {
         return video.videoWithAudioFormats()
     }
 
-    fun downloadYouTubeVideo(videoId: String, videoTitle: String, format: VideoFormat, thumbnailURL: String) {
+    fun downloadYouTubeVideo(
+        videoId: String,
+        videoTitle: String,
+        format: VideoFormat,
+        thumbnailURL: String,
+        completionCallback: () -> Unit
+    ) {
         downloader.config.maxRetries = 1000000
         val videoDir = File(context.filesDir, "videos")
         val outputDir = File(videoDir, videoId)
@@ -73,11 +77,11 @@ class YouTubeDownloader(private val context: Context) {
                                 Log.d("youtube init", "Thumbnail could not be saved")
                             }
                             Log.d("youtube init", "FINISHED DONE")
+                            completionCallback()
                         }
 
                         override fun onError(throwable: Throwable) {
                             Log.d("youtube init", "Error: ${throwable.localizedMessage}")
-
                         }
                     })
                     .maxRetries(100000000)
