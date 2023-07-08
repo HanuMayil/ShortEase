@@ -1,6 +1,7 @@
 package com.example.shortease
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -49,11 +50,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.shortease.ui.theme.ShortEaseTheme
 import com.example.shortease.ui.theme.colorPalette
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,18 +82,15 @@ fun SavedVideos(
         Log.d("youtube init", "${folder.listFiles()}");
         if (folder.exists() && folder.isDirectory) {
             Log.d("youtube init", "got into for loop");
-            val videoFiles = folder.listFiles { file ->
-                file.isFile && file.extension in listOf("mp4", "mkv", "avi")
-            }
             val sub_folders =  folder.listFiles { file ->
                 file.isDirectory
             }
-            videos.clear()
             sub_folders?.forEach { sub_folders ->
                 val videoFiles = sub_folders.listFiles { file ->
                     file.isFile && file.extension in listOf("mp4", "mkv", "avi")
                 }
-                videos.addAll(videoFiles ?: emptyArray())
+                Log.d("youtube init","Video File: ${videoFiles.size}")
+                videos.addAll(videoFiles)
             }
 
             videos?.forEach { videoFile ->
@@ -97,14 +99,7 @@ fun SavedVideos(
             sub_folders?.forEach { sub_folders ->
                 Log.d("youtube init","Folders: ${sub_folders.name}")
             }
-        }
-    }
-
-    Surface(modifier = Modifier.fillMaxSize()) {
-        LazyColumn {
-            items(videos) { video ->
-                VideoItem(video)
-            }
+            
         }
     }
 
@@ -140,7 +135,9 @@ fun SavedVideos(
                             Image(
                                 painter = painterResource(R.drawable.search),
                                 contentDescription = "Search Icon",
-                                Modifier.padding(start = 10.dp).size(30.dp)
+                                Modifier
+                                    .padding(start = 10.dp)
+                                    .size(30.dp)
                             )
                         },
                         actions = {
@@ -155,47 +152,10 @@ fun SavedVideos(
                             }
                         }
                     )
-                    val context = LocalContext.current
-                    Box(modifier = Modifier.weight(1f)
-                    ) {
-                        // Display the thumbnails in a LazyColumn
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize())
-                        {
-                            itemsIndexed(thumbnailItems) { _, thumbnailItem ->
-                                Column(
-                                    modifier = Modifier
-                                        .padding(vertical = 8.dp)
-                                        .fillMaxWidth()
-                                ) {
-                                    Image(
-
-                                        painter = rememberImagePainter(thumbnailItem.thumbnailUrl),
-                                        contentDescription = thumbnailItem.title,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(272.dp)
-                                    )
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.padding(horizontal = 16.dp)
-                                    ) {
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                text = thumbnailItem.title,
-                                                style = TextStyle(
-                                                    color = colorPalette.ShortEaseRed,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 16.sp
-                                                ),
-                                                modifier = Modifier.padding(end = 8.dp)
-                                            )
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Divider(color = colorPalette.ShortEaseRed, thickness = 1.dp)
-                                }
+                    Box(modifier = Modifier.weight(1f)) {
+                        LazyColumn {
+                            items(videos) { video ->
+                                VideoItem(video)
                             }
                         }
                     }
@@ -211,7 +171,9 @@ fun SavedVideos(
                             border = BorderStroke(width = 1.dp, color = colorPalette.ShortEaseRed),
                         ) {
                             Button(
-                                onClick = { selected = 0 },
+                                onClick = {
+                                    selected = 0;
+                                    navController.navigate(route = Screen.MyVideos.route) },
                                 shape = RoundedCornerShape(50),
                                 colors = ButtonDefaults.buttonColors(Color.Transparent),
                                 modifier = Modifier
@@ -290,27 +252,68 @@ fun SavedVideos(
             }
         }
     }
+
 }
 
 
 @Composable
-fun VideoItem(video: File) {
-    val context = LocalContext.current
-    Log.d("youtube init", "got into fucntion");
+fun VideoList(videoFiles: List<File>) {
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
-        Image(
-            painter = painterResource(R.drawable.home_button), // Placeholder image
-            contentDescription = "Video Thumbnail",
-            contentScale = ContentScale.Crop,
-            colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
+}
+@Composable
+fun VideoItem(video: File) {
+    // Display video item here
+    // Replace with your desired representation
+    // You can use libraries like ExoPlayer or Glide to handle video loading and playback
+    Log.d("youtube init","got into video item")
+    Log.d("youtube init","Video Item: ${video}")
+    // Example: Display video file name
+    val context = LocalContext.current
+    val videoId = video.toString().substringAfterLast("/videos/").substringBefore("/")
+    val title =   video.toString().substringAfterLast("/").substringBeforeLast(".mp4")
+    Log.d("youtube init","Video ID: ${videoId}")
+    var thumbnail_pic = File(context.filesDir, "videos/${videoId}/thumbnail.jpg");
+    if(thumbnail_pic.isFile) {
+        Log.d("youtube init","thumbail_pic: ${thumbnail_pic}")
+        Column(
             modifier = Modifier
-                .size(120.dp)
-        )
+            .padding(vertical = 8.dp)
+            .fillMaxWidth()
+        ) {
+            Image(
+                painter = rememberImagePainter(thumbnail_pic),
+                contentDescription = title,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(272.dp),
+            )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = title,
+                        style = TextStyle(
+                            color = colorPalette.ShortEaseRed,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
+                    Image(
+                        painter = painterResource(R.drawable.download_icon),
+                        contentDescription = "Download Icon",
+                        colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
+                        modifier = Modifier.size(24.dp).align(Alignment.CenterVertically)
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Divider(color = colorPalette.ShortEaseRed, thickness = 1.dp)
     }
 }
 
