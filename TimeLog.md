@@ -27,4 +27,5 @@
 | 07/04/2023 | 6    |         |       | 6        |          |       | Work on Youtube Download                             |
 | 07/05/2023 | 3    |         |       | 3        |          |       | Work on Youtube Download                             |
 | 07/05/2023 |      | 3       |       |          |          |       | Worked on getting channel id from google login       |
+| 07/05/2023 |      |         |       |          | 6        | 6     | Worked on getting channel icon + dropdown            |
 | 07/07/2023 | 6    |         |       | 6        |          |       | Work on Youtube Download                             |
