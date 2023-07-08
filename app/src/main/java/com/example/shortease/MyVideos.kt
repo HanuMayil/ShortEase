@@ -1,6 +1,5 @@
 package com.example.shortease
 
-import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -20,8 +19,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -51,16 +52,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberImagePainter
 import com.example.shortease.ui.theme.ShortEaseTheme
 import com.example.shortease.ui.theme.colorPalette
+import com.example.shortease.youtube.YouTubeDownloader
+import com.github.kiulian.downloader.model.videos.formats.VideoWithAudioFormat
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
-import coil.compose.rememberImagePainter
-import com.example.shortease.youtube.YouTubeDownloader
+import kotlinx.coroutines.withContext
+import java.io.File
 import java.math.BigInteger
 import java.text.NumberFormat
 import java.util.Locale
+import java.util.concurrent.Executors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,7 +78,6 @@ fun MyVideos(
 ) {
     val thumbnailItems = remember { mutableStateListOf<ThumbnailItem>() }
     val youtubeDownloader = YouTubeDownloader(LocalContext.current)
-
 //    DisposableEffect(Unit) {
 //        val scope = CoroutineScope(Dispatchers.Main)
 //        val channelId = "UCX6OQ3DkcsbYNE6H8uQQuVA"
@@ -84,20 +91,22 @@ fun MyVideos(
 //            job.cancel()
 //        }
 //    }
-
-    val fakeThumbnailItem: ThumbnailItem = ThumbnailItem(
-        "10 Sec Timer",
-        "https://i.ytimg.com/vi/zU9y354XAgM/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyiceF5hUqg8CSc85pQwJuvOxXkQ",
-        BigInteger("1234567890")
-    )
-    val fakeThumbnailItem2: ThumbnailItem = ThumbnailItem(
-        "Donkey Kong Gets Sturdy",
-        "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
-        BigInteger("1234567890")
-    )
-    thumbnailItems.add(fakeThumbnailItem)
-    thumbnailItems.add(fakeThumbnailItem2)
-
+    DisposableEffect(Unit) {
+        val fakeThumbnailItem: ThumbnailItem = ThumbnailItem(
+            "10 Sec Timer",
+            "https://i.ytimg.com/vi/zU9y354XAgM/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyiceF5hUqg8CSc85pQwJuvOxXkQ",
+            BigInteger("1234567890")
+        )
+        val fakeThumbnailItem2: ThumbnailItem = ThumbnailItem(
+            "Donkey Kong Gets Sturdy",
+            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
+            BigInteger("1234567890")
+        )
+        thumbnailItems.add(fakeThumbnailItem)
+        thumbnailItems.add(fakeThumbnailItem2)
+        onDispose {}
+    }
+    var selected by remember { mutableStateOf(0) }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -151,7 +160,7 @@ fun MyVideos(
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxSize())
-                                 {
+                        {
                             itemsIndexed(thumbnailItems) { _, thumbnailItem ->
                                 Column(
                                     modifier = Modifier
@@ -185,25 +194,107 @@ fun MyVideos(
                                                 modifier = Modifier.padding(end = 8.dp)
                                             )
                                         }
-                                        Image(
-                                            painter = painterResource(R.drawable.download_icon),
-                                            contentDescription = "Download Icon",
-                                            colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
-                                            modifier = Modifier
-                                                .size(24.dp)
-                                                .align(Alignment.CenterVertically)
-                                                .clickable {
-                                                    var videoId = extractVideoId(thumbnailItem.thumbnailUrl)
-//                                                    var videoId = "CH50zuS8DD0"
-                                                    if(videoId != null) {
-                                                        CoroutineScope(Dispatchers.Main).launch {
-                                                            youtubeDownloader.downloadYouTubeVideo(videoId = videoId, videoTitle = thumbnailItem.title)
+                                        val isPopupOpen = remember { mutableStateOf(false) }
+                                        var videoId = remember { mutableStateOf(extractVideoId(thumbnailItem.thumbnailUrl)) }
+                                        var formats = remember { mutableStateOf(emptyList<VideoWithAudioFormat>()) }
+                                        var finishedDownload = remember { mutableStateOf(false) }
+                                        var videoDirExists = remember {mutableStateOf(false)}
+                                        Column(
+                                            verticalArrangement = Arrangement.Center,
+                                        ) {
+                                            var videoDir = File("${context.filesDir}/videos/${videoId.value}")
+                                            videoDirExists.value = videoDir.exists()
+
+                                            if(videoDirExists.value) {
+                                                Log.d("youtube init", videoDir.toString())
+                                                finishedDownload.value = File(videoDir, "thumbnail.jpg").exists()
+                                                if(finishedDownload.value) {
+                                                    Image(
+                                                        painter = painterResource(R.drawable.check),
+                                                        contentDescription = "Check Icon",
+                                                        colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
+                                                        modifier = Modifier.size(24.dp)
+                                                    )
+                                                }
+                                                else {
+                                                    CircularProgressIndicator(
+                                                        modifier = Modifier
+                                                            .size(24.dp),
+                                                        strokeWidth = 2.dp,
+                                                        color = colorPalette.ShortEaseRed
+
+                                                    )
+                                                }
+                                            }
+                                            else {
+                                                Image(
+                                                    painter = painterResource(R.drawable.download_icon),
+                                                    contentDescription = "Download Icon",
+                                                    colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
+                                                    modifier = Modifier.clickable {
+                                                        if (videoId.value != "") {
+                                                            formats.value = youtubeDownloader.requestVideoDetail(videoId.value)
+                                                            isPopupOpen.value = true
+                                                        } else {
+                                                            Toast.makeText(context, "Cannot download this video", Toast.LENGTH_SHORT).show()
                                                         }
                                                     }
-                                                    else Toast.makeText(context, "Cannot download this video", Toast.LENGTH_SHORT).show()
+                                                        .size(24.dp)
+                                                )
+                                            }
+                                        }
+
+                                        if (isPopupOpen.value) {
+                                            AlertDialog(
+                                                onDismissRequest = { isPopupOpen.value = false },
+                                                title = { Text(text = "Select Format") },
+                                                confirmButton = {},
+                                                text = {
+                                                    Column {
+                                                        formats.value.forEach { format ->
+                                                            Button(
+                                                                onClick = {
+                                                                    videoDirExists.value = true
+                                                                    val backgroundDispatcher: CoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+                                                                    CoroutineScope(Dispatchers.Main).launch {
+                                                                        withContext(backgroundDispatcher) {
+                                                                            val deferred = CompletableDeferred<Unit>()
+                                                                            youtubeDownloader.downloadYouTubeVideo(
+                                                                                videoId = videoId.value,
+                                                                                videoTitle = thumbnailItem.title,
+                                                                                format = format,
+                                                                                thumbnailURL = thumbnailItem.thumbnailUrl,
+                                                                                completionCallback = {
+                                                                                    deferred.complete(Unit)
+                                                                                }
+                                                                            )
+                                                                            deferred.await()
+                                                                        }
+                                                                    }.invokeOnCompletion {
+                                                                        finishedDownload.value = true
+                                                                    }
+                                                                    isPopupOpen.value = false
+                                                                },
+                                                                modifier = Modifier
+                                                                    .padding(16.dp)
+                                                                    .height(64.dp)
+                                                                    .fillMaxWidth(),
+                                                                shape = RoundedCornerShape(8.dp),
+                                                                colors = ButtonDefaults.buttonColors(
+                                                                    containerColor = colorPalette.ShortEaseRed,
+                                                                    contentColor = colorPalette.ShortEaseWhite
+                                                                )
+
+                                                            ) {
+                                                                Text(
+                                                                    text = format.videoQuality().toString()
+                                                                )
+                                                            }
+                                                        }
+                                                    }
                                                 }
-                                            ,
-                                        )
+                                            )
+                                        }
                                     }
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Divider(color = colorPalette.ShortEaseRed, thickness = 1.dp)
@@ -298,13 +389,13 @@ fun formatViewCount(viewCount: BigInteger): String {
     return numberFormat.format(viewCount.toLong())
 }
 
-fun extractVideoId(url: String): String? {
+fun extractVideoId(url: String): String {
     val startIndex = url.indexOf("vi/") + 3
     val endIndex = url.indexOf("/", startIndex)
     if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
         return url.substring(startIndex, endIndex)
     }
-    return null
+    return ""
 }
 
 @Composable
@@ -315,4 +406,3 @@ private fun MyVideosPreview() {
         signOutClicked = {  }
     )
 }
-
