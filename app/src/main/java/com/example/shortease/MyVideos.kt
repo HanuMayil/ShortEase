@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -90,19 +91,21 @@ fun MyVideos(
 //            job.cancel()
 //        }
 //    }
-    val fakeThumbnailItem: ThumbnailItem = ThumbnailItem(
-        "10 Sec Timer",
-        "https://i.ytimg.com/vi/zU9y354XAgM/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyiceF5hUqg8CSc85pQwJuvOxXkQ",
-        BigInteger("1234567890")
-    )
-    val fakeThumbnailItem2: ThumbnailItem = ThumbnailItem(
-        "Donkey Kong Gets Sturdy",
-        "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
-        BigInteger("1234567890")
-    )
-    thumbnailItems.add(fakeThumbnailItem)
-    thumbnailItems.add(fakeThumbnailItem2)
-
+    DisposableEffect(Unit) {
+        val fakeThumbnailItem: ThumbnailItem = ThumbnailItem(
+            "10 Sec Timer",
+            "https://i.ytimg.com/vi/zU9y354XAgM/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyiceF5hUqg8CSc85pQwJuvOxXkQ",
+            BigInteger("1234567890")
+        )
+        val fakeThumbnailItem2: ThumbnailItem = ThumbnailItem(
+            "Donkey Kong Gets Sturdy",
+            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
+            BigInteger("1234567890")
+        )
+        thumbnailItems.add(fakeThumbnailItem)
+        thumbnailItems.add(fakeThumbnailItem2)
+        onDispose {}
+    }
     var selected by remember { mutableStateOf(0) }
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -157,7 +160,7 @@ fun MyVideos(
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxSize())
-                                 {
+                        {
                             itemsIndexed(thumbnailItems) { _, thumbnailItem ->
                                 Column(
                                     modifier = Modifier
@@ -311,21 +314,18 @@ fun MyVideos(
                             border = BorderStroke(width = 1.dp, color = colorPalette.ShortEaseRed),
                         ) {
                             Button(
-                                onClick = { selected = 0 },
+                                onClick = {  },
                                 shape = RoundedCornerShape(50),
                                 colors = ButtonDefaults.buttonColors(Color.Transparent),
                                 modifier = Modifier
-                                    .clickable { selected = 0 }
                                     .background(
-                                        if (selected == 0) colorPalette.ShortEaseRed
-                                        else colorPalette.ShortEaseWhite
+                                        colorPalette.ShortEaseRed
                                     ),
                             ) {
                                 Image(
                                     painter = painterResource(R.drawable.edit),
                                     contentDescription = "Edit Icon",
-                                    colorFilter = if (selected == 0) ColorFilter.tint(colorPalette.ShortEaseWhite)
-                                    else ColorFilter.tint(colorPalette.ShortEaseRed),
+                                    colorFilter = ColorFilter.tint(colorPalette.ShortEaseWhite),
                                     modifier = Modifier
                                         .size(30.dp)
                                 )
@@ -338,21 +338,15 @@ fun MyVideos(
                             border = BorderStroke(width = 1.dp, color = colorPalette.ShortEaseRed),
                         ) {
                             Button(
-                                onClick = { selected = 1 },
+                                onClick = {
+                                    navController.navigate(route = Screen.SavedVideos.route) },
                                 shape = RoundedCornerShape(50),
                                 colors = ButtonDefaults.buttonColors(Color.Transparent),
-                                modifier = Modifier
-                                    .clickable { selected = 1 }
-                                    .background(
-                                        if (selected == 1) colorPalette.ShortEaseRed
-                                        else colorPalette.ShortEaseWhite
-                                    ),
                             ) {
                                 Image(
                                     painter = painterResource(R.drawable.save),
                                     contentDescription = "App Logo",
-                                    colorFilter = if (selected == 1) ColorFilter.tint(colorPalette.ShortEaseWhite)
-                                    else ColorFilter.tint(colorPalette.ShortEaseRed),
+                                    colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
                                     modifier = Modifier
                                         .size(30.dp)
                                 )
@@ -365,21 +359,18 @@ fun MyVideos(
                             border = BorderStroke(width = 1.dp, color = colorPalette.ShortEaseRed),
                         ) {
                             Button(
-                                onClick = { selected = 2 },
+                                onClick = {  },
                                 shape = RoundedCornerShape(50),
                                 colors = ButtonDefaults.buttonColors(Color.Transparent),
                                 modifier = Modifier
-                                    .clickable { selected = 2 }
                                     .background(
-                                        if (selected == 2) colorPalette.ShortEaseRed
-                                        else colorPalette.ShortEaseWhite
+                                        colorPalette.ShortEaseWhite
                                     ),
                             ) {
                                 Image(
                                     painter = painterResource(R.drawable.share),
                                     contentDescription = "Share Logo",
-                                    colorFilter = if (selected == 2) ColorFilter.tint(colorPalette.ShortEaseWhite)
-                                    else ColorFilter.tint(colorPalette.ShortEaseRed),
+                                    colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
                                     modifier = Modifier
                                         .size(30.dp)
                                 )
@@ -415,4 +406,3 @@ private fun MyVideosPreview() {
         signOutClicked = {  }
     )
 }
-

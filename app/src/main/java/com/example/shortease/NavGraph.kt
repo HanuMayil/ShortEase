@@ -53,5 +53,11 @@ fun SetupNavGraph(
         ) {
             Permissions(navController)
         }
+        composable(
+            route = Screen.SavedVideos.route
+        ) {
+            SavedVideos(navController, signOutClicked)
+        }
     }
 }
+

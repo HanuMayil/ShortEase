@@ -132,6 +132,23 @@ fun DebugScreen(
                     text = "Permissions"
                 )
             }
+            Button(
+                onClick = { navController.navigate(route = Screen.SavedVideos.route) },
+                modifier = Modifier
+                    .padding(16.dp)
+                    .height(64.dp)
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorPalette.ShortEaseRed,
+                    contentColor = colorPalette.ShortEaseWhite
+                )
+
+            ) {
+                Text(
+                    text = "Saved Videos"
+                )
+            }
         }
     }
 }
