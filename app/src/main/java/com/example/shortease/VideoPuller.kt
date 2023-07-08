@@ -1,5 +1,5 @@
 package com.example.shortease
-import android.content.Context
+import androidx.compose.runtime.MutableState
 import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.JsonFactory
@@ -13,14 +13,13 @@ import com.google.api.services.youtube.model.VideoListResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.math.BigInteger
+import java.net.URL
 
 class YouTubeApiClient(private val apiKey: String) {
     private val HTTP_TRANSPORT: NetHttpTransport = NetHttpTransport()
     private val JSON_FACTORY: JsonFactory = GsonFactory.getDefaultInstance()
     private val TAG = "YouTubeApiClient"
-
-
-    suspend fun fetchVideoThumbnails(channelId: String): List<ThumbnailItem> = withContext(Dispatchers.IO) {
+    suspend fun fetchVideoThumbnails(channelId: String, channelIconUrl: MutableState<String>): List<ThumbnailItem> = withContext(Dispatchers.IO) {
         val youtube = YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, HttpRequestInitializer { })
             .setApplicationName("YourAppName")
             .build()
@@ -34,6 +33,13 @@ class YouTubeApiClient(private val apiKey: String) {
 
         val searchResponse: SearchListResponse = searchRequest.execute()
         val searchItems: List<SearchResult> = searchResponse.items
+
+        if (searchItems.isNotEmpty()) {
+            val doc = URL("https://www.youtube.com/channel/$channelId").readText()
+            val regex = Regex("<meta property=\"og:image\" content=\"([^\"]+)\"")
+            val matchResult = regex.find(doc)
+            channelIconUrl.value = matchResult?.groupValues?.get(1).toString()
+        }
 
         val thumbnailItems = mutableListOf<ThumbnailItem>()
         for (searchItem in searchItems) {
