@@ -78,7 +78,8 @@ fun MyVideos(
 ) {
     val thumbnailItems = remember { mutableStateListOf<ThumbnailItem>() }
     val youtubeDownloader = YouTubeDownloader(LocalContext.current)
-//    DisposableEffect(Unit) {
+    val context = LocalContext.current
+    DisposableEffect(Unit) {
 //        val scope = CoroutineScope(Dispatchers.Main)
 //        val channelId = "UCX6OQ3DkcsbYNE6H8uQQuVA"
 //        val y = YouTubeApiClient("AIzaSyCZ1aVkQw5j_ljA-AesWfHh0c6lnGQIq-A") // Replace with your API key
@@ -90,8 +91,6 @@ fun MyVideos(
 //        onDispose {
 //            job.cancel()
 //        }
-//    }
-    DisposableEffect(Unit) {
         val fakeThumbnailItem: ThumbnailItem = ThumbnailItem(
             "10 Sec Timer",
             "https://i.ytimg.com/vi/zU9y354XAgM/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyiceF5hUqg8CSc85pQwJuvOxXkQ",
@@ -153,7 +152,6 @@ fun MyVideos(
                             }
                         }
                     )
-                    val context = LocalContext.current
                     Box(modifier = Modifier.weight(1f)
                     ) {
                         // Display the thumbnails in a LazyColumn

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -255,11 +256,6 @@ fun SavedVideos(
 
 }
 
-
-@Composable
-fun VideoList(videoFiles: List<File>) {
-
-}
 @Composable
 fun VideoItem(video: File) {
     // Display video item here
@@ -303,11 +299,24 @@ fun VideoItem(video: File) {
                         ),
                         modifier = Modifier.weight(1f)
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Image(
-                        painter = painterResource(R.drawable.download_icon),
+                        painter = painterResource(R.drawable.trashcan),
+                        contentDescription = "Delete Icon",
+                        colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
+                        modifier = Modifier.size(24.dp)
+                            .align(Alignment.CenterVertically)
+                            .clickable {
+                                var fileDirectory = File(context.filesDir, "videos/${videoId}")
+                                fileDirectory.deleteRecursively()
+                            }
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Image(
+                        painter = painterResource(R.drawable.edit),
                         contentDescription = "Download Icon",
                         colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
-                        modifier = Modifier.size(24.dp).align(Alignment.CenterVertically)
+                        modifier = Modifier.size(20.dp).align(Alignment.CenterVertically)
                     )
                 }
             }

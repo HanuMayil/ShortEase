@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -21,6 +22,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.io.File
 
 class MainActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
@@ -46,6 +48,7 @@ class MainActivity : ComponentActivity() {
         val user = firebaseAuth.currentUser
 
         setContent {
+            clearCachedData(LocalContext.current)
             ShortEaseTheme {
                 navController = rememberNavController()
                     SetupNavGraph(
@@ -123,5 +126,20 @@ class MainActivity : ComponentActivity() {
                     Toast.makeText(this, "Sign In Failed", Toast.LENGTH_SHORT).show()
                 }
             }
+    }
+
+    private fun clearCachedData(context: Context) {
+        val folder = File(context.filesDir, "videos")
+        if (folder.exists() && folder.isDirectory) {
+            val sub_folders =  folder.listFiles { file ->
+                file.isDirectory
+            }
+            sub_folders?.forEach { sub_folder ->
+                val thumbnailFile = File(sub_folder, "thumbnail.jpg")
+                if (!thumbnailFile.exists()) {
+                    sub_folder.deleteRecursively()
+                }
+            }
+        }
     }
 }
