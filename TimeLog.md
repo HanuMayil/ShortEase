@@ -26,7 +26,7 @@
 | 07/02/2023 | 3    |         |       | 4        |          |       | Work on Youtube Download                             |
 | 07/04/2023 | 6    |         |       | 6        |          |       | Work on Youtube Download                             |
 | 07/05/2023 | 3    |         |       | 3        |          |       | Work on Youtube Download                             |
-| 07/05/2023 |      | 3       |       |          |          |       | Worked on getting channel id from google login       |
+| 07/05/2023 |      | 3       | 4     |          |          |       | Worked on getting channel id from google login       |
 | 07/05/2023 |      |         |       |          | 6        | 6     | Worked on getting channel icon + dropdown            |
 | 07/07/2023 | 6    |         |       | 6        |          |       | Work on Youtube Download                             |
 | 07/08/2023 | 5    |         |       | 5        |          |       | Finish Youtube DL and Gallery Manager                |
