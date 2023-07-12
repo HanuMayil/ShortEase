@@ -1,6 +1,5 @@
 package com.example.shortease
 
-import MyVideos
 import Permissions
 import PreviewScreen
 import androidx.compose.runtime.Composable
@@ -54,5 +53,11 @@ fun SetupNavGraph(
         ) {
             Permissions(navController)
         }
+        composable(
+            route = Screen.SavedVideos.route
+        ) {
+            SavedVideos(navController, signOutClicked)
+        }
     }
 }
+

@@ -12,6 +12,7 @@ fun Permissions(navController: NavController) {
     val storagePermissionState = rememberMultiplePermissionsState(
         permissions = listOf(
             android.Manifest.permission.READ_MEDIA_VIDEO,
+            android.Manifest.permission.INTERNET
         )
     )
 
