@@ -6,7 +6,7 @@ sealed class Screen(val route: String) {
     object MyVideos: Screen(route = "my_videos")
     object Generate: Screen(route = "generate")
     object PreviewScreen: Screen(route = "preview_screen")
-    object VideoEditorScreen: Screen(route = "video_editor_screen")
+    object VideoEditorScreen: Screen(route = "video_editor_screen?param1={param1}")
     object Permissions: Screen(route = "permissions")
     object SavedVideos: Screen(route = "saved_videos")
 }

@@ -1,5 +1,6 @@
 package com.example.shortease
 
+import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -76,7 +77,7 @@ fun SavedVideos(
 
     val folderPath = "${LocalContext.current.filesDir}/videos"
 
-//    val folderPath = "/data/user/0/com.example.shortease/files"
+//   val folderPath = "/data/user/0/com.example.shortease/files"
     // Retrieve videos from the specified folder
     LaunchedEffect(folderPath) {
         val folder = File(folderPath)
@@ -158,7 +159,7 @@ fun SavedVideos(
                     Box(modifier = Modifier.weight(1f)) {
                         LazyColumn {
                             items(videos) { video ->
-                                VideoItem(video)
+                                VideoItem(video, navController)
                             }
                         }
                     }
@@ -259,7 +260,7 @@ fun SavedVideos(
 }
 
 @Composable
-fun VideoItem(video: File) {
+fun VideoItem(video: File, navController: NavController) {
     // Display video item here
     // Replace with your desired representation
     // You can use libraries like ExoPlayer or Glide to handle video loading and playback
@@ -272,9 +273,34 @@ fun VideoItem(video: File) {
     Log.d("youtube init","Video ID: ${videoId}")
     var thumbnail_pic = File(context.filesDir, "videos/${videoId}/thumbnail.jpg");
     val showDialog = remember { mutableStateOf(false) }
+    val showEditDialog = remember { mutableStateOf(false) }
 
+    if (showEditDialog.value && !showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showEditDialog.value = false },
+            title = { Text(text = "Edit Video?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showEditDialog.value = false
+                        navController.navigate(route = "video_editor_screen?param1=$videoId")
+                    },
+                    colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
+                ) {
+                    Text(text = "Confirm")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showEditDialog.value = false },
+                    colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
+                ) {
+                    Text(text = "Cancel")
+                }
+            }
+        )
+    }
     // Show confirmation dialog
-    if (showDialog.value) {
+    if (showDialog.value && !showEditDialog.value) {
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
             title = { Text(text = "Delete Video?") },
@@ -304,8 +330,8 @@ fun VideoItem(video: File) {
         Log.d("youtube init","thumbail_pic: ${thumbnail_pic}")
         Column(
             modifier = Modifier
-            .padding(vertical = 8.dp)
-            .fillMaxWidth()
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
         ) {
             Image(
                 painter = rememberImagePainter(thumbnail_pic),
@@ -335,7 +361,8 @@ fun VideoItem(video: File) {
                         painter = painterResource(R.drawable.trashcan),
                         contentDescription = "Delete Icon",
                         colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier
+                            .size(24.dp)
                             .align(Alignment.CenterVertically)
                             .clickable {
                                 showDialog.value = true
@@ -346,7 +373,12 @@ fun VideoItem(video: File) {
                         painter = painterResource(R.drawable.edit),
                         contentDescription = "Download Icon",
                         colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
-                        modifier = Modifier.size(20.dp).align(Alignment.CenterVertically)
+                        modifier = Modifier
+                            .size(20.dp)
+                            .align(Alignment.CenterVertically)
+                            .clickable {
+                                showEditDialog.value = true
+                            }
                     )
                 }
             }
