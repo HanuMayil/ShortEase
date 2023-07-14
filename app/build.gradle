@@ -67,8 +67,6 @@ dependencies {
     implementation 'com.github.sealedtx:java-youtube-downloader:3.0.1'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:<version>'
 
-
-
     // Libraries
     implementation 'androidx.navigation:navigation-runtime-ktx:2.6.0'
     implementation 'com.google.firebase:firebase-auth-ktx:21.1.0'
@@ -99,5 +97,4 @@ dependencies {
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
-
 }

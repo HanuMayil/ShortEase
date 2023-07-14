@@ -1,42 +1,27 @@
 package com.example.shortease
 
-import android.annotation.SuppressLint
-import android.media.browse.MediaBrowser
-import android.net.Uri
 import android.util.Log
-import android.view.ViewGroup
-import android.widget.VideoView
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -44,21 +29,17 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.consumePositionChange
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -73,15 +54,18 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.shortease.ui.theme.colorPalette
-import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import java.io.File
 import com.google.android.exoplayer2.ui.PlayerView
-import com.google.android.exoplayer2.ui.StyledPlayerView
-import androidx.activity.compose.setContent
+import java.io.File
+import kotlin.properties.Delegates
 
+var shouldRenderContent by mutableStateOf(-1)
+var videoDuration = -1f
+lateinit var playerView: PlayerView
+var startCropTime = 0f
+var endCropTime = 0f
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoEditorScreen(
@@ -89,17 +73,16 @@ fun VideoEditorScreen(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val videoId = navBackStackEntry?.arguments?.getString("param1")
-
-    val context = LocalContext.current
-    val videoView = remember { VideoView(context) }
     val videoPath = "${LocalContext.current.filesDir}/videos/${videoId}"
-
     val folder = File(videoPath)
     val folderContents = folder.listFiles()
     val folderContentNames = folderContents?.map { file -> file.name } ?: emptyList()
-
     var finalVideoPath = "${LocalContext.current.filesDir}/videos/${videoId}/${folderContentNames.getOrNull(0)}"
-
+    DisposableEffect(Unit) {
+        onDispose {
+            shouldRenderContent = -1
+        }
+    }
 
     Box (
         modifier = Modifier.fillMaxSize()
@@ -159,7 +142,6 @@ fun VideoEditorScreen(
                     .height(1.dp)
                     .background(colorPalette.ShortEaseWhite)
             )
-//            Spacer(modifier = Modifier.weight(1f))
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -170,6 +152,73 @@ fun VideoEditorScreen(
             ) {
                 if(folderContentNames.getOrNull(0) != null){
                     VideoPlayer(finalVideoPath);
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .background(colorPalette.ShortEaseBlack)
+            ) {
+                if (shouldRenderContent == R.drawable.scissors_icon) {
+                    // Render your content here based on the condition
+                    var range by remember { mutableStateOf(0f..videoDuration*1000) }
+                    var values by remember { mutableStateOf(0f..videoDuration*1000) }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Crop Video",
+                            color = Color.White,
+                            fontSize = 20.sp,
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .align(Alignment.CenterHorizontally)
+                        )
+                        RangeSliderComponent(
+                            range = range,
+                            values = values,
+                            onRangeChanged = { newValues ->
+                                values = newValues
+                            })
+                    }
+                }
+                else if (shouldRenderContent == R.drawable.text_icon) {
+                    // Render your content here based on the condition
+                    Text(
+                        text = "text",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                else if (shouldRenderContent == R.drawable.music_note_icon) {
+                    // Render your content here based on the condition
+                    Text(
+                        text = "music",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                else if (shouldRenderContent == R.drawable.effect_icon) {
+                    // Render your content here based on the condition
+                    Text(
+                        text = "effect",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                else if (shouldRenderContent == R.drawable.filter_icon) {
+                    // Render your content here based on the condition
+                    Text(
+                        text = "filter",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
             }
             Box(
@@ -233,6 +282,50 @@ fun VideoEditorScreen(
     }
 }
 
+@ExperimentalMaterial3Api
+@Composable
+fun RangeSliderComponent(
+    range: ClosedFloatingPointRange<Float>,
+    values: ClosedFloatingPointRange<Float>,
+    onRangeChanged: (ClosedFloatingPointRange<Float>) -> Unit
+) {
+    val timestamp = remember(values) {
+        calculateTimestamp(values)
+    }
+
+    Column {
+        RangeSlider(
+            value = values,
+            onValueChange = { newValues ->
+                onRangeChanged(newValues)
+                playerView.player?.seekTo(newValues.start.toLong())
+            },
+            valueRange = range,
+            steps = 100,
+            colors = SliderDefaults.colors(
+                thumbColor = colorPalette.ShortEaseWhite,
+                activeTrackColor = colorPalette.ShortEaseRed,
+                inactiveTrackColor = colorPalette.ShortEaseRed.copy(alpha = 0.2f)
+            ),
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+
+        Text(
+            text = timestamp,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .align(Alignment.CenterHorizontally),
+            style = TextStyle(color = colorPalette.ShortEaseRed)
+        )
+    }
+}
+
+private fun calculateTimestamp(values: ClosedFloatingPointRange<Float>): String {
+    val startPosition = values.start.toInt()
+    val endPosition = values.endInclusive.toInt()
+    return "Start: ${startPosition/1000F} s, End: ${endPosition/1000F} s"
+}
+
 @Composable
 fun BottomBarButton(
     iconResId: Int,
@@ -244,7 +337,11 @@ fun BottomBarButton(
         contentDescription = contentDescription,
         modifier = Modifier
             .size(50.dp)
-            .padding(vertical = 4.dp),
+            .padding(vertical = 4.dp)
+            .clickable {
+                shouldRenderContent = iconResId
+            }
+        ,
         alpha = if (selected) 1f else 0.6f // Optional: Customize the opacity of selected/unselected icons
     )
 }
@@ -258,12 +355,12 @@ private fun VideoEditorPreview() {
 }
 
 @Composable
-fun VideoPlayer(sampleVideo : String){
-    Log.d("video to see ", sampleVideo)
+fun VideoPlayer(videoPath : String) {
+    Log.d("video to see ", videoPath)
     val context = LocalContext.current
     val player = SimpleExoPlayer.Builder(context).build()
-    val playerView = PlayerView(context)
-    val mediaItem = MediaItem.fromUri(sampleVideo)
+    playerView = PlayerView(context)
+    val mediaItem = MediaItem.fromUri(videoPath)
     val playWhenReady by rememberSaveable {
         mutableStateOf(true)
     }
@@ -271,10 +368,43 @@ fun VideoPlayer(sampleVideo : String){
     playerView.player = player
     LaunchedEffect(player) {
         player.prepare()
+        player.addListener(object : Player.EventListener {
+            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+                super.onPlayerStateChanged(playWhenReady, playbackState)
+                if (playbackState == Player.STATE_READY) {
+                    if(videoDuration == -1f) {
+                        endCropTime = player.duration.toFloat()
+                        videoDuration = endCropTime / 1000
+                    }
+                    else {
+                        Log.d("time", "testing")
+                        val currentPosition = player.currentPosition / 1000f
+                        // Check if the current position exceeds the endCropTime
+                        if (currentPosition >= endCropTime) {
+                            // Pause the player
+                            player.playWhenReady = false
+                            player.seekTo((endCropTime/1000).toLong())
+                        }
+                    }
+                }
+            }
+        })
         player.playWhenReady = playWhenReady
 
     }
-    AndroidView(factory = {
-        playerView
-    })
+    DisposableEffect(Unit) {
+        onDispose {
+            player.clearMediaItems()
+        }
+    }
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        AndroidView(
+            factory = {
+                playerView
+            }
+        )
+    }
 }
