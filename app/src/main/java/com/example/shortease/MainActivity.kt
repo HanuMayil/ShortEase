@@ -1,5 +1,6 @@
 package com.example.shortease
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -14,21 +15,23 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.Scope
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.youtube.YouTube
-import com.google.api.services.youtube.YouTubeScopes
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.io.File
 
 class MainActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
+
     companion object {
         const val RC_SIGN_IN = 100
     }
@@ -42,7 +45,6 @@ class MainActivity : ComponentActivity() {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.web_client_id))
             .requestEmail()
-            .requestScopes(Scope(YouTubeScopes.YOUTUBE_READONLY),Scope(YouTubeScopes.YOUTUBE_FORCE_SSL))
             .build()
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
@@ -52,15 +54,15 @@ class MainActivity : ComponentActivity() {
         setContent {
             ShortEaseTheme {
                 navController = rememberNavController()
-                    SetupNavGraph(
-                        navController = navController,
-                        startDestination = if(user != null) Screen.MyVideos.route else Screen.HomeScreen.route,
-                        signInClicked = { signIn() },
-                        signOutClicked = { signOut() }
-                    )
-                }
+                SetupNavGraph(
+                    navController = navController,
+                    startDestination = if (user != null) Screen.MyVideos.route else Screen.HomeScreen.route,
+                    signInClicked = { signIn() },
+                    signOutClicked = { signOut() }
+                )
             }
         }
+    }
 
     private fun signIn() {
         val signInIntent = googleSignInClient.signInIntent
@@ -119,8 +121,8 @@ class MainActivity : ComponentActivity() {
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         firebaseAuth.signInWithCredential(credential)
-            .addOnCompleteListener(this) {task ->
-                if(task.isSuccessful) {
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
                     Toast.makeText(this, "Sign In Successful", Toast.LENGTH_SHORT).show()
                     navController.navigate(Screen.MyVideos.route)
                 } else {
@@ -131,9 +133,14 @@ class MainActivity : ComponentActivity() {
         if (account != null) {
             fetchYouTubeChannelId(account.idToken!!)
         } else {
-            Toast.makeText(this, "Failed to retrieve Google account information", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                "Failed to retrieve Google account information",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
+
 
     private fun fetchYouTubeChannelId(idToken: String) {
         lifecycleScope.launch(Dispatchers.IO) {
@@ -164,7 +171,26 @@ class MainActivity : ComponentActivity() {
             } catch (e: Exception) {
                 // Handle any exceptions that occur during the YouTube channel ID retrieval
                 Log.e("Fetch YouTube Channel ID", "Error: ${e.message}")
-                Toast.makeText(this@MainActivity, "Failed to fetch YouTube channel ID", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@MainActivity,
+                    "Failed to fetch YouTube channel ID",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        private fun clearCachedData(context: Context) {
+            val folder = File(context.filesDir, "videos")
+            if (folder.exists() && folder.isDirectory) {
+                val sub_folders = folder.listFiles { file ->
+                    file.isDirectory
+                }
+                sub_folders?.forEach { sub_folder ->
+                    val thumbnailFile = File(sub_folder, "thumbnail.jpg")
+                    if (!thumbnailFile.exists()) {
+                        sub_folder.deleteRecursively()
+                    }
+                }
             }
         }
     }

@@ -26,3 +26,11 @@
 | 07/02/2023 | 3    |         |       | 4        |          |       | Work on Youtube Download                             |
 | 07/04/2023 | 6    |         |       | 6        |          |       | Work on Youtube Download                             |
 | 07/05/2023 | 3    |         |       | 3        |          |       | Work on Youtube Download                             |
+| 07/05/2023 |      | 3       | 4     |          |          |       | Worked on getting channel id from google login       |
+| 07/05/2023 |      |         |       |          | 6        | 6     | Worked on getting channel icon + dropdown            |
+| 07/07/2023 | 6    |         |       | 6        |          |       | Work on Youtube Download                             |
+| 07/08/2023 | 5    |         |       | 5        |          |       | Finish Youtube DL and Gallery Manager                |
+| 07/10/2023 |      |         | 2     |          |          |       | Continued work on retrieving channel id              |
+| 07/11/2023 |      |         | 4     |          |          |       | Continued work on retrieving channel id              |
+| 07/11/2023 |      |         |       |          | 4        |       | Worked on retrieving most replayed part of video     |
+| 07/13/2023 |      |         |       |          | 4        | 8     | Finished mp4 player on video editor page             |
