@@ -176,7 +176,7 @@ fun SavedVideos(
                             Button(
                                 onClick = {
                                     selected = 0;
-                                    navController.navigate(route = Screen.MyVideos.route) },
+                                    navController.popBackStack() },
                                 shape = RoundedCornerShape(50),
                                 colors = ButtonDefaults.buttonColors(Color.Transparent),
                                 modifier = Modifier

@@ -19,7 +19,7 @@ class YouTubeApiClient(private val apiKey: String) {
     private val HTTP_TRANSPORT: NetHttpTransport = NetHttpTransport()
     private val JSON_FACTORY: JsonFactory = GsonFactory.getDefaultInstance()
     private val TAG = "YouTubeApiClient"
-    suspend fun fetchVideoThumbnails(channelId: String, channelIconUrl: MutableState<String>): List<ThumbnailItem> = withContext(Dispatchers.IO) {
+    suspend fun fetchVideoThumbnails(channelId: String?, channelIconUrl: MutableState<String>): List<ThumbnailItem> = withContext(Dispatchers.IO) {
         val youtube = YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, HttpRequestInitializer { })
             .setApplicationName("YourAppName")
             .build()
@@ -28,7 +28,7 @@ class YouTubeApiClient(private val apiKey: String) {
         searchRequest.key = apiKey
         searchRequest.channelId = channelId
         searchRequest.type = mutableListOf("video")  // Only retrieve videos
-        searchRequest.videoDuration = "medium"  // Include videos of any duration
+        searchRequest.videoDuration = "any"  // Include videos of any duration
         searchRequest.maxResults = 10  // Adjust as per your requirements
 
         val searchResponse: SearchListResponse = searchRequest.execute()
