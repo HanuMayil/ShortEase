@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -194,13 +195,25 @@ fun VideoEditorScreen(
                     )
                 }
                 else if (shouldRenderContent == R.drawable.music_note_icon) {
-                    // Render your content here based on the condition
-                    Text(
-                        text = "music",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    var value by remember { mutableStateOf(100f) }
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Edit Music",
+                            color = Color.White,
+                            fontSize = 20.sp,
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .align(Alignment.CenterHorizontally)
+                        )
+                        SliderComponent(
+                            value = value,
+                            onValueChange = { newValue ->
+                                value = newValue
+                        })
+                    }
                 }
                 else if (shouldRenderContent == R.drawable.effect_icon) {
                     // Render your content here based on the condition
@@ -319,12 +332,49 @@ fun RangeSliderComponent(
         )
     }
 }
+@Composable
+fun SliderComponent(
+    value: Float,
+    onValueChange: (Float) -> Unit
+) {
+    val formattedValue = remember(value) {
+        formatSliderValue(value)
+    }
+
+    Column {
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = 0f..100f,
+            steps = 100,
+            colors = SliderDefaults.colors(
+                thumbColor = colorPalette.ShortEaseWhite,
+                activeTrackColor = colorPalette.ShortEaseRed,
+                inactiveTrackColor = colorPalette.ShortEaseRed.copy(alpha = 0.2f)
+            ),
+        )
+        Text(
+            text = "Audio Volume: $formattedValue",
+            color = Color.White,
+            fontSize = 16.sp,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+    }
+}
+
+
 
 private fun calculateTimestamp(values: ClosedFloatingPointRange<Float>): String {
     val startPosition = values.start.toInt()
     val endPosition = values.endInclusive.toInt()
     return "Start: ${startPosition/1000F} s, End: ${endPosition/1000F} s"
 }
+
+private fun formatSliderValue(value: Float): String {
+    val formattedValue = value.toInt()
+    return formattedValue.toString()
+}
+
 
 @Composable
 fun BottomBarButton(
