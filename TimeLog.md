@@ -34,3 +34,5 @@
 | 07/11/2023 |      |         | 4     |          |          |       | Continued work on retrieving channel id              |
 | 07/11/2023 |      |         |       |          | 4        |       | Worked on retrieving most replayed part of video     |
 | 07/13/2023 |      |         |       |          | 4        | 8     | Finished mp4 player on video editor page             |
+| 07/13/2023 |      |         | 3     |          |          |       | Continued work on retrieving channel id              |
+| 07/14/2023 |      |         | 10    |          |          |       | Continued work on retrieving channel id              |
