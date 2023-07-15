@@ -156,9 +156,9 @@ class MainActivity : ComponentActivity() {
 
                 val channels = youtube.channels().list(mutableListOf("id"))
                     .setMine(true)
-                    .setKey("API KEY")
+                    .setKey("AIzaSyCZ1aVkQw5j_ljA-AesWfHh0c6lnGQIq-A")
                     .setFields("items(id)")
-                    .setOauthToken(credential.accessToken)
+                    .setAccessToken(credential.accessToken)
                     .execute()
 
                 val channelId = channels.items[0].id
@@ -178,18 +178,17 @@ class MainActivity : ComponentActivity() {
                 ).show()
             }
         }
-
-        private fun clearCachedData(context: Context) {
-            val folder = File(context.filesDir, "videos")
-            if (folder.exists() && folder.isDirectory) {
-                val sub_folders = folder.listFiles { file ->
-                    file.isDirectory
-                }
-                sub_folders?.forEach { sub_folder ->
-                    val thumbnailFile = File(sub_folder, "thumbnail.jpg")
-                    if (!thumbnailFile.exists()) {
-                        sub_folder.deleteRecursively()
-                    }
+    }
+    private fun clearCachedData(context: Context) {
+        val folder = File(context.filesDir, "videos")
+        if (folder.exists() && folder.isDirectory) {
+            val sub_folders = folder.listFiles { file ->
+                file.isDirectory
+            }
+            sub_folders?.forEach { sub_folder ->
+                val thumbnailFile = File(sub_folder, "thumbnail.jpg")
+                if (!thumbnailFile.exists()) {
+                    sub_folder.deleteRecursively()
                 }
             }
         }
