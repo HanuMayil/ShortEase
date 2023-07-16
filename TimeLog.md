@@ -39,3 +39,4 @@
 | 07/15/2023 |      |         | 4     |          |          |       | Finished retrieving channel id                       |
 | 07/15/2023 |      | 5       |       |          |          |       | Look into and start implementing text effects        |
 | 07/15/2023 |      |         |       |  5       |          |       | Finish Cropping Video                                |
+| 07/16/2023 |      |         |       |          |          | 7     | Built serverless api to get most watched stats       |
