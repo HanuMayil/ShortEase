@@ -68,7 +68,7 @@ class TokenActivity : AppCompatActivity() {
         }
         if (mStateManager!!.current.isAuthorized) {
             var resultData = getAccessToken()
-            if(resultData == null) {
+            if(resultData == "") {
                 refreshAccessToken()
                 resultData = getAccessToken()
             }
@@ -91,6 +91,8 @@ class TokenActivity : AppCompatActivity() {
                 exchangeAuthorizationCode(response)
             } else if (ex != null) {
                 displayMessage("Authorization flow failed: " + ex.message)
+                setResult(RC_REAUTH)
+                finish()
             } else {
                 displayMessage("No authorization state retained - reauthorization required")
                 setResult(RC_REAUTH)
