@@ -97,7 +97,6 @@ fun VideoEditorScreen(
             videoDuration = -1f
         }
     }
-
     Box (
         modifier = Modifier.fillMaxSize()
     ) {
@@ -130,6 +129,7 @@ fun VideoEditorScreen(
                         IconButton(
                             onClick = {
                                 navController.popBackStack()
+                                resetVariables()
                             }
                         ) {
                             Image(
@@ -170,7 +170,6 @@ fun VideoEditorScreen(
                                                     deferred.complete(Unit)
                                                 })
                                             deferred.await()
-
                                             val sourceFile = File(context.filesDir, "videos/$videoId/thumbnail.jpg")
                                             val destinationFile = File(context.filesDir, "output/$videoId/thumbnail.jpg")
                                             if (sourceFile.exists()) {
@@ -178,9 +177,7 @@ fun VideoEditorScreen(
                                             } else {
                                                 Log.d("Cropping", "Source file does not exist: ${sourceFile.path}")
                                             }
-                                            startCropTime = 0f
-                                            endCropTime = 0f
-                                            audioVolume = 100f
+                                            resetVariables()
                                         }
 
                                         // Navigate to a different page using the NavController
@@ -219,7 +216,7 @@ fun VideoEditorScreen(
                 if (shouldRenderContent == R.drawable.scissors_icon) {
                     // Render your content here based on the condition
                     var range by remember { mutableStateOf(0f..videoDuration*1000) }
-                    var values by remember { mutableStateOf(0f..videoDuration*1000) }
+                    var values by remember { mutableStateOf(startCropTime..endCropTime) }
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -239,6 +236,7 @@ fun VideoEditorScreen(
                                 values = newValues
                                 startCropTime = values.start.toFloat()
                                 endCropTime = values.endInclusive.toFloat()
+
                             })
                     }
                 }
@@ -252,7 +250,7 @@ fun VideoEditorScreen(
                     )
                 }
                 else if (shouldRenderContent == R.drawable.music_note_icon) {
-                    var value by remember { mutableStateOf(100f) }
+                    var value by remember { mutableStateOf(audioVolume) }
 
                     Column(
                         modifier = Modifier.fillMaxWidth()
@@ -364,7 +362,6 @@ fun CropRangeSlider(
     val timestamp = remember(values) {
         calculateTimestamp(values)
     }
-
     Column {
         RangeSlider(
             value = values,
@@ -381,7 +378,6 @@ fun CropRangeSlider(
             ),
             modifier = Modifier.padding(horizontal = 16.dp)
         )
-
         Text(
             text = timestamp,
             modifier = Modifier
@@ -399,7 +395,6 @@ fun SliderComponent(
     val formattedValue = remember(value) {
         formatSliderValue(value)
     }
-
     Column {
         Slider(
             value = value,
@@ -469,6 +464,12 @@ private fun cropVideo(context: Context, videoId: String, fileName: String,  comp
     } catch (e: Exception) {
         Log.e("Cropping", "Error occurred during video cropping: ${e.message}", e)
     }
+}
+
+fun resetVariables() {
+    startCropTime = 0f
+    endCropTime = 0f
+    audioVolume = 100f
 }
 
 fun processAudio(context: Context, videoId: String, completionCallback: () -> Unit) {
