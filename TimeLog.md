@@ -37,3 +37,4 @@
 | 07/13/2023 |      |         | 3     |          |          |       | Continued work on retrieving channel id              |
 | 07/14/2023 |      |         | 10    |          |          |       | Continued work on retrieving channel id              |
 | 07/15/2023 |      | 5       |       |          |          |       | Look into and start implementing text effects        |
+| 07/15/2023 |      |         |       |  5       |          |       | Finish Cropping Video                                |
