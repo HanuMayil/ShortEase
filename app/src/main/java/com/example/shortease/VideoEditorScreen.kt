@@ -1,5 +1,9 @@
 package com.example.shortease
 
+import VideoHandle.EpEditor
+import VideoHandle.EpVideo
+import VideoHandle.OnEditorListener
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -58,6 +62,10 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ui.PlayerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.properties.Delegates
 
@@ -72,15 +80,20 @@ fun VideoEditorScreen(
     navController: NavController
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val videoId = navBackStackEntry?.arguments?.getString("param1")
-    val videoPath = "${LocalContext.current.filesDir}/videos/${videoId}"
+    val context = LocalContext.current
+    val videoId = navBackStackEntry?.arguments?.getString("videoId")
+    val videoPath = "${context.filesDir}/videos/${videoId}"
     val folder = File(videoPath)
     val folderContents = folder.listFiles()
     val folderContentNames = folderContents?.map { file -> file.name } ?: emptyList()
-    var finalVideoPath = "${LocalContext.current.filesDir}/videos/${videoId}/${folderContentNames.getOrNull(0)}"
+    var finalVideoPath = "${context.filesDir}/videos/${videoId}/${folderContentNames.getOrNull(0)}"
+    val coroutineScope = CoroutineScope(Dispatchers.Default)
     DisposableEffect(Unit) {
         onDispose {
             shouldRenderContent = -1
+            startCropTime = 0f
+            endCropTime = 0f
+            videoDuration = -1f
         }
     }
 
@@ -131,6 +144,20 @@ fun VideoEditorScreen(
                             Image(
                                 painter = painterResource(R.drawable.forward_button),
                                 contentDescription = "Forward Button",
+                                modifier = Modifier.clickable {
+                                    if (videoId != null) {
+                                        val fileName = folderContentNames.getOrNull(0) ?: "output"
+                                        val thumbnail = File(context.filesDir, "output/${videoId}/thumbnail.jpg")
+                                        thumbnail.delete()
+                                        // Run the cropVideo function in the background using coroutines
+                                        coroutineScope.launch {
+                                            cropVideo(videoId = videoId, context = context, fileName = fileName)
+                                        }
+
+                                        // Navigate to a different page using the NavController
+                                        navController.navigate("generate?videoId=$videoId")
+                                    }
+                                }
                             )
                         }
                     }
@@ -176,11 +203,13 @@ fun VideoEditorScreen(
                                 .padding(vertical = 8.dp)
                                 .align(Alignment.CenterHorizontally)
                         )
-                        RangeSliderComponent(
+                        CropRangeSlider(
                             range = range,
                             values = values,
                             onRangeChanged = { newValues ->
                                 values = newValues
+                                startCropTime = values.start.toFloat()
+                                endCropTime = values.endInclusive.toFloat()
                             })
                     }
                 }
@@ -284,7 +313,7 @@ fun VideoEditorScreen(
 
 @ExperimentalMaterial3Api
 @Composable
-fun RangeSliderComponent(
+fun CropRangeSlider(
     range: ClosedFloatingPointRange<Float>,
     values: ClosedFloatingPointRange<Float>,
     onRangeChanged: (ClosedFloatingPointRange<Float>) -> Unit
@@ -324,6 +353,49 @@ private fun calculateTimestamp(values: ClosedFloatingPointRange<Float>): String 
     val startPosition = values.start.toInt()
     val endPosition = values.endInclusive.toInt()
     return "Start: ${startPosition/1000F} s, End: ${endPosition/1000F} s"
+}
+
+private fun cropVideo(context: Context, videoId: String, fileName: String) {
+    var fileDir = File(context.filesDir, "output/${videoId}")
+    var videoDir = File(context.filesDir, "videos/${videoId}")
+    if(!fileDir.isDirectory) {
+        fileDir.mkdirs()
+    }
+    var epVideo = EpVideo("${videoDir.toString()}/${fileName}")
+    epVideo.clip(startCropTime/1000, (endCropTime- startCropTime)/1000)
+    var outFile = File(fileDir, "output.mp4")
+    val outputOption = EpEditor.OutputOption(outFile.toString())
+    outputOption.frameRate = 30
+    outputOption.bitRate = 10
+    val editorListener = object : OnEditorListener {
+        override fun onSuccess() {
+            // Implement your logic when the operation is successful
+            Log.d("Cropping", "Finished")
+            val sourceFile = File(videoDir, "thumbnail.jpg")
+            val destinationFile = File(fileDir, "thumbnail.jpg")
+            if (sourceFile.exists()) {
+                sourceFile.copyTo(destinationFile, overwrite = true)
+            } else {
+                Log.d("Cropping", "Source file does not exist: ${sourceFile.path}")
+            }
+        }
+
+        override fun onFailure() {
+            // Implement your logic when the operation fails
+            Log.d("Cropping", "Failed")
+        }
+
+        override fun onProgress(progress: Float) {
+            // Implement your logic to track the progress of the operation
+            Log.d("Cropping", "Progress: ${progress}")
+        }
+    }
+    try {
+        // Video cropping code here
+        EpEditor.exec(epVideo, outputOption, editorListener)
+    } catch (e: Exception) {
+        Log.e("Cropping", "Error occurred during video cropping: ${e.message}", e)
+    }
 }
 
 @Composable
@@ -368,6 +440,8 @@ fun VideoPlayer(videoPath : String) {
     playerView.player = player
     LaunchedEffect(player) {
         player.prepare()
+        Log.d("video to see ", videoPath)
+        Log.d("time", videoPath)
         player.addListener(object : Player.EventListener {
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 super.onPlayerStateChanged(playWhenReady, playbackState)
@@ -376,25 +450,25 @@ fun VideoPlayer(videoPath : String) {
                         endCropTime = player.duration.toFloat()
                         videoDuration = endCropTime / 1000
                     }
-                    else {
-                        Log.d("time", "testing")
-                        val currentPosition = player.currentPosition / 1000f
-                        // Check if the current position exceeds the endCropTime
-                        if (currentPosition >= endCropTime) {
-                            // Pause the player
-                            player.playWhenReady = false
-                            player.seekTo((endCropTime/1000).toLong())
-                        }
-                    }
                 }
             }
         })
         player.playWhenReady = playWhenReady
-
+        while (true) {
+            if (endCropTime > 0f && (player.currentPosition.toFloat() > endCropTime)) {
+                    player.pause()
+                    player.seekTo(startCropTime.toLong())
+            }
+            else if(player.currentPosition.toFloat() < startCropTime) {
+                player.seekTo(startCropTime.toLong())
+            }
+            delay(100) // Adjust the delay interval as needed
+        }
     }
     DisposableEffect(Unit) {
         onDispose {
             player.clearMediaItems()
+            player.release()
         }
     }
     Box(

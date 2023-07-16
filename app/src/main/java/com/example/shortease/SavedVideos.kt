@@ -283,7 +283,7 @@ fun VideoItem(video: File, navController: NavController) {
                 Button(
                     onClick = {
                         showEditDialog.value = false
-                        navController.navigate(route = "video_editor_screen?param1=$videoId")
+                        navController.navigate(route = "video_editor_screen?videoId=$videoId")
                     },
                     colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
                 ) {

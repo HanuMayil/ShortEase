@@ -28,17 +28,28 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.shortease.Screen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.io.File
 
+var isPlaying = false
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreviewScreen(
     navController: NavController
 ) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val videoId = navBackStackEntry?.arguments?.getString("videoId")
     Column(modifier = Modifier.fillMaxSize()) {
         Surface(color = colorPalette.ShortEaseRed
         ) {
@@ -59,21 +70,9 @@ fun PreviewScreen(
                         )
                     )
                 },
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            navController.popBackStack()
-                        }
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.back_button),
-                            contentDescription = "Back",
-                        )
-                    }
-                },
                 actions = {
                     IconButton(onClick = {
-                        navController.navigate(route = Screen.HomeScreen.route)
+                        navController.navigate(route = Screen.MyVideos.route)
                     }) {
                         Image(
                             painter = painterResource(R.drawable.home_button),
@@ -99,12 +98,30 @@ fun PreviewScreen(
                             .background(Color.Black),
                         contentAlignment = Alignment.Center
                     ) {
-                        AndroidView(
-                            factory = { videoView },
-                            modifier = Modifier.fillMaxSize()
-                        ) { view ->
-                            view.setVideoPath("android.resource://${context.packageName}/${R.raw.shorts_example}")
-                            view.start()
+                        if(!isPlaying && videoId != null) {
+                            AndroidView(
+                                factory = { context ->
+                                    VideoView(context)
+                                },
+                                modifier = Modifier.fillMaxSize()
+                            ) { videoView ->
+                                val folder = File("${context.filesDir}/output/${videoId}")
+                                val folderContents = folder.listFiles()
+                                val folderContentNames = folderContents?.map { file -> file.name } ?: emptyList()
+                                val video = File(folder, folderContentNames.getOrNull(0) ?: "")
+                                if(video.isFile) {
+                                    videoView.setVideoPath(video.absolutePath)
+                                    videoView.start()
+                                    val scope = CoroutineScope(Dispatchers.Default)
+                                    // Launch a coroutine
+                                    scope.launch {
+                                        // Wait for 30 seconds
+                                        delay(30000)
+                                        // Reset the variable
+                                        isPlaying = false
+                                    }
+                                }
+                            }
                         }
                     }
 
