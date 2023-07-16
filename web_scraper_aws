@@ -1,0 +1,60 @@
+import starter as st
+import time as chime
+from bs4 import BeautifulSoup
+import json
+
+def lambda_handler(event, context):
+    driver = st.start_drive()
+    print(event['body'])
+    driver.get(json.loads(event['body'])['video'])
+    driver.maximize_window()
+    chime.sleep(10)
+    
+    soup = BeautifulSoup(driver.page_source,"html.parser")
+    chime.sleep(10)
+    
+    mydivs = soup.find("path", {"class": "ytp-heat-map-path"})
+    heatmap = mydivs.get('d')
+    
+    data_list = heatmap.split()
+    times = []
+    watch_counts = []
+    
+    for i in range(1, len(data_list), 2):
+        time, watch_count = map(float, data_list[i].split(","))
+        if time > 30:
+            times.append(time)
+            watch_counts.append(watch_count)
+    
+    # Find the maximum watch count and its index
+    max_watch_count = max(watch_counts)
+    max_index = watch_counts.index(max_watch_count)
+    
+    # Find the indices of the entries
+    start_index = max_index - 5
+    end_index = max_index + 5
+    
+    # Adjust the indices to ensure they are within the valid range
+    start_index = max(start_index, 0)
+    end_index = min(end_index, len(times) - 1)
+
+    # Retrieve the entries within the specified range
+    entries = []
+    for i in range(start_index, end_index + 1):
+        entry = {
+            "time": times[i],
+            "watch_count": watch_counts[i]
+        }
+        entries.append(entry)
+    
+    # Create a dictionary to hold the result
+    result = {
+        "maximum_watch_count": max_watch_count,
+        "entries": entries
+    }
+    
+    # Convert the result to JSON
+    json_result = json.dumps(result)
+    
+    return json_result
+    
