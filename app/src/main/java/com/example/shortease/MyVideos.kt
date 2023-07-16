@@ -1,8 +1,8 @@
 package com.example.shortease
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
-import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,14 +17,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -32,7 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
@@ -52,7 +57,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.shortease.ui.theme.ShortEaseTheme
 import com.example.shortease.ui.theme.colorPalette
@@ -70,16 +77,6 @@ import java.math.BigInteger
 import java.text.NumberFormat
 import java.util.Locale
 import java.util.concurrent.Executors
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.ui.draw.clip
-import coil.annotation.ExperimentalCoilApi
-import com.example.shortease.R
-import com.example.shortease.Screen
-import com.example.shortease.ThumbnailItem
-import com.example.shortease.YouTubeApiClient
 
 
 @SuppressLint("SuspiciousIndentation")
@@ -94,31 +91,32 @@ fun MyVideos(
     val channelIconUrl = remember { mutableStateOf("https://www.digitary.net/wp-content/uploads/2021/07/Generic-Profile-Image.png") }
     val youtubeDownloader = YouTubeDownloader(LocalContext.current)
     val context = LocalContext.current
-    DisposableEffect(Unit) {
-//        val scope = CoroutineScope(Dispatchers.Main)
-//        val channelId = "UCX6OQ3DkcsbYNE6H8uQQuVA"
-//        val y = YouTubeApiClient("AIzaSyCZ1aVkQw5j_ljA-AesWfHh0c6lnGQIq-A") // Replace with your API key
-//        val job = scope.launch {
-//            val fetchedThumbnailItems = y.fetchVideoThumbnails(channelId, channelIconUrl)
-//            thumbnailItems.addAll(fetchedThumbnailItems)
-//        }
-//        onDispose {
-//            job.cancel()
-//        }
-        val fakeThumbnailItem: ThumbnailItem = ThumbnailItem(
-            "10 Sec Timer",
-            "https://i.ytimg.com/vi/zU9y354XAgM/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyiceF5hUqg8CSc85pQwJuvOxXkQ",
-            BigInteger("1234567890")
-        )
-        val fakeThumbnailItem2: ThumbnailItem = ThumbnailItem(
-            "Donkey Kong Gets Sturdy",
-            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
-            BigInteger("1234567890")
-        )
-        thumbnailItems.add(fakeThumbnailItem)
-        thumbnailItems.add(fakeThumbnailItem2)
-        onDispose {}
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val channelId = navBackStackEntry?.arguments?.getString("channelId")
+
+    val y = YouTubeApiClient("AIzaSyCZ1aVkQw5j_ljA-AesWfHh0c6lnGQIq-A") // Replace with your API key
+
+    LaunchedEffect(channelId) {
+        if (channelId != null) {
+            val fetchedThumbnailItems = y.fetchVideoThumbnails(channelId, channelIconUrl)
+            thumbnailItems.addAll(fetchedThumbnailItems)
+        }
     }
+
+//        val fakeThumbnailItem: ThumbnailItem = ThumbnailItem(
+//            "10 Sec Timer",
+//            "https://i.ytimg.com/vi/zU9y354XAgM/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyiceF5hUqg8CSc85pQwJuvOxXkQ",
+//            BigInteger("1234567890")
+//        )
+//        val fakeThumbnailItem2: ThumbnailItem = ThumbnailItem(
+//            "Donkey Kong Gets Sturdy",
+//            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
+//            BigInteger("1234567890")
+//        )
+//        thumbnailItems.add(fakeThumbnailItem)
+//        thumbnailItems.add(fakeThumbnailItem2)
+
 
     var expanded by remember { mutableStateOf(false) }
 
