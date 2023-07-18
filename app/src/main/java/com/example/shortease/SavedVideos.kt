@@ -1,8 +1,6 @@
 package com.example.shortease
 
-import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -43,7 +40,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -54,15 +50,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.shortease.ui.theme.ShortEaseTheme
 import com.example.shortease.ui.theme.colorPalette
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -125,7 +117,7 @@ fun SavedVideos(
                         ),
                         title = {
                             Text(
-                                text = "Saved Videos",
+                                text = stringResource(R.string.saved_videos_header),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth(),
                                 style = TextStyle(
@@ -278,7 +270,7 @@ fun VideoItem(video: File, navController: NavController) {
     if (showEditDialog.value && !showDialog.value) {
         AlertDialog(
             onDismissRequest = { showEditDialog.value = false },
-            title = { Text(text = "Edit Video?") },
+            title = { Text(text = stringResource(R.string.edit_video))},
             confirmButton = {
                 Button(
                     onClick = {
@@ -287,14 +279,14 @@ fun VideoItem(video: File, navController: NavController) {
                     },
                     colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
                 ) {
-                    Text(text = "Confirm")
+                    Text(text = stringResource(R.string.confirm))
                 }
             },
             dismissButton = {
                 Button(onClick = { showEditDialog.value = false },
                     colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
                 ) {
-                    Text(text = "Cancel")
+                    Text(text = stringResource(R.string.cancel))
                 }
             }
         )
@@ -303,8 +295,8 @@ fun VideoItem(video: File, navController: NavController) {
     if (showDialog.value && !showEditDialog.value) {
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
-            title = { Text(text = "Delete Video?") },
-            text = { Text(text =  "Are you sure you want to delete: \n \"${title}\"?") },
+            title = { Text(text = stringResource(R.string.delete_video))},
+            text = { Text(text = stringResource(R.string.delete_video_prompt) + " \n \"${title}\"?") },
             confirmButton = {
                 Button(
                     onClick = {
@@ -314,20 +306,19 @@ fun VideoItem(video: File, navController: NavController) {
                     },
                     colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
                 ) {
-                    Text(text = "Confirm")
+                    Text(text = stringResource(R.string.confirm))
                 }
             },
             dismissButton = {
                 Button(onClick = { showDialog.value = false },
                     colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
                 ) {
-                    Text(text = "Cancel")
+                    Text(text = stringResource(R.string.cancel))
                 }
             }
         )
     }
     if(thumbnail_pic.isFile) {
-        Log.d("youtube init","thumbail_pic: ${thumbnail_pic}")
         Column(
             modifier = Modifier
                 .padding(vertical = 8.dp)

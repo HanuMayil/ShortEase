@@ -33,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.shortease.Screen
@@ -60,7 +61,7 @@ fun PreviewScreen(
                 ),
                 title = {
                     Text(
-                        text = "Preview",
+                        text = stringResource(R.string.video_preview_header),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
                         style = TextStyle(

@@ -47,6 +47,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -55,6 +56,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -115,7 +117,7 @@ fun VideoEditorScreen(
                     ),
                     title = {
                         Text(
-                            text = "Editor",
+                            text = stringResource(R.string.video_editor_header),
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth(),
                             style = TextStyle(
@@ -222,7 +224,7 @@ fun VideoEditorScreen(
                             .fillMaxWidth()
                     ) {
                         Text(
-                            text = "Crop Video",
+                            text = stringResource(R.string.edit_crop),
                             color = Color.White,
                             fontSize = 20.sp,
                             modifier = Modifier
@@ -256,7 +258,7 @@ fun VideoEditorScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "Edit Music",
+                            text = stringResource(R.string.edit_audio),
                             color = Color.White,
                             fontSize = 20.sp,
                             modifier = Modifier
@@ -359,8 +361,9 @@ fun CropRangeSlider(
     values: ClosedFloatingPointRange<Float>,
     onRangeChanged: (ClosedFloatingPointRange<Float>) -> Unit
 ) {
+    val context = LocalContext.current
     val timestamp = remember(values) {
-        calculateTimestamp(values)
+        calculateTimestamp(context = context, values)
     }
     Column {
         RangeSlider(
@@ -408,7 +411,7 @@ fun SliderComponent(
             ),
         )
         Text(
-            text = "Audio Volume: $formattedValue",
+            text = stringResource(R.string.edit_audio_text) + " $formattedValue",
             color = Color.White,
             fontSize = 16.sp,
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -418,10 +421,10 @@ fun SliderComponent(
 
 
 
-private fun calculateTimestamp(values: ClosedFloatingPointRange<Float>): String {
+private fun calculateTimestamp(context: Context, values: ClosedFloatingPointRange<Float>): String {
     val startPosition = values.start.toInt()
     val endPosition = values.endInclusive.toInt()
-    return "Start: ${startPosition/1000F} s, End: ${endPosition/1000F} s"
+    return getString(context, R.string.start) + " ${startPosition/1000F} s, " + getString(context, R.string.end) + " ${endPosition/1000F} s"
 }
 
 private fun formatSliderValue(value: Float): String {

@@ -75,6 +75,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import coil.annotation.ExperimentalCoilApi
 import com.example.shortease.R
 import com.example.shortease.Screen
@@ -139,7 +140,7 @@ fun MyVideos(
                         ),
                         title = {
                             Text(
-                                text = "My Videos",
+                                text = stringResource(R.string.my_videos_header),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth(),
                                 style = TextStyle(
@@ -177,7 +178,9 @@ fun MyVideos(
 
                                 ) {
                                     DropdownMenuItem(
-                                        text = { Text("Sign Out", textAlign = TextAlign.Center,
+                                        text = { Text(
+                                            text = stringResource(R.string.sign_out_button),
+                                            textAlign = TextAlign.Center,
                                             style = TextStyle(color = colorPalette.ShortEaseRed, fontSize = 14.sp),
                                             modifier = Modifier.padding(horizontal = 20.dp))},
                                         onClick = {
@@ -241,7 +244,6 @@ fun MyVideos(
                                             videoDirExists.value = videoDir.exists()
 
                                             if(videoDirExists.value) {
-                                                Log.d("youtube init", videoDir.toString())
                                                 finishedDownload.value = File(videoDir, "thumbnail.jpg").exists()
                                                 if(finishedDownload.value) {
                                                     Image(
@@ -262,6 +264,7 @@ fun MyVideos(
                                                 }
                                             }
                                             else {
+                                                val savedVideosHeaderText = stringResource(R.string.download_failed)
                                                 Image(
                                                     painter = painterResource(R.drawable.download_icon),
                                                     contentDescription = "Download Icon",
@@ -271,7 +274,7 @@ fun MyVideos(
                                                             formats.value = youtubeDownloader.requestVideoDetail(videoId.value)
                                                             isPopupOpen.value = true
                                                         } else {
-                                                            Toast.makeText(context, "Cannot download this video", Toast.LENGTH_SHORT).show()
+                                                            Toast.makeText(context, savedVideosHeaderText, Toast.LENGTH_SHORT).show()
                                                         }
                                                     }
                                                         .size(24.dp)
@@ -282,7 +285,7 @@ fun MyVideos(
                                         if (isPopupOpen.value) {
                                             AlertDialog(
                                                 onDismissRequest = { isPopupOpen.value = false },
-                                                title = { Text(text = "Select Format") },
+                                                title = { Text(text = stringResource(R.string.select_format)) },
                                                 confirmButton = {},
                                                 text = {
                                                     Column {
