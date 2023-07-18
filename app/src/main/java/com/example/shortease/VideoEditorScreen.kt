@@ -5,6 +5,7 @@ import VideoHandle.EpVideo
 import VideoHandle.OnEditorListener
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -68,8 +68,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import showPopup
 import java.io.File
-import kotlin.properties.Delegates
+
 
 var shouldRenderContent by mutableStateOf(-1)
 var videoDuration = -1f
@@ -241,13 +242,22 @@ fun VideoEditorScreen(
                     }
                 }
                 else if (shouldRenderContent == R.drawable.text_icon) {
-                    // Render your content here based on the condition
-                    Text(
-                        text = "text",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    showPopup(0f..videoDuration*1000, startCropTime..endCropTime,
+                    onConfirm = {
+                            userInput,
+                            selectedPosition,
+                            selectedFontSize,
+                            startCropTime,
+                            endCropTime -> Toast.makeText(context,
+                            "User Input: $userInput, Position: $selectedPosition, Font Size: $selectedFontSize, Start Time: $startCropTime, End Time: $endCropTime",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        shouldRenderContent = -1
+                    },
+                    onCancel = {
+                        shouldRenderContent = -1
+                    })
+
                 }
                 else if (shouldRenderContent == R.drawable.music_note_icon) {
                     var value by remember { mutableStateOf(audioVolume) }
