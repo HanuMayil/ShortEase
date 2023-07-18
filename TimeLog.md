@@ -41,4 +41,5 @@
 | 07/15/2023 |      | 5       |       |          |          |       | Look into and start implementing text effects        |
 | 07/15/2023 |      |         |       |  5       |          |       | Finish Cropping Video                                |
 | 07/16/2023 |      |         |       |          |6         | 7     | Built serverless api to retrieve most watched stats  |
-| 07/15/2023 |      |         |       |  4       |          |       | Add Language Support                                 |
+| 07/18/2023 |      |         |       |  4       |          |       | Add Language Support                                 |
+| 07/18/2023 |      |         | 3     |          |          |       | Added popup window for creating subtitles            |
