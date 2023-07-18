@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -46,6 +46,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -54,6 +55,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -62,18 +64,19 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ui.PlayerView
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
-import kotlin.properties.Delegates
 
 var shouldRenderContent by mutableStateOf(-1)
 var videoDuration = -1f
 lateinit var playerView: PlayerView
 var startCropTime = 0f
 var endCropTime = 0f
+var audioVolume = 100f
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoEditorScreen(
@@ -91,12 +94,9 @@ fun VideoEditorScreen(
     DisposableEffect(Unit) {
         onDispose {
             shouldRenderContent = -1
-            startCropTime = 0f
-            endCropTime = 0f
             videoDuration = -1f
         }
     }
-
     Box (
         modifier = Modifier.fillMaxSize()
     ) {
@@ -115,13 +115,13 @@ fun VideoEditorScreen(
                     ),
                     title = {
                         Text(
-                            text = "Editor",
+                            text = stringResource(R.string.video_editor_header),
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth(),
                             style = TextStyle(
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.SansSerif,
-                                fontSize = 32.sp
+                                fontSize = 24.sp
                             )
                         )
                     },
@@ -129,6 +129,7 @@ fun VideoEditorScreen(
                         IconButton(
                             onClick = {
                                 navController.popBackStack()
+                                resetVariables()
                             }
                         ) {
                             Image(
@@ -151,7 +152,32 @@ fun VideoEditorScreen(
                                         thumbnail.delete()
                                         // Run the cropVideo function in the background using coroutines
                                         coroutineScope.launch {
-                                            cropVideo(videoId = videoId, context = context, fileName = fileName)
+                                            var deferred = CompletableDeferred<Unit>()
+                                            cropVideo(
+                                                videoId = videoId,
+                                                context = context,
+                                                fileName = fileName,
+                                                completionCallback = {
+                                                    deferred.complete(Unit)
+                                                 }
+                                            )
+                                            deferred.await()
+                                            deferred = CompletableDeferred<Unit>()
+                                            processAudio(
+                                                videoId = videoId,
+                                                context = context,
+                                                completionCallback = {
+                                                    deferred.complete(Unit)
+                                                })
+                                            deferred.await()
+                                            val sourceFile = File(context.filesDir, "videos/$videoId/thumbnail.jpg")
+                                            val destinationFile = File(context.filesDir, "output/$videoId/thumbnail.jpg")
+                                            if (sourceFile.exists()) {
+                                                sourceFile.copyTo(destinationFile, overwrite = true)
+                                            } else {
+                                                Log.d("Cropping", "Source file does not exist: ${sourceFile.path}")
+                                            }
+                                            resetVariables()
                                         }
 
                                         // Navigate to a different page using the NavController
@@ -190,13 +216,13 @@ fun VideoEditorScreen(
                 if (shouldRenderContent == R.drawable.scissors_icon) {
                     // Render your content here based on the condition
                     var range by remember { mutableStateOf(0f..videoDuration*1000) }
-                    var values by remember { mutableStateOf(0f..videoDuration*1000) }
+                    var values by remember { mutableStateOf(startCropTime..endCropTime) }
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
                         Text(
-                            text = "Crop Video",
+                            text = stringResource(R.string.edit_crop),
                             color = Color.White,
                             fontSize = 20.sp,
                             modifier = Modifier
@@ -210,6 +236,7 @@ fun VideoEditorScreen(
                                 values = newValues
                                 startCropTime = values.start.toFloat()
                                 endCropTime = values.endInclusive.toFloat()
+
                             })
                     }
                 }
@@ -223,13 +250,27 @@ fun VideoEditorScreen(
                     )
                 }
                 else if (shouldRenderContent == R.drawable.music_note_icon) {
-                    // Render your content here based on the condition
-                    Text(
-                        text = "music",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    var value by remember { mutableStateOf(audioVolume) }
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = stringResource(R.string.edit_audio),
+                            color = Color.White,
+                            fontSize = 20.sp,
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .align(Alignment.CenterHorizontally)
+                        )
+                        SliderComponent(
+                            value = value,
+                            onValueChange = { newValue ->
+                                value = newValue
+                                audioVolume = newValue
+                                playerView.player?.setVolume(audioVolume/100)
+                        })
+                    }
                 }
                 else if (shouldRenderContent == R.drawable.effect_icon) {
                     // Render your content here based on the condition
@@ -318,10 +359,10 @@ fun CropRangeSlider(
     values: ClosedFloatingPointRange<Float>,
     onRangeChanged: (ClosedFloatingPointRange<Float>) -> Unit
 ) {
+    val context = LocalContext.current
     val timestamp = remember(values) {
-        calculateTimestamp(values)
+        calculateTimestamp(context = context, values)
     }
-
     Column {
         RangeSlider(
             value = values,
@@ -338,7 +379,6 @@ fun CropRangeSlider(
             ),
             modifier = Modifier.padding(horizontal = 16.dp)
         )
-
         Text(
             text = timestamp,
             modifier = Modifier
@@ -348,14 +388,50 @@ fun CropRangeSlider(
         )
     }
 }
-
-private fun calculateTimestamp(values: ClosedFloatingPointRange<Float>): String {
-    val startPosition = values.start.toInt()
-    val endPosition = values.endInclusive.toInt()
-    return "Start: ${startPosition/1000F} s, End: ${endPosition/1000F} s"
+@Composable
+fun SliderComponent(
+    value: Float,
+    onValueChange: (Float) -> Unit
+) {
+    val formattedValue = remember(value) {
+        formatSliderValue(value)
+    }
+    Column {
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = 0f..100f,
+            steps = 100,
+            colors = SliderDefaults.colors(
+                thumbColor = colorPalette.ShortEaseWhite,
+                activeTrackColor = colorPalette.ShortEaseRed,
+                inactiveTrackColor = colorPalette.ShortEaseRed.copy(alpha = 0.2f)
+            ),
+        )
+        Text(
+            text = stringResource(R.string.edit_audio_text) + " $formattedValue",
+            color = Color.White,
+            fontSize = 16.sp,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+    }
 }
 
-private fun cropVideo(context: Context, videoId: String, fileName: String) {
+
+
+private fun calculateTimestamp(context: Context, values: ClosedFloatingPointRange<Float>): String {
+    val startPosition = values.start.toInt()
+    val endPosition = values.endInclusive.toInt()
+    return getString(context, R.string.start) + " ${startPosition/1000F} s, " + getString(context, R.string.end) + " ${endPosition/1000F} s"
+}
+
+private fun formatSliderValue(value: Float): String {
+    val formattedValue = value.toInt()
+    return formattedValue.toString()
+}
+
+
+private fun cropVideo(context: Context, videoId: String, fileName: String,  completionCallback: () -> Unit) {
     var fileDir = File(context.filesDir, "output/${videoId}")
     var videoDir = File(context.filesDir, "videos/${videoId}")
     if(!fileDir.isDirectory) {
@@ -363,21 +439,14 @@ private fun cropVideo(context: Context, videoId: String, fileName: String) {
     }
     var epVideo = EpVideo("${videoDir.toString()}/${fileName}")
     epVideo.clip(startCropTime/1000, (endCropTime- startCropTime)/1000)
-    var outFile = File(fileDir, "output.mp4")
+    var outFile = File(fileDir, "output-cropped.mp4")
     val outputOption = EpEditor.OutputOption(outFile.toString())
     outputOption.frameRate = 30
     outputOption.bitRate = 10
     val editorListener = object : OnEditorListener {
         override fun onSuccess() {
             // Implement your logic when the operation is successful
-            Log.d("Cropping", "Finished")
-            val sourceFile = File(videoDir, "thumbnail.jpg")
-            val destinationFile = File(fileDir, "thumbnail.jpg")
-            if (sourceFile.exists()) {
-                sourceFile.copyTo(destinationFile, overwrite = true)
-            } else {
-                Log.d("Cropping", "Source file does not exist: ${sourceFile.path}")
-            }
+            completionCallback()
         }
 
         override fun onFailure() {
@@ -397,6 +466,46 @@ private fun cropVideo(context: Context, videoId: String, fileName: String) {
         Log.e("Cropping", "Error occurred during video cropping: ${e.message}", e)
     }
 }
+
+fun resetVariables() {
+    startCropTime = 0f
+    endCropTime = 0f
+    audioVolume = 100f
+}
+
+fun processAudio(context: Context, videoId: String, completionCallback: () -> Unit) {
+    val fileDir = File(context.filesDir, "output/$videoId/output-cropped.mp4")
+    var videoDir = File(context.filesDir, "videos/${videoId}")
+
+    val epVideo: EpVideo = EpVideo("${fileDir.toString()}")
+    Log.d("youtube init", "name" + epVideo)
+
+    val outFile = File(context.filesDir, "output/$videoId/output-audio.mp4")
+
+    val editorListener = object : OnEditorListener {
+        override fun onSuccess() {
+            // Implement your logic when the operation is successful
+            Log.d("youtube init", "Finished")
+            completionCallback()
+        }
+
+        override fun onFailure() {
+            // Implement your logic when the operation fails
+            Log.d("youtube init", "Failed")
+        }
+
+        override fun onProgress(progress: Float) {
+            // Implement your logic to track the progress of the operation
+            Log.d("youtube init", "Progress: $progress")
+        }
+    }
+
+    Log.d("youtube init", "HERE")
+    Log.d("audio volume", "${audioVolume/100f}")
+    EpEditor.music(fileDir.toString(), fileDir.toString(), outFile.toString(), audioVolume/100f, 0.0F, editorListener)
+}
+
+
 
 @Composable
 fun BottomBarButton(

@@ -1,0 +1,35 @@
+[1mdiff --git a/app/src/main/java/com/example/shortease/MainActivity.kt b/app/
+src/main/java/com/example/shortease/MainActivity.kt[m
+[1mindex 61b89a0..fbfbb8b 100755[m
+[1m--- a/app/src/main/java/com/example/shortease/MainActivity.kt[m
+[1m+++ b/app/src/main/java/com/example/shortease/MainActivity.kt[m
+[36m@@ -1,7 +1,9 @@[m
+ package com.example.shortease[m
+ [m
+[32m+[m[32mimport android.annotation.SuppressLint[m
+ import android.content.Context[m
+ import android.content.Intent[m
+[32m+[m[32mimport android.content.res.Configuration[m
+ import android.os.Bundle[m
+ import android.util.Log[m
+ import android.widget.Toast[m
+[36m@@ -23,6 +25,7 @@[m [mimport kotlinx.coroutines.Dispatchers[m
+ import kotlinx.coroutines.launch[m
+ import kotlinx.coroutines.runBlocking[m
+ import java.io.File[m
+[32m+[m[32mimport java.util.Locale[m
+ [m
+ class MainActivity : ComponentActivity() {[m
+     private lateinit var navController: NavHostController[m
+[36m@@ -32,9 +35,9 @@[m [mclass MainActivity : ComponentActivity() {[m
+         const val RC_SIGN_IN = 100[m
+     }[m
+ [m
+[32m+[m[32m    @SuppressLint("SuspiciousIndentation")[m
+     override fun onCreate(savedInstanceState: Bundle?) {[m
+         super.onCreate(savedInstanceState)[m
+[31m-[m
+         //firebase stuff[m
+         firebaseAuth = FirebaseAuth.getInstance()[m
+ [m
+

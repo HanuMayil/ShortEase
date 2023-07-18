@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">شورت إيز</string>
+    <string name="web_client_id">738134261328-sfth69n6us8muiltpb3gl4k49sdltkpv.apps.googleusercontent.com</string>
+    <string name="sign_in_button">تسجيل الدخول باستخدام جوجل</string>
+    <string name="my_videos_header">فيديوهاتي</string>
+    <string name="saved_videos_header">الفيديوهات المحفوظة</string>
+    <string name="video_editor_header">محرر</string>
+    <string name="generating">جاري إنشاء المعاينة...</string>
+    <string name="video_preview_header">المعاينة</string>
+    <string name="sign_out_button">تسجيل الخروج</string>
+    <string name="download_failed">لا يمكن تنزيل هذا الفيديو</string>
+    <string name="select_format">اختر الصيغة</string>
+    <string name="edit_video">تعديل الفيديو؟</string>
+    <string name="confirm">تأكيد</string>
+    <string name="cancel">إلغاء</string>
+    <string name="delete_video">حذف الفيديو؟</string>
+    <string name="delete_video_prompt">هل أنت متأكد من رغبتك في حذف:</string>
+    <string name="edit_crop">تقطيع الفيديو</string>
+    <string name="start">البدء:</string>
+    <string name="end">الانتهاء:</string>
+    <string name="edit_audio">تحرير الصوت</string>
+    <string name="edit_audio_text">مستوى الصوت:</string>
+    <string name="english">الإنجليزية</string>
+    <string name="arabic">العربية</string>
+    <string name="spanish">الإسبانية</string>
+    <string name="french">الفرنسية</string>
+    <string name="hindi">الهندية</string>
+    <string name="tamil">التاميلية</string>
+    <string name="vietnamese">الفيتنامية</string>
+    <string name="mandarin">الصينية الماندرينية</string>
+</resources>

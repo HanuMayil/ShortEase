@@ -1,5 +1,10 @@
+import android.widget.VideoView
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -7,35 +12,30 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.shortease.R
+import com.example.shortease.Screen
 import com.example.shortease.ui.theme.ShortEaseTheme
 import com.example.shortease.ui.theme.colorPalette
-import android.widget.VideoView
-import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.shortease.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -60,13 +60,13 @@ fun PreviewScreen(
                 ),
                 title = {
                     Text(
-                        text = "Preview",
+                        text = stringResource(R.string.video_preview_header),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
                         style = TextStyle(
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.SansSerif,
-                            fontSize = 32.sp
+                            fontSize = 24.sp
                         )
                     )
                 },
@@ -105,7 +105,7 @@ fun PreviewScreen(
                                 },
                                 modifier = Modifier.fillMaxSize()
                             ) { videoView ->
-                                val folder = File("${context.filesDir}/output/${videoId}")
+                                val folder = File("${context.filesDir}/output/${videoId}/output-audio.mp4")
                                 val folderContents = folder.listFiles()
                                 val folderContentNames = folderContents?.map { file -> file.name } ?: emptyList()
                                 val video = File(folder, folderContentNames.getOrNull(0) ?: "")

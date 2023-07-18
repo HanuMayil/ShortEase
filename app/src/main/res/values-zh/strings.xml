@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">简易视频编辑器</string>
+    <string name="web_client_id">738134261328-sfth69n6us8muiltpb3gl4k49sdltkpv.apps.googleusercontent.com</string>
+    <string name="sign_in_button">使用Google登录</string>
+    <string name="my_videos_header">我的视频</string>
+    <string name="saved_videos_header">已保存的视频</string>
+    <string name="video_editor_header">编辑器</string>
+    <string name="generating">正在生成预览...</string>
+    <string name="video_preview_header">预览</string>
+    <string name="sign_out_button">退出登录</string>
+    <string name="download_failed">无法下载此视频</string>
+    <string name="select_format">选择格式</string>
+    <string name="edit_video">编辑视频？</string>
+    <string name="confirm">确认</string>
+    <string name="cancel">取消</string>
+    <string name="delete_video">删除视频？</string>
+    <string name="delete_video_prompt">确定要删除以下内容吗：</string>
+    <string name="edit_crop">裁剪视频</string>
+    <string name="start">开始：</string>
+    <string name="end">结束：</string>
+    <string name="edit_audio">编辑音频</string>
+    <string name="edit_audio_text">音频音量：</string>
+    <string name="english">英语</string>
+    <string name="arabic">阿拉伯语</string>
+    <string name="spanish">西班牙语</string>
+    <string name="french">法语</string>
+    <string name="hindi">印地语</string>
+    <string name="tamil">泰米尔语</string>
+    <string name="vietnamese">越南语</string>
+    <string name="mandarin">普通话</string>
+</resources>

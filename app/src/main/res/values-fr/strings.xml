@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">ShortEase</string>
+    <string name="web_client_id">738134261328-sfth69n6us8muiltpb3gl4k49sdltkpv.apps.googleusercontent.com</string>
+    <string name="sign_in_button">Se connecter avec Google</string>
+    <string name="my_videos_header">Mes Vidéos</string>
+    <string name="saved_videos_header">Vidéos Sauvegardées</string>
+    <string name="video_editor_header">Éditeur</string>
+    <string name="generating">Génération de la prévisualisation...</string>
+    <string name="video_preview_header">Aperçu</string>
+    <string name="sign_out_button">Se Déconnecter</string>
+    <string name="download_failed">Impossible de télécharger cette vidéo</string>
+    <string name="select_format">Sélectionner le Format</string>
+    <string name="edit_video">Modifier la Vidéo ?</string>
+    <string name="confirm">Confirmer</string>
+    <string name="cancel">Annuler</string>
+    <string name="delete_video">Supprimer la Vidéo ?</string>
+    <string name="delete_video_prompt">Êtes-vous sûr de vouloir supprimer :</string>
+    <string name="edit_crop">Recadrer la Vidéo</string>
+    <string name="start">Début :</string>
+    <string name="end">Fin :</string>
+    <string name="edit_audio">Modifier l\'Audio</string>
+    <string name="edit_audio_text">Volume de l\'Audio :</string>
+    <string name="english">Anglais</string>
+    <string name="arabic">Arabe</string>
+    <string name="spanish">Espagnol</string>
+    <string name="french">Français</string>
+    <string name="hindi">Hindi</string>
+    <string name="tamil">Tamoul</string>
+    <string name="vietnamese">Vietnamien</string>
+    <string name="mandarin">Mandarin</string>
+</resources>
