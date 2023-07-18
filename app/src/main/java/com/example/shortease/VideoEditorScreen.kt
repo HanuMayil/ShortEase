@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -71,7 +70,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
-import kotlin.properties.Delegates
 
 var shouldRenderContent by mutableStateOf(-1)
 var videoDuration = -1f
@@ -123,7 +121,7 @@ fun VideoEditorScreen(
                             style = TextStyle(
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.SansSerif,
-                                fontSize = 32.sp
+                                fontSize = 24.sp
                             )
                         )
                     },

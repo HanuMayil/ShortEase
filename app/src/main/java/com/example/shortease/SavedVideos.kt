@@ -123,7 +123,7 @@ fun SavedVideos(
                                 style = TextStyle(
                                     fontWeight = FontWeight.Bold,
                                     fontFamily = FontFamily.SansSerif,
-                                    fontSize = 32.sp
+                                    fontSize = 24.sp
                                 )
                             )
                         },

@@ -20,4 +20,12 @@
     <string name="end">End:</string>
     <string name="edit_audio">Edit Audio</string>
     <string name="edit_audio_text">Audio Volume:</string>
+    <string name="english">English</string>
+    <string name="arabic">Arabic</string>
+    <string name="spanish">Spanish</string>
+    <string name="french">French</string>
+    <string name="hindi">Hindi</string>
+    <string name="tamil">Tamil</string>
+    <string name="vietnamese">Vietnamese</string>
+    <string name="mandarin">Mandarin</string>
 </resources>

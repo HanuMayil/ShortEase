@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">குறுநேரம் எளிதாக்கு</string>
+    <string name="web_client_id">738134261328-sfth69n6us8muiltpb3gl4k49sdltkpv.apps.googleusercontent.com</string>
+    <string name="sign_in_button">Google உடன் உள்நுழைக</string>
+    <string name="my_videos_header">எனது காணொளிகள்</string>
+    <string name="saved_videos_header">சேமித்த காணொளிகள்</string>
+    <string name="video_editor_header">திருத்தி</string>
+    <string name="generating">முன்னோக்கி உருவாக்குகின்றன...</string>
+    <string name="video_preview_header">முன்னோக்கி</string>
+    <string name="sign_out_button">வெளியேறு</string>
+    <string name="download_failed">இந்த காணொளியை பதிவிறக்க முடியாது</string>
+    <string name="select_format">வடிவமைப்பைத் தேர்ந்தெடுக்கவும்</string>
+    <string name="edit_video">காணொளி திருத்த வேண்டுமா?</string>
+    <string name="confirm">உறுதிப்படுத்தவும்</string>
+    <string name="cancel">ரத்துசெய்யவும்</string>
+    <string name="delete_video">காணொளி நீக்க வேண்டுமா?</string>
+    <string name="delete_video_prompt">நீங்கள் உறுதியாக நிச்சயிக்கின்றீர்களா:</string>
+    <string name="edit_crop">காணொளி குறைவு</string>
+    <string name="start">தொடக்கம்:</string>
+    <string name="end">முடிவு:</string>
+    <string name="edit_audio">ஒலி திருத்து</string>
+    <string name="edit_audio_text">ஒலி அளவு:</string>
+    <string name="english">ஆங்கிலம்</string>
+    <string name="arabic">அரபிக்</string>
+    <string name="spanish">ஸ்பானிஷ்</string>
+    <string name="french">பிரஞ்சு</string>
+    <string name="hindi">இந்தி</string>
+    <string name="tamil">தமிழ்</string>
+    <string name="vietnamese">வியட்நாமிஸ்</string>
+    <string name="mandarin">மெண்டரின்</string>
+</resources>
