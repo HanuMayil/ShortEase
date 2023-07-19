@@ -78,6 +78,7 @@ lateinit var playerView: PlayerView
 var startCropTime = 0f
 var endCropTime = 0f
 var audioVolume = 100f
+var subtitleList = mutableListOf<PlayerSubtitles>()
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoEditorScreen(
@@ -171,6 +172,16 @@ fun VideoEditorScreen(
                                                     deferred.complete(Unit)
                                                 })
                                             deferred.await()
+                                            deferred = CompletableDeferred<Unit>()
+                                            processSubtitles(
+                                                videoId = videoId,
+                                                context = context,
+                                                subtitleList = subtitleList,
+                                                completionCallback = {
+                                                    deferred.complete(Unit)
+                                                }
+                                            )
+//                                            deferred.await()
                                             val sourceFile = File(context.filesDir, "videos/$videoId/thumbnail.jpg")
                                             val destinationFile = File(context.filesDir, "output/$videoId/thumbnail.jpg")
                                             if (sourceFile.exists()) {
@@ -252,6 +263,9 @@ fun VideoEditorScreen(
                             "User Input: $userInput, Position: $selectedPosition, Font Size: $selectedFontSize, Start Time: $startCropTime, End Time: $endCropTime",
                             Toast.LENGTH_SHORT
                         ).show()
+                        subtitleList.add(PlayerSubtitles(userInput,selectedPosition, startCropTime, endCropTime))
+                        val currentDirector = System.getProperty("user.dir")
+                        println("Current directory: $currentDirector")
                         shouldRenderContent = -1
                     },
                     onCancel = {
@@ -514,7 +528,65 @@ fun processAudio(context: Context, videoId: String, completionCallback: () -> Un
     EpEditor.music(fileDir.toString(), fileDir.toString(), outFile.toString(), audioVolume/100f, 0.0F, editorListener)
 }
 
+fun processSubtitles(context: Context, videoId: String, subtitleList: MutableList<PlayerSubtitles>,
+                     completionCallback: () -> Unit) {
+    val fileDir = File(context.filesDir, "output/$videoId/output-cropped.mp4")
+    var videoDir = File(context.filesDir, "videos/${videoId}")
 
+    // Get font
+    val fontPath = File("app\\src\\main\\res\\font")
+    val fontFileName = "arialn.tff"
+    val fontFile = File(fontPath,fontFileName)
+
+    // Access the private function from EpVideo
+    val epVideo: EpVideo = EpVideo("${fileDir.toString()}")
+//    val addTextMethod = EpVideo::class.java.getDeclaredMethod("addText", Int::class.java, Int::class.java, Float::class.java, String::class.java, String::class.java,
+//                                                                String::class.java, EpText.Time::class.java)
+//    addTextMethod.isAccessible = true
+
+    Log.d("youtube init", "name" + epVideo)
+
+    // Output file
+    val outFile = File(context.filesDir, "output/$videoId/output-subtitles.mp4")
+    val outputOption = EpEditor.OutputOption(outFile.toString())
+    outputOption.frameRate = 30
+    outputOption.bitRate = 10
+
+    val editorListener = object : OnEditorListener {
+        override fun onSuccess() {
+            // Implement your logic when the operation is successful
+            Log.d("youtube init", "Finished")
+            completionCallback()
+        }
+
+        override fun onFailure() {
+            // Implement your logic when the operation fails
+            Log.d("youtube init", "Failed")
+        }
+
+        override fun onProgress(progress: Float) {
+            // Implement your logic to track the progress of the operation
+            Log.d("youtube init", "Progress: $progress")
+        }
+    }
+
+    if(subtitleList.size > 0) {
+        println("ADDING THE FOLLOWING SUBTITLES:")
+        subtitleList.forEach { item ->
+            println("Subtitle: $item")
+//        val epText = EpText(playerView.width/2, playerView.height - 10, 35.0F,
+//            EpText.Color.Black, fontFile.absolutePath, item.userInput ,EpText.Time(item.startCropTime.toInt(),item.endCropTime.toInt()))
+            epVideo.addText(playerView.width/2, playerView.height - (playerView.height), 100.0F,
+                "White", fontFile.absolutePath, item.userInput)
+        }
+        try {
+            // Video cropping code here
+            EpEditor.exec(epVideo, outputOption, editorListener)
+        } catch (e: Exception) {
+            Log.e("Adding Subtitles", "Error occurred during video adding subtitles: ${e.message}", e)
+        }
+    }
+}
 
 @Composable
 fun BottomBarButton(
@@ -600,3 +672,5 @@ fun VideoPlayer(videoPath : String) {
         )
     }
 }
+data class PlayerSubtitles(val userInput: String, val selectedPosition: String,
+                           val startCropTime: Float, val endCropTime: Float )
