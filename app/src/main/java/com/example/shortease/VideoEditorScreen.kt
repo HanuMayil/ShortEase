@@ -1,11 +1,11 @@
 package com.example.shortease
 
 import Jni.FFmpegCmd
+import Jni.VideoUitls
 import VideoHandle.CmdList
 import VideoHandle.EpEditor
 import VideoHandle.EpVideo
 import VideoHandle.OnEditorListener
-import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
@@ -532,7 +532,6 @@ fun processAudio(context: Context, videoId: String, completionCallback: () -> Un
     EpEditor.music(fileDir.toString(), fileDir.toString(), outFile.toString(), audioVolume/100f, 0.0F, editorListener)
 }
 
-@SuppressLint("SuspiciousIndentation")
 fun processSubtitles(context: Context, videoId: String, subtitleList: MutableList<PlayerSubtitles>,
                      completionCallback: () -> Unit) {
     val fileDir = File(context.filesDir, "output/$videoId/output-audio.mp4")
@@ -582,11 +581,12 @@ fun processSubtitles(context: Context, videoId: String, subtitleList: MutableLis
 //        val epText = EpText(playerView.width/2, playerView.height - 10, 35.0F,
 //            EpText.Color.Black, fontFile.absolutePath, item.userInput ,EpText.Time(item.startCropTime.toInt(),item.endCropTime.toInt()))
             val cmd = CmdList()
-            cmd.append(ffmpegCmd).append("-i").append(videoDir.toString()).append("-vf")
-                .append("drawtext=text='${item.userInput}':x=10:y=10:fontsize=24:fontcolor=white:enable='between(t,${item.startCropTime},${item.endCropTime})'")
+            cmd.append(ffmpegCmd)
+                .append("-i").append(fileDir.toString()).append("-vf")
+                .append("drawtext=fontfile=${fontFile.toString()}:x=10:y=10:text='${item.userInput}':fontsize=24:fontcolor=white:enable='between(t,${item.startCropTime},${item.endCropTime})'")
                 .append("-c:a").append("copy").append("-y").append(outFile.toString())
 
-            execCmd(cmd,0, editorListener)
+            execCmd(cmd,VideoUitls.getDuration(fileDir.toString()), editorListener)
         }
     }
 }
@@ -682,6 +682,7 @@ private fun execCmd(cmd: CmdList, duration: Long, onEditorListener: OnEditorList
         cmdLog += cmds
     }
     Log.v("EpMediaF", "cmd:$cmdLog")
+
     FFmpegCmd.exec(cmds, duration, object : OnEditorListener {
         override fun onSuccess() {
             onEditorListener.onSuccess()
