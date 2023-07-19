@@ -1,8 +1,11 @@
 package com.example.shortease
 
+import Jni.FFmpegCmd
+import VideoHandle.CmdList
 import VideoHandle.EpEditor
 import VideoHandle.EpVideo
 import VideoHandle.OnEditorListener
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
@@ -182,6 +185,7 @@ fun VideoEditorScreen(
                                                 }
                                             )
 //                                            deferred.await()
+//                                            deferred = CompletableDeferred<Unit>()
                                             val sourceFile = File(context.filesDir, "videos/$videoId/thumbnail.jpg")
                                             val destinationFile = File(context.filesDir, "output/$videoId/thumbnail.jpg")
                                             if (sourceFile.exists()) {
@@ -528,13 +532,14 @@ fun processAudio(context: Context, videoId: String, completionCallback: () -> Un
     EpEditor.music(fileDir.toString(), fileDir.toString(), outFile.toString(), audioVolume/100f, 0.0F, editorListener)
 }
 
+@SuppressLint("SuspiciousIndentation")
 fun processSubtitles(context: Context, videoId: String, subtitleList: MutableList<PlayerSubtitles>,
                      completionCallback: () -> Unit) {
-    val fileDir = File(context.filesDir, "output/$videoId/output-cropped.mp4")
+    val fileDir = File(context.filesDir, "output/$videoId/output-audio.mp4")
     var videoDir = File(context.filesDir, "videos/${videoId}")
 
     // Get font
-    val fontPath = File("app\\src\\main\\res\\font")
+    val fontPath = File("/app/src/main/res/font/")
     val fontFileName = "arialn.tff"
     val fontFile = File(fontPath,fontFileName)
 
@@ -569,21 +574,19 @@ fun processSubtitles(context: Context, videoId: String, subtitleList: MutableLis
             Log.d("youtube init", "Progress: $progress")
         }
     }
-
+    val ffmpegCmd = "ffmpeg"
     if(subtitleList.size > 0) {
         println("ADDING THE FOLLOWING SUBTITLES:")
         subtitleList.forEach { item ->
             println("Subtitle: $item")
 //        val epText = EpText(playerView.width/2, playerView.height - 10, 35.0F,
 //            EpText.Color.Black, fontFile.absolutePath, item.userInput ,EpText.Time(item.startCropTime.toInt(),item.endCropTime.toInt()))
-            epVideo.addText(playerView.width/2, playerView.height - (playerView.height), 100.0F,
-                "White", fontFile.absolutePath, item.userInput)
-        }
-        try {
-            // Video cropping code here
-            EpEditor.exec(epVideo, outputOption, editorListener)
-        } catch (e: Exception) {
-            Log.e("Adding Subtitles", "Error occurred during video adding subtitles: ${e.message}", e)
+            val cmd = CmdList()
+            cmd.append(ffmpegCmd).append("-i").append(videoDir.toString()).append("-vf")
+                .append("drawtext=text='${item.userInput}':x=10:y=10:fontsize=24:fontcolor=white:enable='between(t,${item.startCropTime},${item.endCropTime})'")
+                .append("-c:a").append("copy").append("-y").append(outFile.toString())
+
+            execCmd(cmd,0, editorListener)
         }
     }
 }
@@ -671,6 +674,27 @@ fun VideoPlayer(videoPath : String) {
             }
         )
     }
+}
+private fun execCmd(cmd: CmdList, duration: Long, onEditorListener: OnEditorListener) {
+    val cmds = cmd.toTypedArray()
+    var cmdLog = ""
+    for (ss in cmds) {
+        cmdLog += cmds
+    }
+    Log.v("EpMediaF", "cmd:$cmdLog")
+    FFmpegCmd.exec(cmds, duration, object : OnEditorListener {
+        override fun onSuccess() {
+            onEditorListener.onSuccess()
+        }
+
+        override fun onFailure() {
+            onEditorListener.onFailure()
+        }
+
+        override fun onProgress(progress: Float) {
+            onEditorListener.onProgress(progress)
+        }
+    })
 }
 data class PlayerSubtitles(val userInput: String, val selectedPosition: String,
                            val startCropTime: Float, val endCropTime: Float )

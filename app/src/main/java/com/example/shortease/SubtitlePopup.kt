@@ -6,19 +6,14 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.RangeSlider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.example.shortease.CropRangeSlider
-import com.example.shortease.playerView
 import com.example.shortease.ui.theme.colorPalette
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,7 +33,7 @@ fun showPopup(
     val fontSizes = arrayOf(8, 9, 10, 11, 12)
     val position = arrayOf("Top", "Middle", "Bottom")
     var startCropTime = 0f
-    var endCropTime = 0f
+    var endCropTime = values.endInclusive
     var range by remember { mutableStateOf(range) }
     var values by remember { mutableStateOf(values) }
 
