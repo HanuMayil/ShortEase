@@ -8,6 +8,7 @@ import VideoHandle.EpVideo
 import VideoHandle.OnEditorListener
 import android.content.Context
 import android.graphics.Typeface
+import android.media.MediaMetadataRetriever
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Canvas
@@ -585,20 +586,26 @@ fun processSubtitles(context: Context, videoId: String, subtitleList: MutableLis
             Log.d("youtube init", "Progress: $progress")
         }
     }
-    val ffmpegCmd = "ffmpeg"
-    if(subtitleList.size > 0) {
-        println("ADDING THE FOLLOWING SUBTITLES:")
-        subtitleList.forEach { item ->
-            println("Subtitle: $item")
+    val dimensions = getVideoDimensions(fileDir.toString())
+    if (dimensions != null) {
+        val (width, height) = dimensions
+        println("Video Dimensions: $width x $height")
+        val ffmpegCmd = "ffmpeg"
+        if (subtitleList.size > 0) {
+            println("ADDING THE FOLLOWING SUBTITLES:")
+            subtitleList.forEach { item ->
+                println("Subtitle: $item")
 //        val epText = EpText(playerView.width/2, playerView.height - 10, 35.0F,
 //            EpText.Color.Black, fontFile.absolutePath, item.userInput ,EpText.Time(item.startCropTime.toInt(),item.endCropTime.toInt()))
-            val cmd = CmdList()
-            cmd.append(ffmpegCmd)
-                .append("-i").append(fileDir.toString()).append("-vf")
-                .append("drawtext=fontfile='/system/fonts/Roboto-Regular.ttf':fontsize=100:fontcolor=white:x=${playerView.width/2}:y=${playerView.height/2}:text=${item.userInput}='between(t,${item.startCropTime/1000},${item.endCropTime/1000})'")
-                .append("-c:a").append("copy").append("-y").append(outFile.toString())
+                val cmd = CmdList()
+                cmd.append(ffmpegCmd)
+                    .append("-i").append(fileDir.toString()).append("-vf")
+                    .append("drawtext=fontfile='/system/fonts/Roboto-Regular.ttf':text='${item.userInput}':fontcolor=white:fontsize=24:box=1:boxcolor=black@0.5:boxborderw=5:x=($width-text_w)/2:y=$height-th-10")
+//                .append("drawtext=fontfile='/system/fonts/Roboto-Regular.ttf':fontsize=100:fontcolor=black:x=${playerView.width/2}:y=${playerView.height/2}:text=${item.userInput}:enable='between(t,${item.startCropTime/1000},${item.endCropTime/1000})'")
+                    .append("-codec:a").append("copy").append(outFile.toString())
 
-            execCmd(cmd,VideoUitls.getDuration(fileDir.toString()), editorListener)
+                execCmd(cmd, VideoUitls.getDuration(fileDir.toString()), editorListener)
+            }
         }
     }
 }
@@ -717,5 +724,25 @@ private fun execCmd(cmd: CmdList, duration: Long, onEditorListener: OnEditorList
         }
     })
 }
+fun getVideoDimensions(videoPath: String): Pair<Int, Int>? {
+    return try {
+        val retriever = MediaMetadataRetriever()
+        retriever.setDataSource(videoPath)
+
+        val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull()
+        val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull()
+
+        retriever.release()
+
+        if (width != null && height != null && width > 0 && height > 0) {
+            Pair(width, height)
+        } else {
+            null
+        }
+    } catch (e: Exception) {
+        null
+    }
+}
 data class PlayerSubtitles(val userInput: String, val selectedPosition: String,
                            val startCropTime: Float, val endCropTime: Float )
+
