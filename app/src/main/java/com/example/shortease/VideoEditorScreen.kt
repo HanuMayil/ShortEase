@@ -69,7 +69,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
+import android.graphics.Paint
+import android.view.TextureView
+import android.view.View
 import java.io.File
+import java.util.logging.Filter
 
 var shouldRenderContent by mutableStateOf(-1)
 var videoDuration = -1f
@@ -77,6 +83,9 @@ lateinit var playerView: PlayerView
 var startCropTime = 0f
 var endCropTime = 0f
 var audioVolume = 100f
+var red = 0f
+var blue = 0f
+var green = 0f
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoEditorScreen(
@@ -283,12 +292,35 @@ fun VideoEditorScreen(
                 }
                 else if (shouldRenderContent == R.drawable.filter_icon) {
                     // Render your content here based on the condition
-                    Text(
-                        text = "filter",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    var valueRed by remember { mutableStateOf(red) }
+                    var valueBlue by remember { mutableStateOf(blue) }
+                    var valueGreen by remember { mutableStateOf(green) }
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        SliderComponentRGB(
+                            value = valueRed,
+                            RGB = "RED",
+                            onValueChange = { newValue ->
+                                valueRed = newValue
+                                red = newValue
+                            })
+                        SliderComponentRGB(
+                            value = valueBlue,
+                            RGB = "BLUE",
+                            onValueChange = { newValue ->
+                                valueBlue = newValue
+                                blue = newValue
+                            })
+                        SliderComponentRGB(
+                            value = valueGreen,
+                            RGB = "GREEN",
+                            onValueChange = { newValue ->
+                                valueGreen = newValue
+                                green = newValue
+                            })
+                    }
                 }
             }
             Box(
@@ -391,7 +423,7 @@ fun CropRangeSlider(
 @Composable
 fun SliderComponent(
     value: Float,
-    onValueChange: (Float) -> Unit
+    onValueChange: (Float) -> Unit,
 ) {
     val formattedValue = remember(value) {
         formatSliderValue(value)
@@ -416,8 +448,35 @@ fun SliderComponent(
         )
     }
 }
-
-
+@Composable
+fun SliderComponentRGB(
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    RGB: String
+) {
+    val formattedValue = remember(value) {
+        formatSliderValue(value)
+    }
+    Column {
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = -10f..10f,
+            steps = 1,
+            colors = SliderDefaults.colors(
+                thumbColor = colorPalette.ShortEaseWhite,
+                activeTrackColor = colorPalette.ShortEaseRed,
+                inactiveTrackColor = colorPalette.ShortEaseRed.copy(alpha = 0.2f)
+            ),
+        )
+        Text(
+            text = RGB,
+            color = Color.White,
+            fontSize = 16.sp,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+    }
+}
 
 private fun calculateTimestamp(context: Context, values: ClosedFloatingPointRange<Float>): String {
     val startPosition = values.start.toInt()
@@ -430,6 +489,36 @@ private fun formatSliderValue(value: Float): String {
     return formattedValue.toString()
 }
 
+fun processFilters(context: Context, videoId: String, fileName: String, filter: String, completionCallback: () -> Unit){
+    val fileDir = File(context.filesDir, "output/$videoId/output-cropped.mp4")
+    var videoDir = File(context.filesDir, "videos/${videoId}")
+
+    val epVideo: EpVideo = EpVideo("${fileDir.toString()}")
+    Log.d("youtube init", "name" + epVideo)
+
+    val outFile = File(context.filesDir, "output/$videoId/output-filtered.mp4")
+
+    val editorListener = object : OnEditorListener {
+        override fun onSuccess() {
+            // Implement your logic when the operation is successful
+            Log.d("youtube init", "Finished")
+            completionCallback()
+        }
+
+        override fun onFailure() {
+            // Implement your logic when the operation fails
+            Log.d("youtube init", "Failed")
+        }
+
+        override fun onProgress(progress: Float) {
+            // Implement your logic to track the progress of the operation
+            Log.d("youtube init", "Progress: $progress")
+        }
+
+    }
+    Log.d("youtube init", "HERE")
+    epVideo.addFilter(filter)
+}
 
 private fun cropVideo(context: Context, videoId: String, fileName: String,  completionCallback: () -> Unit) {
     var fileDir = File(context.filesDir, "output/${videoId}")
@@ -547,6 +636,12 @@ fun VideoPlayer(videoPath : String) {
     }
     player.setMediaItem(mediaItem)
     playerView.player = player
+
+    val colorMatrix = ColorMatrix().apply {
+        // Example: Increase video brightness by 50%
+        setScale(10f, 10f, 10f, 1f)
+    }
+
     LaunchedEffect(player) {
         player.prepare()
         Log.d("video to see ", videoPath)
