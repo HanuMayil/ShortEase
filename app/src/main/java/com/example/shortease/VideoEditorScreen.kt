@@ -7,6 +7,7 @@ import VideoHandle.EpEditor
 import VideoHandle.EpVideo
 import VideoHandle.OnEditorListener
 import android.content.Context
+import android.graphics.Typeface
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Canvas
@@ -58,9 +59,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.res.ResourcesCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.arthenica.mobileffmpeg.Config
 import com.example.shortease.ui.theme.colorPalette
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
@@ -73,6 +76,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import showPopup
 import java.io.File
+import kotlin.math.absoluteValue
 
 
 var shouldRenderContent by mutableStateOf(-1)
@@ -534,13 +538,21 @@ fun processAudio(context: Context, videoId: String, completionCallback: () -> Un
 
 fun processSubtitles(context: Context, videoId: String, subtitleList: MutableList<PlayerSubtitles>,
                      completionCallback: () -> Unit) {
+    val fontFilePath = "android.resource://${context.packageName}/${R.font.arialn}"
+    //Config.setFontconfigConfigurationPath(fontFilePath);
+
+
     val fileDir = File(context.filesDir, "output/$videoId/output-audio.mp4")
     var videoDir = File(context.filesDir, "videos/${videoId}")
 
     // Get font
-    val fontPath = File("/app/src/main/res/font/")
-    val fontFileName = "arialn.tff"
+    val fontPath = File("res/font/arialn.tff")
+    val fontFileName = ""
     val fontFile = File(fontPath,fontFileName)
+
+    val ret = Config.setFontconfigConfigurationPath(fontPath.path);
+
+
 
     // Access the private function from EpVideo
     val epVideo: EpVideo = EpVideo("${fileDir.toString()}")
@@ -583,7 +595,7 @@ fun processSubtitles(context: Context, videoId: String, subtitleList: MutableLis
             val cmd = CmdList()
             cmd.append(ffmpegCmd)
                 .append("-i").append(fileDir.toString()).append("-vf")
-                .append("drawtext=fontfile=${fontFile.toString()}:x=10:y=10:text='${item.userInput}':fontsize=24:fontcolor=white:enable='between(t,${item.startCropTime},${item.endCropTime})'")
+                .append("drawtext=x=10:y=10:text='${item.userInput}':fontsize=24:fontcolor=white:enable='between(t,${item.startCropTime},${item.endCropTime})'")
                 .append("-c:a").append("copy").append("-y").append(outFile.toString())
 
             execCmd(cmd,VideoUitls.getDuration(fileDir.toString()), editorListener)
@@ -624,6 +636,14 @@ fun VideoPlayer(videoPath : String) {
     Log.d("video to see ", videoPath)
     val context = LocalContext.current
     val player = SimpleExoPlayer.Builder(context).build()
+
+
+    // Load the custom font from the "res/font" directory
+    val s = R.font.arialn.absoluteValue
+    val x = R.font.arialn
+    val customTypeface: Typeface? = ResourcesCompat.getFont(context, R.font.arialn)
+
+
     playerView = PlayerView(context)
     val mediaItem = MediaItem.fromUri(videoPath)
     val playWhenReady by rememberSaveable {
