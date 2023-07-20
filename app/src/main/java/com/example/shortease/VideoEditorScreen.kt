@@ -188,7 +188,7 @@ fun VideoEditorScreen(
                                                     deferred.complete(Unit)
                                                 }
                                             )
-//                                            deferred.await()
+                                            deferred.await()
 //                                            deferred = CompletableDeferred<Unit>()
                                             val sourceFile = File(context.filesDir, "videos/$videoId/thumbnail.jpg")
                                             val destinationFile = File(context.filesDir, "output/$videoId/thumbnail.jpg")
@@ -538,7 +538,7 @@ fun processAudio(context: Context, videoId: String, completionCallback: () -> Un
 
 fun processSubtitles(context: Context, videoId: String, subtitleList: MutableList<PlayerSubtitles>,
                      completionCallback: () -> Unit) {
-    val fontFilePath = "android.resource://${context.packageName}/${R.font.arialn}"
+    val fontFilePath = "android.resource://${context.packageName}//${R.font.arialn}"
     //Config.setFontconfigConfigurationPath(fontFilePath);
 
 
@@ -546,8 +546,8 @@ fun processSubtitles(context: Context, videoId: String, subtitleList: MutableLis
     var videoDir = File(context.filesDir, "videos/${videoId}")
 
     // Get font
-    val fontPath = File("res/font/arialn.tff")
-    val fontFileName = ""
+    val fontPath = File("app/src/main/res/font/")
+    val fontFileName = "arialn.ttf"
     val fontFile = File(fontPath,fontFileName)
 
     val ret = Config.setFontconfigConfigurationPath(fontPath.path);
@@ -595,7 +595,7 @@ fun processSubtitles(context: Context, videoId: String, subtitleList: MutableLis
             val cmd = CmdList()
             cmd.append(ffmpegCmd)
                 .append("-i").append(fileDir.toString()).append("-vf")
-                .append("drawtext=x=10:y=10:text='${item.userInput}':fontsize=24:fontcolor=white:enable='between(t,${item.startCropTime},${item.endCropTime})'")
+                .append("drawtext=fontfile='/system/fonts/Roboto-Regular.ttf':fontsize=100:fontcolor=white:x=${playerView.width/2}:y=${playerView.height/2}:text=${item.userInput}='between(t,${item.startCropTime/1000},${item.endCropTime/1000})'")
                 .append("-c:a").append("copy").append("-y").append(outFile.toString())
 
             execCmd(cmd,VideoUitls.getDuration(fileDir.toString()), editorListener)
