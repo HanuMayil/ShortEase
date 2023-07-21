@@ -43,6 +43,6 @@
 | 07/16/2023 |      |         |       |          |6         | 7     | Built serverless api to retrieve most watched stats  |
 | 07/18/2023 |      |         |       |  4       |          |       | Add Language Support                                 |
 | 07/18/2023 |      |         | 3     |          |          |       | Added popup window for creating subtitles            |
-| 07/18/2023 |      | 4       |       |          |          |       | Add Logic For Subtitles                              |
-| 07/19/2023 |      | 12      |       |          |          |       | Add Logic For Subtitles                              |
+| 07/18/2023 |      | 4       | 2     |          |          |       | Add Logic For Subtitles                              |
+| 07/19/2023 |      | 12      | 3     |          |          |       | Add Logic For Subtitles                              |
 | 07/19/2023 | 5    |         |       |          |          |       | Refactor MyVideos and Saved Videos Page              |
