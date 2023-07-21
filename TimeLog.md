@@ -45,4 +45,4 @@
 | 07/18/2023 |      |         | 3     |          |          |       | Added popup window for creating subtitles            |
 | 07/18/2023 |      | 4       |       |          |          |       | Add Logic For Subtitles                              |
 | 07/19/2023 |      | 12      |       |          |          |       | Add Logic For Subtitles                              |
-
+| 07/19/2023 | 5    |         |       |          |          |       | Refactor MyVideos and Saved Videos Page              |
