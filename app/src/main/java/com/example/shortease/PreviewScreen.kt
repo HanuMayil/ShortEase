@@ -105,7 +105,7 @@ fun PreviewScreen(
                                 },
                                 modifier = Modifier.fillMaxSize()
                             ) { videoView ->
-                                val folder = File("${context.filesDir}/output/${videoId}/output-audio.mp4")
+                                val folder = File("${context.filesDir}/output/${videoId}/output-filter.mp4")
                                 val folderContents = folder.listFiles()
                                 val folderContentNames = folderContents?.map { file -> file.name } ?: emptyList()
                                 val video = File(folder, folderContentNames.getOrNull(0) ?: "")
