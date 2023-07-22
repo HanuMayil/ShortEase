@@ -347,6 +347,10 @@ fun VideoItem(video: File) {
                         contentDescription = "Download Icon",
                         colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
                         modifier = Modifier.size(20.dp).align(Alignment.CenterVertically)
+                            .clickable {
+                                var v = video
+
+                            }
                     )
                 }
             }
@@ -355,6 +359,8 @@ fun VideoItem(video: File) {
         Divider(color = colorPalette.ShortEaseRed, thickness = 1.dp)
     }
 }
+
+
 
 @Composable
 @Preview
