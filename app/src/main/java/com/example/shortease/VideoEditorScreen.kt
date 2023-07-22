@@ -440,7 +440,7 @@ fun SliderComponent(
 
 
 
-private fun calculateTimestamp(values: ClosedFloatingPointRange<Float>): String {
+fun calculateTimestamp(values: ClosedFloatingPointRange<Float>): String {
     val startPosition = values.start.toInt()
     val endPosition = values.endInclusive.toInt()
     return "Start: ${startPosition/1000F} s, End: ${endPosition/1000F} s"

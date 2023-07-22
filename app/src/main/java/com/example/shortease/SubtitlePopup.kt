@@ -10,6 +10,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -18,11 +20,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.shortease.CropRangeSlider
 import com.example.shortease.PlayerSubtitles
+import com.example.shortease.calculateTimestamp
+import com.example.shortease.playerView
 import com.example.shortease.ui.theme.colorPalette
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,9 +47,6 @@ fun showPopup(
     val position = arrayOf("Top", "Middle", "Bottom")
     var selectedPosition by remember { mutableStateOf(position[0]) }
     var selectedFontSize by remember { mutableStateOf(fontSizes[0]) }
-    var startCropTime = 0f
-    var endCropTime = values.endInclusive
-    var range by remember { mutableStateOf(range) }
     var values by remember { mutableStateOf(values) }
 
     LaunchedEffect(userInput) {
@@ -185,13 +186,11 @@ fun showPopup(
                                 }
                             }
 
-                            CropRangeSlider(
+                            SubtitleRangeSlider(
                                 range = range,
                                 values = values,
                                 onRangeChanged = { newValues ->
                                     values = newValues
-                                    startCropTime = values.start.toFloat()
-                                    endCropTime = values.endInclusive.toFloat()
                                 })
 
                             Spacer(modifier = Modifier.height(10.dp))
@@ -205,8 +204,8 @@ fun showPopup(
                                                 userInput = userInput,
                                                 selectedPosition = selectedPosition,
                                                 selectedFontSize = selectedFontSize,
-                                                startCropTime = startCropTime,
-                                                endCropTime = endCropTime
+                                                startCropTime = values.start.toFloat(),
+                                                endCropTime = values.endInclusive.toFloat()
                                             )
 
                                             currentSubtitles.add(newSubtitle)
@@ -241,8 +240,6 @@ fun SubtitlesListPage(
     currentSubtitles: MutableList<PlayerSubtitles>,
     onSubtitleRemoved: (Int) -> Unit
 ) {
-    val context = LocalContext.current
-
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         if (currentSubtitles.isEmpty()) {
             Text("No subtitles found.")
@@ -285,5 +282,41 @@ fun SubtitlesListPage(
                 }
             }
         }
+    }
+}
+
+@ExperimentalMaterial3Api
+@Composable
+fun SubtitleRangeSlider(
+    range: ClosedFloatingPointRange<Float>,
+    values: ClosedFloatingPointRange<Float>,
+    onRangeChanged: (ClosedFloatingPointRange<Float>) -> Unit
+) {
+    val timestamp = remember(values) {
+        calculateTimestamp(values)
+    }
+    Column {
+        RangeSlider(
+            value = values,
+            onValueChange = { newValues ->
+                onRangeChanged(newValues)
+                playerView.player?.seekTo(newValues.start.toLong())
+            },
+            valueRange = range,
+            steps = 100,
+            colors = SliderDefaults.colors(
+                thumbColor = colorPalette.ShortEaseWhite,
+                activeTrackColor = colorPalette.ShortEaseRed,
+                inactiveTrackColor = colorPalette.ShortEaseRed.copy(alpha = 0.2f)
+            ),
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+        Text(
+            text = timestamp,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .align(Alignment.CenterHorizontally),
+            style = TextStyle(color = colorPalette.ShortEaseRed)
+        )
     }
 }
