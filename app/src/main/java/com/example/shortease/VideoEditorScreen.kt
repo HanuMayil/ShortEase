@@ -184,6 +184,7 @@ fun VideoEditorScreen(
                                                     context = context,
                                                     subtitleList = subtitleList,
                                                     completionCallback = {
+                                                        subtitleList.clear()
                                                         deferred.complete(Unit)
                                                     }
                                                 )
@@ -585,6 +586,7 @@ fun processSubtitles(context: Context, videoId: String, subtitleList: MutableLis
             println("Subtitle: $item")
         }
         cmd.append("$textFilter[out]")
+        println("Subtitle: $textFilter")
         cmd.append("-codec:a").append("copy").append("-y").append(outFile.toString())
 
         execCmd(cmd, VideoUitls.getDuration(fileDir.toString()), editorListener)
