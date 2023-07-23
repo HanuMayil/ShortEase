@@ -98,7 +98,7 @@ fun MyVideos(
     val y = YouTubeApiClient("AIzaSyCZ1aVkQw5j_ljA-AesWfHh0c6lnGQIq-A") // Replace with your API key
 
     LaunchedEffect(channelId) {
-        if (channelId != null) {
+        if (!channelId.isNullOrEmpty()) {
             val fetchedThumbnailItems = y.fetchVideoThumbnails(channelId, channelIconUrl)
             thumbnailItems.addAll(fetchedThumbnailItems)
         }
