@@ -64,7 +64,7 @@ fun PreviewScreen(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val context = LocalContext.current
-    val videoId = "zU9y354XAgM"
+    val videoId = navBackStackEntry?.arguments?.getString("videoId")
     val videoPath = "${context.filesDir}/videos/${videoId}"
     val folder = File(videoPath)
     val folderContents = folder.listFiles()
