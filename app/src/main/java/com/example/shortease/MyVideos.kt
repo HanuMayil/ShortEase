@@ -98,27 +98,24 @@ fun MyVideos(
     val y = YouTubeApiClient("AIzaSyCZ1aVkQw5j_ljA-AesWfHh0c6lnGQIq-A") // Replace with your API key
 
     LaunchedEffect(channelId) {
-        if (!channelId.isNullOrEmpty()) {
+        if (channelId != null) {
             val fetchedThumbnailItems = y.fetchVideoThumbnails(channelId, channelIconUrl)
             thumbnailItems.addAll(fetchedThumbnailItems)
         }
-        // else {
-//            val fakeThumbnailItem: ThumbnailItem = ThumbnailItem(
-//                "10 Sec Timer",
-//                "https://i.ytimg.com/vi/zU9y354XAgM/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyiceF5hUqg8CSc85pQwJuvOxXkQ",
-//                BigInteger("1234567890")
-//            )
-//            val fakeThumbnailItem2: ThumbnailItem = ThumbnailItem(
-//                "Donkey Kong Gets Sturdy",
-//                "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
-//                BigInteger("1234567890")
-//            )
-//            thumbnailItems.add(fakeThumbnailItem)
-//            thumbnailItems.add(fakeThumbnailItem2)
-//        }
     }
 
-
+//        val fakeThumbnailItem: ThumbnailItem = ThumbnailItem(
+//            "10 Sec Timer",
+//            "https://i.ytimg.com/vi/zU9y354XAgM/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyiceF5hUqg8CSc85pQwJuvOxXkQ",
+//            BigInteger("1234567890")
+//        )
+//        val fakeThumbnailItem2: ThumbnailItem = ThumbnailItem(
+//            "Donkey Kong Gets Sturdy",
+//            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
+//            BigInteger("1234567890")
+//        )
+//        thumbnailItems.add(fakeThumbnailItem)
+//        thumbnailItems.add(fakeThumbnailItem2)
 
 
     var expanded by remember { mutableStateOf(false) }
