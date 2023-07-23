@@ -292,8 +292,9 @@ fun SubtitleRangeSlider(
     values: ClosedFloatingPointRange<Float>,
     onRangeChanged: (ClosedFloatingPointRange<Float>) -> Unit
 ) {
+    val context = LocalContext.current
     val timestamp = remember(values) {
-        calculateTimestamp(values)
+        calculateTimestamp(context,values)
     }
     Column {
         RangeSlider(

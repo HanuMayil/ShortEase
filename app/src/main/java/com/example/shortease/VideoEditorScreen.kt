@@ -7,6 +7,7 @@ import VideoHandle.EpEditor
 import VideoHandle.EpVideo
 import VideoHandle.OnEditorListener
 import android.content.Context
+import android.graphics.ColorMatrix
 import android.graphics.Typeface
 import android.media.MediaMetadataRetriever
 import android.util.Log
@@ -25,7 +26,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RangeSlider
@@ -60,8 +63,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.content.ContextCompat.getString
+import androidx.core.content.res.ResourcesCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -77,11 +80,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import showPopup
 import java.io.File
-import kotlin.math.absoluteValue
-import android.graphics.ColorMatrix
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import java.text.DecimalFormat
+import kotlin.math.absoluteValue
 
 var shouldRenderContent by mutableStateOf(-1)
 var videoDuration = -1f
@@ -536,7 +536,7 @@ fun CropRangeSlider(
 ) {
     val context = LocalContext.current
     val timestamp = remember(values) {
-        calculateTimestamp(context = context, values)
+        calculateTimestamp(context,values)
     }
     Column {
         RangeSlider(
@@ -592,7 +592,7 @@ fun SliderComponent(
     }
 }
 
-fun calculateTimestamp(values: ClosedFloatingPointRange<Float>): String {
+fun calculateTimestamp(context: Context, values: ClosedFloatingPointRange<Float>): String {
     val startPosition = values.start.toInt()
     val endPosition = values.endInclusive.toInt()
     return getString(context, R.string.start) + " ${startPosition/1000F} s, " + getString(context, R.string.end) + " ${endPosition/1000F} s"
@@ -639,7 +639,7 @@ private fun cropVideo(context: Context, videoId: String, fileName: String,  comp
     }
 }
 private fun filterVideo(context: Context, videoId: String, fileName: String,  completionCallback: () -> Unit) {
-    val fileDir = File(context.filesDir, "output/$videoId/output-audio.mp4")
+    val fileDir = File(context.filesDir, "output/$videoId/output-subtitles.mp4")
     var videoDir = File(context.filesDir, "videos/${videoId}")
 
     val epVideo: EpVideo = EpVideo("${fileDir.toString()}")
