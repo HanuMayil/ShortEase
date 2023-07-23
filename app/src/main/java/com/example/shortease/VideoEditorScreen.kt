@@ -1,9 +1,14 @@
 package com.example.shortease
 
+import Jni.FFmpegCmd
+import Jni.VideoUitls
+import VideoHandle.CmdList
 import VideoHandle.EpEditor
 import VideoHandle.EpVideo
 import VideoHandle.OnEditorListener
 import android.content.Context
+import android.graphics.Typeface
+import android.media.MediaMetadataRetriever
 import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -55,6 +60,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -69,11 +75,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import showPopup
+import java.io.File
+import kotlin.math.absoluteValue
 import android.graphics.ColorMatrix
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import java.text.DecimalFormat
-import java.io.File
 
 var shouldRenderContent by mutableStateOf(-1)
 var videoDuration = -1f
@@ -81,9 +89,11 @@ lateinit var playerView: PlayerView
 var startCropTime = 0f
 var endCropTime = 0f
 var audioVolume = 100f
+var subtitleList = mutableListOf<PlayerSubtitles>()
 var y = 0f
 var u = 0f
 var v = 0f
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoEditorScreen(
@@ -195,6 +205,19 @@ fun VideoEditorScreen(
                                                     deferred.complete(Unit)
                                                 })
                                             deferred.await()
+                                            if(subtitleList.size > 0 ){
+                                                deferred = CompletableDeferred<Unit>()
+                                                processSubtitles(
+                                                    videoId = videoId,
+                                                    context = context,
+                                                    subtitleList = subtitleList,
+                                                    completionCallback = {
+                                                        subtitleList.clear()
+                                                        deferred.complete(Unit)
+                                                    }
+                                                )
+                                                deferred.await()
+                                            }
                                             deferred = CompletableDeferred<Unit>()
                                             filterVideo(
                                                 videoId = videoId,
@@ -205,6 +228,7 @@ fun VideoEditorScreen(
                                                 }
                                             )
                                             deferred.await()
+
                                             val sourceFile = File(context.filesDir, "videos/$videoId/thumbnail.jpg")
                                             val destinationFile = File(context.filesDir, "output/$videoId/thumbnail.jpg")
                                             if (sourceFile.exists()) {
@@ -276,13 +300,14 @@ fun VideoEditorScreen(
                     }
                 }
                 else if (shouldRenderContent == R.drawable.text_icon) {
-                    // Render your content here based on the condition
-                    Text(
-                        text = "text",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    showPopup(0f..videoDuration*1000, startCropTime..endCropTime, subtitleList,
+                    onConfirm = {
+                           newSubtitleList ->
+                        subtitleList = newSubtitleList
+                        shouldRenderContent = -1
+                        subtitleList.forEach{item -> println("SUBTITLE ITEM $item")}
+                    })
+
                 }
                 else if (shouldRenderContent == R.drawable.music_note_icon) {
                     var value by remember { mutableStateOf(audioVolume) }
@@ -567,7 +592,7 @@ fun SliderComponent(
     }
 }
 
-private fun calculateTimestamp(context: Context, values: ClosedFloatingPointRange<Float>): String {
+fun calculateTimestamp(values: ClosedFloatingPointRange<Float>): String {
     val startPosition = values.start.toInt()
     val endPosition = values.endInclusive.toInt()
     return getString(context, R.string.start) + " ${startPosition/1000F} s, " + getString(context, R.string.end) + " ${endPosition/1000F} s"
@@ -688,6 +713,75 @@ fun processAudio(context: Context, videoId: String, completionCallback: () -> Un
     EpEditor.music(fileDir.toString(), fileDir.toString(), outFile.toString(), audioVolume/100f, 0.0F, editorListener)
 }
 
+
+fun processSubtitles(context: Context, videoId: String, subtitleList: MutableList<PlayerSubtitles>,
+                     completionCallback: () -> Unit) {
+
+    val fileDir = File(context.filesDir, "output/$videoId/output-audio.mp4")
+
+    // Output file
+    val outFile = File(context.filesDir, "output/$videoId/output-subtitles.mp4")
+    val outputOption = EpEditor.OutputOption(outFile.toString())
+    outputOption.frameRate = 30
+    outputOption.bitRate = 10
+
+    val editorListener = object : OnEditorListener {
+        override fun onSuccess() {
+            // Implement your logic when the operation is successful
+            Log.d("youtube init", "Finished")
+            completionCallback()
+        }
+
+        override fun onFailure() {
+            // Implement your logic when the operation fails
+            Log.d("youtube init", "Failed")
+        }
+
+        override fun onProgress(progress: Float) {
+            // Implement your logic to track the progress of the operation
+            Log.d("youtube init", "Progress: $progress")
+        }
+    }
+    // Get dimension of video (not the player)
+    val dimensions = getVideoDimensions(fileDir.toString())
+    if (dimensions != null) {
+
+        // Extract the width and height to determine relative positions
+        val (width, height) = dimensions
+        println("Video Dimensions: $width x $height")
+
+
+        // Determine if there are subtitles
+        println("ADDING THE FOLLOWING SUBTITLES:")
+
+        // Create command
+        val cmd = CmdList()
+        val ffmpegCmd = "ffmpeg"
+
+        cmd.append(ffmpegCmd).append("-i").append(fileDir.toString()).append("-vf")
+        var textFilter = "[in]"
+
+        // If there are multiple subtitles...
+        subtitleList.forEachIndexed { index, item ->
+            when (item.selectedPosition) {
+                "Top" -> textFilter += ("drawtext=fontfile='/system/fonts/Roboto-Regular.ttf':text='${item.userInput}':fontcolor=white:fontsize=${item.selectedFontSize}:box=1:boxcolor=black@0.5:boxborderw=5:x=($width-text_w)/2:y=10:enable='between(t,${item.startCropTime / 1000},${item.endCropTime / 1000})'")
+                "Middle" -> textFilter += ("drawtext=fontfile='/system/fonts/Roboto-Regular.ttf':text='${item.userInput}':fontcolor=white:fontsize=${item.selectedFontSize}:box=1:boxcolor=black@0.5:boxborderw=5:x=($width-text_w)/2:y=($height-text_h)/2:enable='between(t,${item.startCropTime / 1000},${item.endCropTime / 1000})'")
+                "Bottom" -> textFilter += ("drawtext=fontfile='/system/fonts/Roboto-Regular.ttf':text='${item.userInput}':fontcolor=white:fontsize=${item.selectedFontSize}:box=1:boxcolor=black@0.5:boxborderw=5:x=($width-text_w)/2:y=$height-th-10:enable='between(t,${item.startCropTime / 1000},${item.endCropTime / 1000})'")
+            }
+            if (index != subtitleList.size - 1) {
+                textFilter += ","
+            }
+            println("Subtitle: $item")
+        }
+        cmd.append("$textFilter[out]")
+        println("Subtitle: $textFilter")
+        cmd.append("-codec:a").append("copy").append("-y").append(outFile.toString())
+
+        execCmd(cmd, VideoUitls.getDuration(fileDir.toString()), editorListener)
+
+    }
+}
+
 @Composable
 fun BottomBarButton(
     iconResId: Int,
@@ -721,6 +815,14 @@ fun VideoPlayer(videoPath : String) {
     Log.d("video to see ", videoPath)
     val context = LocalContext.current
     val player = SimpleExoPlayer.Builder(context).build()
+
+
+    // Load the custom font from the "res/font" directory
+    val s = R.font.arialn.absoluteValue
+    val x = R.font.arialn
+    val customTypeface: Typeface? = ResourcesCompat.getFont(context, R.font.arialn)
+
+
     playerView = PlayerView(context)
     val mediaItem = MediaItem.fromUri(videoPath)
     val playWhenReady by rememberSaveable {
@@ -778,3 +880,48 @@ fun VideoPlayer(videoPath : String) {
         )
     }
 }
+
+private fun execCmd(cmd: CmdList, duration: Long, onEditorListener: OnEditorListener) {
+    val cmds = cmd.toTypedArray()
+    var cmdLog = ""
+    for (ss in cmds) {
+        cmdLog += cmds
+    }
+    Log.v("EpMediaF", "cmd:$cmdLog")
+
+    FFmpegCmd.exec(cmds, duration, object : OnEditorListener {
+        override fun onSuccess() {
+            onEditorListener.onSuccess()
+        }
+
+        override fun onFailure() {
+            onEditorListener.onFailure()
+        }
+
+        override fun onProgress(progress: Float) {
+            onEditorListener.onProgress(progress)
+        }
+    })
+}
+fun getVideoDimensions(videoPath: String): Pair<Int, Int>? {
+    return try {
+        val retriever = MediaMetadataRetriever()
+        retriever.setDataSource(videoPath)
+
+        val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull()
+        val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull()
+
+        retriever.release()
+
+        if (width != null && height != null && width > 0 && height > 0) {
+            Pair(width, height)
+        } else {
+            null
+        }
+    } catch (e: Exception) {
+        null
+    }
+}
+
+data class PlayerSubtitles(val userInput: String, val selectedPosition: String, val selectedFontSize: Int,
+                           val startCropTime: Float, val endCropTime: Float )
