@@ -236,7 +236,7 @@ fun MyVideos(
                         Surface(
                             modifier = Modifier
                                 .weight(1f)
-                                .height(70.dp),
+                                .height(55.dp),
                             border = BorderStroke(width = 1.dp, color = colorPalette.ShortEaseRed),
                         ) {
                             Button(
@@ -266,7 +266,7 @@ fun MyVideos(
                         Surface(
                             modifier = Modifier
                                 .weight(1f)
-                                .height(70.dp),
+                                .height(55.dp),
                             border = BorderStroke(width = 1.dp, color = colorPalette.ShortEaseRed),
                         ) {
                             Button(
@@ -294,7 +294,7 @@ fun MyVideos(
                         Surface(
                             modifier = Modifier
                                 .weight(1f)
-                                .height(70.dp),
+                                .height(55.dp),
                             border = BorderStroke(width = 1.dp, color = colorPalette.ShortEaseRed),
                         ) {
                             Button(
