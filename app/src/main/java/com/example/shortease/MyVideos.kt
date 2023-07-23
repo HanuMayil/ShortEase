@@ -200,7 +200,7 @@ fun MyVideos(
                                     )
 
                                     // Language selection dropdown item
-                                    LanguagePicker(initialText = "Select Language")
+                                    LanguagePicker(initialText = getString(context, R.string.select_language))
                                 }
                             }
                         }

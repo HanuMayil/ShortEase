@@ -91,8 +91,6 @@ var endCropTime = 0f
 var audioVolume = 100f
 var subtitleList = mutableListOf<PlayerSubtitles>()
 var y = 0f
-var u = 0f
-var v = 0f
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -109,21 +107,9 @@ fun VideoEditorScreen(
     var finalVideoPath = "${context.filesDir}/videos/${videoId}/${folderContentNames.getOrNull(0)}"
     val coroutineScope = CoroutineScope(Dispatchers.Default)
 
-    fun YuvToRgb(y: Int, u: Int, v: Int): Color {
-        val yFloat = y.toFloat()
-        val uFloat = (u - 128).toFloat()
-        val vFloat = (v - 128).toFloat()
-
-        val r = yFloat + 1.13983f * vFloat
-        val g = yFloat - 0.39465f * uFloat - 0.58060f * vFloat
-        val b = yFloat + 2.03211f * uFloat
-
-        return Color(
-            red = r.coerceIn(0f, 255f) / 255f,
-            green = g.coerceIn(0f, 255f) / 255f,
-            blue = b.coerceIn(0f, 255f) / 255f,
-            alpha = 1f
-        )
+    fun YToRgb(y: Int): Color {
+        val invertedY = 255 - y
+        return Color(invertedY, invertedY, invertedY).copy(alpha = 0.8f)
     }
 
     DisposableEffect(Unit) {
@@ -194,7 +180,7 @@ fun VideoEditorScreen(
                                                 fileName = fileName,
                                                 completionCallback = {
                                                     deferred.complete(Unit)
-                                                 }
+                                                }
                                             )
                                             deferred.await()
                                             deferred = CompletableDeferred<Unit>()
@@ -300,12 +286,12 @@ fun VideoEditorScreen(
                 }
                 else if (shouldRenderContent == R.drawable.text_icon) {
                     showPopup(0f..videoDuration*1000, startCropTime..endCropTime, subtitleList,
-                    onConfirm = {
-                           newSubtitleList ->
-                        subtitleList = newSubtitleList
-                        shouldRenderContent = -1
-                        subtitleList.forEach{item -> println("SUBTITLE ITEM $item")}
-                    })
+                        onConfirm = {
+                                newSubtitleList ->
+                            subtitleList = newSubtitleList
+                            shouldRenderContent = -1
+                            subtitleList.forEach{item -> println("SUBTITLE ITEM $item")}
+                        })
 
                 }
                 else if (shouldRenderContent == R.drawable.music_note_icon) {
@@ -328,58 +314,24 @@ fun VideoEditorScreen(
                                 value = newValue
                                 audioVolume = newValue
                                 playerView.player?.setVolume(audioVolume/100)
-                        })
+                            })
                     }
-                }
-                else if (shouldRenderContent == R.drawable.effect_icon) {
-                    // Render your content here based on the condition
-                    Text(
-                        text = "effect",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
                 }
                 else if (shouldRenderContent == R.drawable.filter_icon) {
                     var sliderValue1 by remember { mutableStateOf(y) }
-                    var sliderValue2 by remember { mutableStateOf(u) }
-                    var sliderValue3 by remember { mutableStateOf(v) }
-
                     // Render your content here based on the condition
                     Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
-                            .verticalScroll(rememberScrollState())
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Row(modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween){
-                            Text(text = "Y", style = TextStyle(
-                                color = colorPalette.ShortEaseWhite,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.SansSerif,
-                                fontSize = 18.sp,
-                                textAlign = TextAlign.Center
-                            ), modifier = Modifier.weight(1f))
-                            Text(text = "U", style = TextStyle(
-                                color = colorPalette.ShortEaseWhite,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.SansSerif,
-                                fontSize = 18.sp,
-                                textAlign = TextAlign.Center
-                            ),  modifier = Modifier.weight(1f))
-                            Text(text = "V", style = TextStyle(
-                                color = colorPalette.ShortEaseWhite,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.SansSerif,
-                                fontSize = 18.sp,
-                                textAlign = TextAlign.Center
-                            ), modifier = Modifier.weight(1f))
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
+                        Text(
+                            text = stringResource(R.string.edit_filter),
+                            color = Color.White,
+                            fontSize = 20.sp,
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .align(Alignment.CenterHorizontally)
+                        )
+                        Column {
                             Slider(
                                 value = sliderValue1,
                                 onValueChange = { newValue ->
@@ -392,71 +344,15 @@ fun VideoEditorScreen(
                                     thumbColor = colorPalette.ShortEaseWhite,
                                     activeTrackColor = colorPalette.ShortEaseRed,
                                     inactiveTrackColor = colorPalette.ShortEaseRed.copy(alpha = 0.2f)
-                                ),
-                                modifier = Modifier.weight(1f)
+                                )
                             )
-                            Slider(
-                                value = sliderValue2,
-                                onValueChange = { newValue ->
-                                    sliderValue2 = newValue
-                                    u = newValue
-                                },
-                                valueRange = 0f..255f,
-                                steps = 255,
-                                colors = SliderDefaults.colors(
-                                    thumbColor = colorPalette.ShortEaseWhite,
-                                    activeTrackColor = colorPalette.ShortEaseRed,
-                                    inactiveTrackColor = colorPalette.ShortEaseRed.copy(alpha = 0.2f)
-                                ),
-                                modifier = Modifier.weight(1f)
-                            )
-                            Slider(
-                                value = sliderValue3,
-                                onValueChange = { newValue ->
-                                    sliderValue3 = newValue
-                                    v = newValue
-                                },
-                                valueRange = 0f..255f,
-                                steps = 255,
-                                colors = SliderDefaults.colors(
-                                    thumbColor = colorPalette.ShortEaseWhite,
-                                    activeTrackColor = colorPalette.ShortEaseRed,
-                                    inactiveTrackColor = colorPalette.ShortEaseRed.copy(alpha = 0.2f)
-                                ),
-                                modifier = Modifier.weight(1f)
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.CenterHorizontally)
+                                    .size(20.dp)
+                                    .background(YToRgb(sliderValue1.toInt()))
                             )
                         }
-                        Row(modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween){
-                            Text(text = "$sliderValue1", style = TextStyle(
-                                color = colorPalette.ShortEaseWhite,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.SansSerif,
-                                fontSize = 18.sp,
-                                textAlign = TextAlign.Center
-                            ), modifier = Modifier.weight(1f))
-                            Text(text = "$sliderValue2", style = TextStyle(
-                                color = colorPalette.ShortEaseWhite,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.SansSerif,
-                                fontSize = 18.sp,
-                                textAlign = TextAlign.Center
-                            ),  modifier = Modifier.weight(1f))
-                            Text(text = "$sliderValue3", style = TextStyle(
-                                color = colorPalette.ShortEaseWhite,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.SansSerif,
-                                fontSize = 18.sp,
-                                textAlign = TextAlign.Center
-                            ), modifier = Modifier.weight(1f))
-                        }
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .padding(5.dp)
-                                .size(20.dp)
-                                .background(YuvToRgb(sliderValue1.toInt(), sliderValue2.toInt(), sliderValue3.toInt()))
-                        )
                     }
                 }
             }
@@ -488,12 +384,6 @@ fun VideoEditorScreen(
                     BottomBarButton(
                         iconResId = R.drawable.music_note_icon,
                         contentDescription = "Music",
-                        selected = true // Optional: Specify if the icon is selected or not
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    BottomBarButton(
-                        iconResId = R.drawable.effect_icon,
-                        contentDescription = "Effects",
                         selected = true // Optional: Specify if the icon is selected or not
                     )
                     Spacer(modifier = Modifier.width(16.dp))
@@ -669,7 +559,7 @@ private fun filterVideo(context: Context, videoId: String, fileName: String,  co
         }
     }
 
-    epVideo.addFilter("lutyuv=y='val-${y.toInt()}':u='val-${u.toInt()}':v='val-${v.toInt()}'")
+    epVideo.addFilter("lutyuv=y='val-${y.toInt()}':u='val-0':v='val-0'")
     EpEditor.exec(epVideo, outputOption, editorListener)
 }
 
@@ -678,14 +568,11 @@ fun resetVariables() {
     endCropTime = 0f
     audioVolume = 100f
     y = 0f
-    u = 0f
-    v = 0f
     subtitleList.clear()
 }
 
 fun processAudio(context: Context, videoId: String, completionCallback: () -> Unit) {
     val fileDir = File(context.filesDir, "output/$videoId/output-cropped.mp4")
-    var videoDir = File(context.filesDir, "videos/${videoId}")
 
     val epVideo: EpVideo = EpVideo("${fileDir.toString()}")
     Log.d("youtube init", "name" + epVideo)
@@ -710,7 +597,6 @@ fun processAudio(context: Context, videoId: String, completionCallback: () -> Un
         }
     }
 
-    Log.d("youtube init", "HERE")
     Log.d("audio volume", "${audioVolume/100f}")
     EpEditor.music(fileDir.toString(), fileDir.toString(), outFile.toString(), audioVolume/100f, 0.0F, editorListener)
 }
@@ -762,13 +648,12 @@ fun processSubtitles(context: Context, videoId: String, subtitleList: MutableLis
 
         cmd.append(ffmpegCmd).append("-i").append(fileDir.toString()).append("-vf")
         var textFilter = "[in]"
-
         // If there are multiple subtitles...
         subtitleList.forEachIndexed { index, item ->
             when (item.selectedPosition) {
-                "Top" -> textFilter += ("drawtext=fontfile='/system/fonts/Roboto-Regular.ttf':text='${item.userInput}':fontcolor=white:fontsize=${item.selectedFontSize}:box=1:boxcolor=black@0.5:boxborderw=5:x=($width-text_w)/2:y=10:enable='between(t,${item.startCropTime / 1000},${item.endCropTime / 1000})'")
-                "Middle" -> textFilter += ("drawtext=fontfile='/system/fonts/Roboto-Regular.ttf':text='${item.userInput}':fontcolor=white:fontsize=${item.selectedFontSize}:box=1:boxcolor=black@0.5:boxborderw=5:x=($width-text_w)/2:y=($height-text_h)/2:enable='between(t,${item.startCropTime / 1000},${item.endCropTime / 1000})'")
-                "Bottom" -> textFilter += ("drawtext=fontfile='/system/fonts/Roboto-Regular.ttf':text='${item.userInput}':fontcolor=white:fontsize=${item.selectedFontSize}:box=1:boxcolor=black@0.5:boxborderw=5:x=($width-text_w)/2:y=$height-th-10:enable='between(t,${item.startCropTime / 1000},${item.endCropTime / 1000})'")
+                getString(context, R.string.top) -> textFilter += ("drawtext=fontfile='/system/fonts/Roboto-Regular.ttf':text='${item.userInput}':fontcolor=white:fontsize=${item.selectedFontSize}:box=1:boxcolor=black@0.5:boxborderw=5:x=($width-text_w)/2:y=10:enable='between(t,${item.startCropTime / 1000},${item.endCropTime / 1000})'")
+                getString(context, R.string.middle) -> textFilter += ("drawtext=fontfile='/system/fonts/Roboto-Regular.ttf':text='${item.userInput}':fontcolor=white:fontsize=${item.selectedFontSize}:box=1:boxcolor=black@0.5:boxborderw=5:x=($width-text_w)/2:y=($height-text_h)/2:enable='between(t,${item.startCropTime / 1000},${item.endCropTime / 1000})'")
+                getString(context, R.string.bottom) -> textFilter += ("drawtext=fontfile='/system/fonts/Roboto-Regular.ttf':text='${item.userInput}':fontcolor=white:fontsize=${item.selectedFontSize}:box=1:boxcolor=black@0.5:boxborderw=5:x=($width-text_w)/2:y=$height-th-10:enable='between(t,${item.startCropTime / 1000},${item.endCropTime / 1000})'")
             }
             if (index != subtitleList.size - 1) {
                 textFilter += ","
@@ -794,7 +679,7 @@ fun BottomBarButton(
         painter = painterResource(iconResId),
         contentDescription = contentDescription,
         modifier = Modifier
-            .size(50.dp)
+            .size(45.dp)
             .padding(vertical = 4.dp)
             .clickable {
                 shouldRenderContent = iconResId
@@ -856,8 +741,8 @@ fun VideoPlayer(videoPath : String) {
         player.playWhenReady = playWhenReady
         while (true) {
             if (endCropTime > 0f && (player.currentPosition.toFloat() > endCropTime)) {
-                    player.pause()
-                    player.seekTo(startCropTime.toLong())
+                player.pause()
+                player.seekTo(startCropTime.toLong())
             }
             else if(player.currentPosition.toFloat() < startCropTime) {
                 player.seekTo(startCropTime.toLong())

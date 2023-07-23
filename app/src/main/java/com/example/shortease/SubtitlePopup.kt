@@ -24,7 +24,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import com.example.shortease.PlayerSubtitles
+import com.example.shortease.R
 import com.example.shortease.calculateTimestamp
 import com.example.shortease.playerView
 import com.example.shortease.ui.theme.colorPalette
@@ -44,7 +46,16 @@ fun showPopup(
     var isSubtitlesListDialogVisible by remember { mutableStateOf(false) }
     var userInputEmpty by remember { mutableStateOf(true) }
     val fontSizes = arrayOf(20,25,30,35,40)
-    val position = arrayOf("Top", "Middle", "Bottom")
+    val position = arrayOf(ContextCompat.getString(
+        context,
+        R.string.top
+    ), ContextCompat.getString(
+        context,
+        R.string.middle
+    ), ContextCompat.getString(
+        context,
+        R.string.bottom
+    ))
     var selectedPosition by remember { mutableStateOf(position[0]) }
     var selectedFontSize by remember { mutableStateOf(fontSizes[0]) }
     var values by remember { mutableStateOf(values) }
@@ -56,7 +67,11 @@ fun showPopup(
     if (isPopupOpen) {
         AlertDialog(
             onDismissRequest = { isPopupOpen = false },
-            title = { Text(text = if (isSubtitlesListDialogVisible) "Current Subtitles" else "Create Subtitle") },
+            title = { Text(text = if (isSubtitlesListDialogVisible) ContextCompat.getString(
+                context,
+                R.string.subtitle_current
+            ) else ContextCompat.getString(context, R.string.subtitle_create))
+            },
             confirmButton = {
                 if(!isSubtitlesListDialogVisible) {
                     Button(
@@ -66,7 +81,7 @@ fun showPopup(
                         },
                         colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
                     ) {
-                        Text("Confirm")
+                        Text(ContextCompat.getString(context, R.string.confirm))
                     }
                 }
             },
@@ -78,7 +93,7 @@ fun showPopup(
                         },
                         colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
                     ) {
-                        Text("Current Subtitles")
+                        Text(ContextCompat.getString(context, R.string.subtitle_current))
                     }
                 } else {
                         Button(
@@ -87,7 +102,7 @@ fun showPopup(
                             },
                             colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
                         ) {
-                            Text("Back")
+                            Text(ContextCompat.getString(context, R.string.back))
                         }
                     }
             },
@@ -95,7 +110,7 @@ fun showPopup(
                     Column(modifier = Modifier.padding(16.dp)
                     ) {
                         if(!isSubtitlesListDialogVisible) {
-                            Text("Please enter your text:")
+                            Text(ContextCompat.getString(context, R.string.subtitle_enter_text))
                             Spacer(modifier = Modifier.height(8.dp))
                             TextField(
                                 value = userInput,
@@ -107,7 +122,7 @@ fun showPopup(
                                 )
                             )
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text("Position")
+                            Text(ContextCompat.getString(context, R.string.subtitle_position))
                             ExposedDropdownMenuBox(
                                 expanded = expandedPosition,
                                 onExpandedChange = {
@@ -147,7 +162,7 @@ fun showPopup(
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text("Font Size")
+                            Text(ContextCompat.getString(context, R.string.subtitle_font_size))
                             ExposedDropdownMenuBox(
                                 expanded = expandedFont,
                                 onExpandedChange = {
@@ -197,7 +212,7 @@ fun showPopup(
                                 Button(
                                     onClick = {
                                         if (userInputEmpty) {
-                                            Toast.makeText(context, "Please enter text before adding",Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, ContextCompat.getString(context, R.string.subtitle_enter_text_error),Toast.LENGTH_SHORT).show()
                                         } else {
                                             // Your add subtitle logic here
                                             val newSubtitle = PlayerSubtitles(
@@ -209,14 +224,14 @@ fun showPopup(
                                             )
 
                                             currentSubtitles.add(newSubtitle)
-                                            Toast.makeText(context, "Successfully Added Subtitle", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, ContextCompat.getString(context, R.string.subtitle_added), Toast.LENGTH_SHORT).show()
                                             userInput = "" // Clear the user input after adding the subtitle
                                         }
                                     },
                                     colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed),
                                     modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
                                 ) {
-                                    Text("Add Subtitle")
+                                    Text(ContextCompat.getString(context, R.string.subtitle_add))
                                 }
                         }
                         if (isSubtitlesListDialogVisible) {
@@ -224,7 +239,7 @@ fun showPopup(
                                 currentSubtitles = currentSubtitles,
                                 onSubtitleRemoved = { index ->
                                     currentSubtitles.removeAt(index)
-                                    Toast.makeText(context, "Successfully Removed Subtitle", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, ContextCompat.getString(context, R.string.subtitle_removed), Toast.LENGTH_SHORT).show()
                                     isSubtitlesListDialogVisible = false
                                 }
                             )
@@ -242,7 +257,10 @@ fun SubtitlesListPage(
 ) {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         if (currentSubtitles.isEmpty()) {
-            Text("No subtitles found.")
+            Text(ContextCompat.getString(
+                LocalContext.current,
+                R.string.subtitle_none
+            ))
         } else {
             currentSubtitles.forEachIndexed { index, subtitle ->
                 Row(
