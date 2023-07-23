@@ -212,7 +212,6 @@ fun VideoEditorScreen(
                                                     context = context,
                                                     subtitleList = subtitleList,
                                                     completionCallback = {
-                                                        subtitleList.clear()
                                                         deferred.complete(Unit)
                                                     }
                                                 )
@@ -639,8 +638,10 @@ private fun cropVideo(context: Context, videoId: String, fileName: String,  comp
     }
 }
 private fun filterVideo(context: Context, videoId: String, fileName: String,  completionCallback: () -> Unit) {
-    val fileDir = File(context.filesDir, "output/$videoId/output-subtitles.mp4")
-    var videoDir = File(context.filesDir, "videos/${videoId}")
+    var fileDir = File(context.filesDir, "output/$videoId/output-subtitles.mp4")
+    if (subtitleList.isEmpty()) {
+        fileDir = File(context.filesDir, "output/$videoId/output-audio.mp4")
+    }
 
     val epVideo: EpVideo = EpVideo("${fileDir.toString()}")
     Log.d("youtube init", "name" + epVideo)
@@ -679,6 +680,7 @@ fun resetVariables() {
     y = 0f
     u = 0f
     v = 0f
+    subtitleList.clear()
 }
 
 fun processAudio(context: Context, videoId: String, completionCallback: () -> Unit) {
