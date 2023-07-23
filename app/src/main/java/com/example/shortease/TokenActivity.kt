@@ -71,6 +71,10 @@ class TokenActivity : AppCompatActivity() {
             if(resultData == "") {
                 refreshAccessToken()
                 resultData = getAccessToken()
+                if(resultData == "") {
+                    setResult(RC_REAUTH)
+                    finish()
+                }
             }
             val resultIntent = Intent().apply {
                 putExtra("resultKey", resultData)

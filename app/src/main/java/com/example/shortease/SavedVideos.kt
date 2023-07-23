@@ -1,5 +1,6 @@
 package com.example.shortease
 
+import VideoUploadTask
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -42,10 +42,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -53,15 +51,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.shortease.ui.theme.ShortEaseTheme
 import com.example.shortease.ui.theme.colorPalette
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.google.api.client.http.FileContent
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.gson.GsonFactory
+import com.google.api.services.youtube.YouTube
+import showUploadPopup
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -272,6 +271,35 @@ fun VideoItem(video: File) {
     Log.d("youtube init","Video ID: ${videoId}")
     var thumbnail_pic = File(context.filesDir, "videos/${videoId}/thumbnail.jpg");
     val showDialog = remember { mutableStateOf(false) }
+    val videoPath =  remember { mutableStateOf<FileContent?>(null) }
+    val videoTitle =  remember { mutableStateOf("") }
+    val videoDescription  = remember { mutableStateOf("") }
+    val videoTags =  remember { mutableStateOf(emptyList<String>()) }
+    val showPopup = remember { mutableStateOf(false) }
+
+    if (showPopup.value) {
+        showUploadPopup(onConfirm = { title, description, tags ->
+            // Update the state variables with the data from the popup
+            videoTitle.value = title
+            videoDescription.value = description
+            videoTags.value = tags
+
+            // Close the popup
+            showPopup.value = false
+
+            // Video Metadata
+            val httpTransport = NetHttpTransport()
+            val jsonFactory = GsonFactory()
+
+            val youtube = YouTube
+                .Builder(httpTransport, jsonFactory, null)
+                .setApplicationName("YourAppName")
+                .build()
+            val videoUploadTask = VideoUploadTask(youtube, videoTitle.value, videoDescription.value, videoTags.value, videoPath.value)
+            videoUploadTask.execute()
+            Toast.makeText(context, "Video successfully uploaded.", Toast.LENGTH_SHORT).show()
+        })
+    }
 
     // Show confirmation dialog
     if (showDialog.value) {
@@ -304,8 +332,8 @@ fun VideoItem(video: File) {
         Log.d("youtube init","thumbail_pic: ${thumbnail_pic}")
         Column(
             modifier = Modifier
-            .padding(vertical = 8.dp)
-            .fillMaxWidth()
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
         ) {
             Image(
                 painter = rememberImagePainter(thumbnail_pic),
@@ -335,7 +363,8 @@ fun VideoItem(video: File) {
                         painter = painterResource(R.drawable.trashcan),
                         contentDescription = "Delete Icon",
                         colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier
+                            .size(24.dp)
                             .align(Alignment.CenterVertically)
                             .clickable {
                                 showDialog.value = true
@@ -346,7 +375,13 @@ fun VideoItem(video: File) {
                         painter = painterResource(R.drawable.edit),
                         contentDescription = "Download Icon",
                         colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
-                        modifier = Modifier.size(20.dp).align(Alignment.CenterVertically)
+                        modifier = Modifier
+                            .size(20.dp)
+                            .align(Alignment.CenterVertically)
+                            .clickable {
+                                videoPath.value = FileContent("video/*", video)
+                                showPopup.value = true
+                            }
                     )
                 }
             }
@@ -355,6 +390,7 @@ fun VideoItem(video: File) {
         Divider(color = colorPalette.ShortEaseRed, thickness = 1.dp)
     }
 }
+
 
 @Composable
 @Preview
