@@ -46,5 +46,6 @@
 | 07/18/2023 |      | 4       | 2     |          |          |       | Add Logic For Subtitles                              |
 | 07/19/2023 |      | 12      | 3     |          |          |       | Add Logic For Subtitles                              |
 | 07/19/2023 | 5    |         |       |          |          |       | Refactor MyVideos and Saved Videos Page              |
+| 07/20/2023 |      | 6       |       |          |          |       | Finish implementation of subtitles                   |
 | 07/21/2023 |      |         |       |          |          | 3     | Added webscraper function to get most watched        |
 | 07/22/2023 |      |         |       |          |7         | 8     | Added filters section to app                         |
