@@ -72,7 +72,7 @@ fun PreviewScreen(
     val folder = File(videoPath)
     val folderContents = folder.listFiles()
     val folderContentNames = folderContents?.map { file -> file.name } ?: emptyList()
-    var finalVideoPath = "${context.filesDir}/videos/${videoId}/${folderContentNames.getOrNull(0)}"
+    var finalVideoPath = "${context.filesDir}/output/${videoId}/output-filter.mp4"
     val coroutineScope = CoroutineScope(Dispatchers.Default)
 
     Column(modifier = Modifier.fillMaxSize()) {
