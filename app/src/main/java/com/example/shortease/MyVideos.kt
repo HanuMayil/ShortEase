@@ -3,6 +3,9 @@ package com.example.shortease
 import android.util.Log
 import android.widget.Toast
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
+import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -75,6 +78,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat.getString
 import coil.annotation.ExperimentalCoilApi
 import com.example.shortease.R
 import com.example.shortease.Screen
@@ -139,13 +144,13 @@ fun MyVideos(
                         ),
                         title = {
                             Text(
-                                text = "My Videos",
+                                text = stringResource(R.string.my_videos_header),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth(),
                                 style = TextStyle(
                                     fontWeight = FontWeight.Bold,
                                     fontFamily = FontFamily.SansSerif,
-                                    fontSize = 32.sp
+                                    fontSize = 24.sp
                                 )
                             )
                         },
@@ -153,7 +158,9 @@ fun MyVideos(
                             Image(
                                 painter = painterResource(R.drawable.search),
                                 contentDescription = "Search Icon",
-                                Modifier.padding(start = 10.dp).size(30.dp)
+                                Modifier
+                                    .padding(start = 10.dp)
+                                    .size(30.dp)
                             )
                         },
                         actions = {
@@ -167,24 +174,33 @@ fun MyVideos(
                                     Image(
                                         painter = rememberImagePainter(channelIconUrl.value),
                                         contentDescription = "Channel Icon",
-                                        modifier = Modifier.size(36.dp).clip(CircleShape)
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .clip(CircleShape)
                                     )
                                 }
                                 DropdownMenu(
                                     expanded = expanded,
                                     onDismissRequest = { expanded = false },
                                     modifier = Modifier.background(color = colorPalette.ShortEaseWhite)
-
                                 ) {
                                     DropdownMenuItem(
-                                        text = { Text("Sign Out", textAlign = TextAlign.Center,
-                                            style = TextStyle(color = colorPalette.ShortEaseRed, fontSize = 14.sp),
-                                            modifier = Modifier.padding(horizontal = 20.dp))},
+                                        text = {
+                                            Text(
+                                                text = stringResource(R.string.sign_out_button),
+                                                textAlign = TextAlign.Center,
+                                                style = TextStyle(color = colorPalette.ShortEaseRed, fontSize = 14.sp),
+                                                modifier = Modifier.padding(horizontal = 20.dp)
+                                            )
+                                        },
                                         onClick = {
                                             navController.navigate(route = Screen.HomeScreen.route)
                                             signOutClicked()
                                         }
                                     )
+
+                                    // Language selection dropdown item
+                                    LanguagePicker(initialText = "Select Language")
                                 }
                             }
                         }
@@ -241,7 +257,6 @@ fun MyVideos(
                                             videoDirExists.value = videoDir.exists()
 
                                             if(videoDirExists.value) {
-                                                Log.d("youtube init", videoDir.toString())
                                                 finishedDownload.value = File(videoDir, "thumbnail.jpg").exists()
                                                 if(finishedDownload.value) {
                                                     Image(
@@ -262,18 +277,29 @@ fun MyVideos(
                                                 }
                                             }
                                             else {
+                                                val savedVideosHeaderText = stringResource(R.string.download_failed)
                                                 Image(
                                                     painter = painterResource(R.drawable.download_icon),
                                                     contentDescription = "Download Icon",
                                                     colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
-                                                    modifier = Modifier.clickable {
-                                                        if (videoId.value != "") {
-                                                            formats.value = youtubeDownloader.requestVideoDetail(videoId.value)
-                                                            isPopupOpen.value = true
-                                                        } else {
-                                                            Toast.makeText(context, "Cannot download this video", Toast.LENGTH_SHORT).show()
+                                                    modifier = Modifier
+                                                        .clickable {
+                                                            if (videoId.value != "") {
+                                                                formats.value =
+                                                                    youtubeDownloader.requestVideoDetail(
+                                                                        videoId.value
+                                                                    )
+                                                                isPopupOpen.value = true
+                                                            } else {
+                                                                Toast
+                                                                    .makeText(
+                                                                        context,
+                                                                        savedVideosHeaderText,
+                                                                        Toast.LENGTH_SHORT
+                                                                    )
+                                                                    .show()
+                                                            }
                                                         }
-                                                    }
                                                         .size(24.dp)
                                                 )
                                             }
@@ -282,7 +308,7 @@ fun MyVideos(
                                         if (isPopupOpen.value) {
                                             AlertDialog(
                                                 onDismissRequest = { isPopupOpen.value = false },
-                                                title = { Text(text = "Select Format") },
+                                                title = { Text(text = stringResource(R.string.select_format)) },
                                                 confirmButton = {},
                                                 text = {
                                                     Column {
@@ -442,4 +468,85 @@ private fun MyVideosPreview() {
         navController = rememberNavController(),
         signOutClicked = {  }
     )
+}
+
+@Composable
+fun LanguagePicker(
+    initialText: String
+) {
+    var showLanguages by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    // Language options in the second dropdown
+    val languages = listOf(
+        "en" to getString(context, R.string.english),
+        "ar" to getString(context, R.string.arabic),
+        "es" to getString(context, R.string.spanish),
+        "fr" to getString(context, R.string.french),
+        "hi" to getString(context, R.string.hindi),
+        "ta" to getString(context, R.string.tamil),
+        "vi" to getString(context, R.string.vietnamese),
+        "zh" to getString(context, R.string.mandarin),
+    )
+
+    // Function to handle language selection
+    fun handleLanguageSelection(languageCode: String) {
+        setLocale(context, languageCode)
+        showLanguages = false
+    }
+
+    Box {
+        // Set Languages button
+        DropdownMenuItem(
+            onClick = { showLanguages = !showLanguages },
+            text = {
+                Text(
+                    text = initialText,
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(color = colorPalette.ShortEaseRed, fontSize = 14.sp),
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+            }
+        )
+
+        // Second dropdown with language options
+        if (showLanguages) {
+            Column {
+                DropdownMenu(
+                    expanded = true,
+                    onDismissRequest = { showLanguages = false },
+                    modifier = Modifier.background(color = colorPalette.ShortEaseWhite)
+                ) {
+                    languages.forEach { (languageCode, languageName) ->
+                        DropdownMenuItem(
+                            onClick = { handleLanguageSelection(languageCode) },
+                            text = {
+                                Text(
+                                    text = languageName,
+                                    textAlign = TextAlign.Center,
+                                    style = TextStyle(color = colorPalette.ShortEaseRed, fontSize = 14.sp),
+                                    modifier = Modifier.padding(horizontal = 20.dp)
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+fun setLocale(context: Context, languageCode: String) {
+    val locale = Locale(languageCode)
+    Locale.setDefault(locale)
+
+    val config = Configuration(context.resources.configuration)
+    config.setLocale(locale)
+
+    context.resources.updateConfiguration(config, context.resources.displayMetrics)
+
+    // Restart the activity to apply the new configuration
+    if (context is Activity) {
+        context.recreate()
+    }
 }

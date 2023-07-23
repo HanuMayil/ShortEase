@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">ShortEase</string>
+    <string name="web_client_id">738134261328-sfth69n6us8muiltpb3gl4k49sdltkpv.apps.googleusercontent.com</string>
+    <string name="sign_in_button">Google से लॉग इन करें</string>
+    <string name="my_videos_header">मेरे वीडियो</string>
+    <string name="saved_videos_header">सहेजे गए वीडियो</string>
+    <string name="video_editor_header">संपादक</string>
+    <string name="generating">पूर्वावलोकन उत्पन्न कर रहा है...</string>
+    <string name="video_preview_header">पूर्वावलोकन</string>
+    <string name="sign_out_button">साइन आउट</string>
+    <string name="download_failed">इस वीडियो को डाउनलोड नहीं किया जा सकता</string>
+    <string name="select_format">स्वरूप चुनें</string>
+    <string name="edit_video">वीडियो संपादित करें?</string>
+    <string name="confirm">पुष्टि करें</string>
+    <string name="cancel">रद्द करें</string>
+    <string name="delete_video">वीडियो हटाएं?</string>
+    <string name="delete_video_prompt">क्या आप वाकई हटाना चाहते हैं:</string>
+    <string name="edit_crop">वीडियो काटें</string>
+    <string name="start">आरंभ:</string>
+    <string name="end">समाप्ति:</string>
+    <string name="edit_audio">ऑडियो संपादित करें</string>
+    <string name="edit_audio_text">ऑडियो वॉल्यूम:</string>
+    <string name="english">अंग्रेज़ी</string>
+    <string name="arabic">अरबी</string>
+    <string name="spanish">स्पैनिश</string>
+    <string name="french">फ्रेंच</string>
+    <string name="hindi">हिंदी</string>
+    <string name="tamil">तमिल</string>
+    <string name="vietnamese">वियतनामी</string>
+    <string name="mandarin">मंदारिन</string>
+</resources>

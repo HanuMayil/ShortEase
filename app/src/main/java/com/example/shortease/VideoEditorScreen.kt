@@ -51,6 +51,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -60,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -76,6 +78,10 @@ import kotlinx.coroutines.launch
 import showPopup
 import java.io.File
 import kotlin.math.absoluteValue
+import android.graphics.ColorMatrix
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import java.text.DecimalFormat
 
 var shouldRenderContent by mutableStateOf(-1)
 var videoDuration = -1f
@@ -84,6 +90,10 @@ var startCropTime = 0f
 var endCropTime = 0f
 var audioVolume = 100f
 var subtitleList = mutableListOf<PlayerSubtitles>()
+var y = 0f
+var u = 0f
+var v = 0f
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoEditorScreen(
@@ -98,6 +108,24 @@ fun VideoEditorScreen(
     val folderContentNames = folderContents?.map { file -> file.name } ?: emptyList()
     var finalVideoPath = "${context.filesDir}/videos/${videoId}/${folderContentNames.getOrNull(0)}"
     val coroutineScope = CoroutineScope(Dispatchers.Default)
+
+    fun YuvToRgb(y: Int, u: Int, v: Int): Color {
+        val yFloat = y.toFloat()
+        val uFloat = (u - 128).toFloat()
+        val vFloat = (v - 128).toFloat()
+
+        val r = yFloat + 1.13983f * vFloat
+        val g = yFloat - 0.39465f * uFloat - 0.58060f * vFloat
+        val b = yFloat + 2.03211f * uFloat
+
+        return Color(
+            red = r.coerceIn(0f, 255f) / 255f,
+            green = g.coerceIn(0f, 255f) / 255f,
+            blue = b.coerceIn(0f, 255f) / 255f,
+            alpha = 1f
+        )
+    }
+
     DisposableEffect(Unit) {
         onDispose {
             shouldRenderContent = -1
@@ -122,13 +150,13 @@ fun VideoEditorScreen(
                     ),
                     title = {
                         Text(
-                            text = "Editor",
+                            text = stringResource(R.string.video_editor_header),
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth(),
                             style = TextStyle(
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.SansSerif,
-                                fontSize = 32.sp
+                                fontSize = 24.sp
                             )
                         )
                     },
@@ -190,7 +218,17 @@ fun VideoEditorScreen(
                                                 )
                                                 deferred.await()
                                             }
-//                                            deferred = CompletableDeferred<Unit>()
+                                            deferred = CompletableDeferred<Unit>()
+                                            filterVideo(
+                                                videoId = videoId,
+                                                context = context,
+                                                fileName = fileName,
+                                                completionCallback = {
+                                                    deferred.complete(Unit)
+                                                }
+                                            )
+                                            deferred.await()
+
                                             val sourceFile = File(context.filesDir, "videos/$videoId/thumbnail.jpg")
                                             val destinationFile = File(context.filesDir, "output/$videoId/thumbnail.jpg")
                                             if (sourceFile.exists()) {
@@ -243,7 +281,7 @@ fun VideoEditorScreen(
                             .fillMaxWidth()
                     ) {
                         Text(
-                            text = "Crop Video",
+                            text = stringResource(R.string.edit_crop),
                             color = Color.White,
                             fontSize = 20.sp,
                             modifier = Modifier
@@ -278,7 +316,7 @@ fun VideoEditorScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "Edit Music",
+                            text = stringResource(R.string.edit_audio),
                             color = Color.White,
                             fontSize = 20.sp,
                             modifier = Modifier
@@ -304,13 +342,123 @@ fun VideoEditorScreen(
                     )
                 }
                 else if (shouldRenderContent == R.drawable.filter_icon) {
+                    var sliderValue1 by remember { mutableStateOf(y) }
+                    var sliderValue2 by remember { mutableStateOf(u) }
+                    var sliderValue3 by remember { mutableStateOf(v) }
+
                     // Render your content here based on the condition
-                    Text(
-                        text = "filter",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        Row(modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween){
+                            Text(text = "Y", style = TextStyle(
+                                color = colorPalette.ShortEaseWhite,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.SansSerif,
+                                fontSize = 18.sp,
+                                textAlign = TextAlign.Center
+                            ), modifier = Modifier.weight(1f))
+                            Text(text = "U", style = TextStyle(
+                                color = colorPalette.ShortEaseWhite,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.SansSerif,
+                                fontSize = 18.sp,
+                                textAlign = TextAlign.Center
+                            ),  modifier = Modifier.weight(1f))
+                            Text(text = "V", style = TextStyle(
+                                color = colorPalette.ShortEaseWhite,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.SansSerif,
+                                fontSize = 18.sp,
+                                textAlign = TextAlign.Center
+                            ), modifier = Modifier.weight(1f))
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Slider(
+                                value = sliderValue1,
+                                onValueChange = { newValue ->
+                                    sliderValue1 = newValue
+                                    y = newValue
+                                },
+                                valueRange = 0f..255f,
+                                steps = 255,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = colorPalette.ShortEaseWhite,
+                                    activeTrackColor = colorPalette.ShortEaseRed,
+                                    inactiveTrackColor = colorPalette.ShortEaseRed.copy(alpha = 0.2f)
+                                ),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Slider(
+                                value = sliderValue2,
+                                onValueChange = { newValue ->
+                                    sliderValue2 = newValue
+                                    u = newValue
+                                },
+                                valueRange = 0f..255f,
+                                steps = 255,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = colorPalette.ShortEaseWhite,
+                                    activeTrackColor = colorPalette.ShortEaseRed,
+                                    inactiveTrackColor = colorPalette.ShortEaseRed.copy(alpha = 0.2f)
+                                ),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Slider(
+                                value = sliderValue3,
+                                onValueChange = { newValue ->
+                                    sliderValue3 = newValue
+                                    v = newValue
+                                },
+                                valueRange = 0f..255f,
+                                steps = 255,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = colorPalette.ShortEaseWhite,
+                                    activeTrackColor = colorPalette.ShortEaseRed,
+                                    inactiveTrackColor = colorPalette.ShortEaseRed.copy(alpha = 0.2f)
+                                ),
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween){
+                            Text(text = "$sliderValue1", style = TextStyle(
+                                color = colorPalette.ShortEaseWhite,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.SansSerif,
+                                fontSize = 18.sp,
+                                textAlign = TextAlign.Center
+                            ), modifier = Modifier.weight(1f))
+                            Text(text = "$sliderValue2", style = TextStyle(
+                                color = colorPalette.ShortEaseWhite,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.SansSerif,
+                                fontSize = 18.sp,
+                                textAlign = TextAlign.Center
+                            ),  modifier = Modifier.weight(1f))
+                            Text(text = "$sliderValue3", style = TextStyle(
+                                color = colorPalette.ShortEaseWhite,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.SansSerif,
+                                fontSize = 18.sp,
+                                textAlign = TextAlign.Center
+                            ), modifier = Modifier.weight(1f))
+                        }
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .padding(5.dp)
+                                .size(20.dp)
+                                .background(YuvToRgb(sliderValue1.toInt(), sliderValue2.toInt(), sliderValue3.toInt()))
+                        )
+                    }
                 }
             }
             Box(
@@ -374,6 +522,11 @@ fun VideoEditorScreen(
     }
 }
 
+fun roundToOneDecimalPoint(number: Float): String {
+    val df = DecimalFormat("#.#")
+    return df.format(number)
+}
+
 @ExperimentalMaterial3Api
 @Composable
 fun CropRangeSlider(
@@ -381,8 +534,9 @@ fun CropRangeSlider(
     values: ClosedFloatingPointRange<Float>,
     onRangeChanged: (ClosedFloatingPointRange<Float>) -> Unit
 ) {
+    val context = LocalContext.current
     val timestamp = remember(values) {
-        calculateTimestamp(values)
+        calculateTimestamp(context = context, values)
     }
     Column {
         RangeSlider(
@@ -412,7 +566,7 @@ fun CropRangeSlider(
 @Composable
 fun SliderComponent(
     value: Float,
-    onValueChange: (Float) -> Unit
+    onValueChange: (Float) -> Unit,
 ) {
     val formattedValue = remember(value) {
         formatSliderValue(value)
@@ -430,7 +584,7 @@ fun SliderComponent(
             ),
         )
         Text(
-            text = "Audio Volume: $formattedValue",
+            text = stringResource(R.string.edit_audio_text) + " $formattedValue",
             color = Color.White,
             fontSize = 16.sp,
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -438,19 +592,16 @@ fun SliderComponent(
     }
 }
 
-
-
 fun calculateTimestamp(values: ClosedFloatingPointRange<Float>): String {
     val startPosition = values.start.toInt()
     val endPosition = values.endInclusive.toInt()
-    return "Start: ${startPosition/1000F} s, End: ${endPosition/1000F} s"
+    return getString(context, R.string.start) + " ${startPosition/1000F} s, " + getString(context, R.string.end) + " ${endPosition/1000F} s"
 }
 
 private fun formatSliderValue(value: Float): String {
     val formattedValue = value.toInt()
     return formattedValue.toString()
 }
-
 
 private fun cropVideo(context: Context, videoId: String, fileName: String,  completionCallback: () -> Unit) {
     var fileDir = File(context.filesDir, "output/${videoId}")
@@ -487,11 +638,47 @@ private fun cropVideo(context: Context, videoId: String, fileName: String,  comp
         Log.e("Cropping", "Error occurred during video cropping: ${e.message}", e)
     }
 }
+private fun filterVideo(context: Context, videoId: String, fileName: String,  completionCallback: () -> Unit) {
+    val fileDir = File(context.filesDir, "output/$videoId/output-audio.mp4")
+    var videoDir = File(context.filesDir, "videos/${videoId}")
+
+    val epVideo: EpVideo = EpVideo("${fileDir.toString()}")
+    Log.d("youtube init", "name" + epVideo)
+
+    val outFile = File(context.filesDir, "output/$videoId/output-filter.mp4")
+    val outputOption = EpEditor.OutputOption(outFile.toString())
+    outputOption.frameRate = 30
+    outputOption.bitRate = 10
+
+    val editorListener = object : OnEditorListener {
+        override fun onSuccess() {
+            // Implement your logic when the operation is successful
+            Log.d("youtube init", "Finished")
+            completionCallback()
+        }
+
+        override fun onFailure() {
+            // Implement your logic when the operation fails
+            Log.d("youtube init", "Failed")
+        }
+
+        override fun onProgress(progress: Float) {
+            // Implement your logic to track the progress of the operation
+            Log.d("youtube init", "Progress: $progress")
+        }
+    }
+
+    epVideo.addFilter("lutyuv=y='val-${y.toInt()}':u='val-${u.toInt()}':v='val-${v.toInt()}'")
+    EpEditor.exec(epVideo, outputOption, editorListener)
+}
 
 fun resetVariables() {
     startCropTime = 0f
     endCropTime = 0f
     audioVolume = 100f
+    y = 0f
+    u = 0f
+    v = 0f
 }
 
 fun processAudio(context: Context, videoId: String, completionCallback: () -> Unit) {
@@ -525,6 +712,7 @@ fun processAudio(context: Context, videoId: String, completionCallback: () -> Un
     Log.d("audio volume", "${audioVolume/100f}")
     EpEditor.music(fileDir.toString(), fileDir.toString(), outFile.toString(), audioVolume/100f, 0.0F, editorListener)
 }
+
 
 fun processSubtitles(context: Context, videoId: String, subtitleList: MutableList<PlayerSubtitles>,
                      completionCallback: () -> Unit) {
@@ -642,6 +830,12 @@ fun VideoPlayer(videoPath : String) {
     }
     player.setMediaItem(mediaItem)
     playerView.player = player
+
+    val colorMatrix = ColorMatrix().apply {
+        // Example: Increase video brightness by 50%
+        setScale(10f, 10f, 10f, 1f)
+    }
+
     LaunchedEffect(player) {
         player.prepare()
         Log.d("video to see ", videoPath)
@@ -686,6 +880,7 @@ fun VideoPlayer(videoPath : String) {
         )
     }
 }
+
 private fun execCmd(cmd: CmdList, duration: Long, onEditorListener: OnEditorListener) {
     val cmds = cmd.toTypedArray()
     var cmdLog = ""
@@ -730,4 +925,3 @@ fun getVideoDimensions(videoPath: String): Pair<Int, Int>? {
 
 data class PlayerSubtitles(val userInput: String, val selectedPosition: String, val selectedFontSize: Int,
                            val startCropTime: Float, val endCropTime: Float )
-

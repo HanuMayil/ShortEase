@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">ShortEase</string>
+    <string name="web_client_id">738134261328-sfth69n6us8muiltpb3gl4k49sdltkpv.apps.googleusercontent.com</string>
+    <string name="sign_in_button">Đăng nhập bằng Google</string>
+    <string name="my_videos_header">Video Của Tôi</string>
+    <string name="saved_videos_header">Video Đã Lưu</string>
+    <string name="video_editor_header">Trình chỉnh sửa</string>
+    <string name="generating">Đang tạo xem trước...</string>
+    <string name="video_preview_header">Xem trước</string>
+    <string name="sign_out_button">Đăng xuất</string>
+    <string name="download_failed">Không thể tải xuống video này</string>
+    <string name="select_format">Chọn định dạng</string>
+    <string name="edit_video">Chỉnh sửa Video?</string>
+    <string name="confirm">Xác nhận</string>
+    <string name="cancel">Hủy</string>
+    <string name="delete_video">Xóa Video?</string>
+    <string name="delete_video_prompt">Bạn có chắc chắn muốn xóa:</string>
+    <string name="edit_crop">Cắt Video</string>
+    <string name="start">Bắt đầu:</string>
+    <string name="end">Kết thúc:</string>
+    <string name="edit_audio">Chỉnh sửa Âm thanh</string>
+    <string name="edit_audio_text">Âm lượng âm thanh:</string>
+    <string name="english">Tiếng Anh</string>
+    <string name="arabic">Tiếng Ả Rập</string>
+    <string name="spanish">Tiếng Tây Ban Nha</string>
+    <string name="french">Tiếng Pháp</string>
+    <string name="hindi">Tiếng Hindi</string>
+    <string name="tamil">Tiếng Tamil</string>
+    <string name="vietnamese">Tiếng Việt</string>
+    <string name="mandarin">Tiếng Quan Thoại</string>
+</resources>

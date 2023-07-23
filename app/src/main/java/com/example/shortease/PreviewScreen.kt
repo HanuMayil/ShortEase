@@ -1,4 +1,3 @@
-
 import android.widget.VideoView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -63,13 +63,13 @@ fun PreviewScreen(
                 ),
                 title = {
                     Text(
-                        text = "Preview",
+                        text = stringResource(R.string.video_preview_header),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
                         style = TextStyle(
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.SansSerif,
-                            fontSize = 32.sp
+                            fontSize = 24.sp
                         )
                     )
                 },
@@ -108,6 +108,7 @@ fun PreviewScreen(
                                 },
                                 modifier = Modifier.fillMaxSize()
                             ) { videoView ->
+                              
                                 // Get most recently added mp4
                                 val directory = File("${context.filesDir}/output/${videoId}/")
                                 val getMp4 = getMostRecentlyAddedMp4File(directory.toString())
