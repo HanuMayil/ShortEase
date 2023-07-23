@@ -55,6 +55,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.attribute.BasicFileAttributes
 
 var isPlaying = false
 @OptIn(ExperimentalMaterial3Api::class)
@@ -170,6 +173,27 @@ fun PreviewScreen(
         }
     }
 }
+
+fun getMostRecentlyAddedMp4File(directoryPath: String): File? {
+    val directory = File(directoryPath)
+    if (!directory.isDirectory) {
+        throw IllegalArgumentException("The provided path is not a directory.")
+    }
+
+    val mostRecentMp4File: Path? = Files.walk(directory.toPath())
+        .filter { Files.isRegularFile(it) && it.toString().endsWith(".mp4", ignoreCase = true) }
+        .max { file1, file2 -> compareFileCreationTime(file1, file2) }
+        .orElse(null)
+
+    return mostRecentMp4File?.toFile()
+}
+
+fun compareFileCreationTime(file1: Path, file2: Path): Int {
+    val basicAttrs1: BasicFileAttributes = Files.readAttributes(file1, BasicFileAttributes::class.java)
+    val basicAttrs2: BasicFileAttributes = Files.readAttributes(file2, BasicFileAttributes::class.java)
+    return basicAttrs1.creationTime().compareTo(basicAttrs2.creationTime())
+}
+
 
 @Composable
 @Preview
