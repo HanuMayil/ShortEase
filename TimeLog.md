@@ -51,4 +51,4 @@
 | 07/22/2023 |      |         |       |          |7         | 8     | Added filters section to app                         |
 | 07/22/2023 |      |         | 6     |          |7         | 8     | Bug fixes + progress on video uploading              |
 | 07/23/2023 |      |         |       |  5       |          |       | merge, clean up code, and finish editor              |
-
+| 07/23/2023 |      |         | 6     |          |          |       | merged to main, fixed bugs, finishing video upload   |
