@@ -92,7 +92,6 @@ dependencies {
 
     // Youtube DL
     implementation 'com.github.sealedtx:java-youtube-downloader:3.0.1'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:<version>'
 
     // Editor
     //implementation 'com.github.yangjie10930:EpMedia:v1.0.1'
