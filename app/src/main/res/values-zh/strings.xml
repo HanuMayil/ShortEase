@@ -4,6 +4,7 @@
     <string name="sign_in_button">用Google登录</string>
     <string name="my_videos_header">我的视频</string>
     <string name="saved_videos_header">已保存的视频</string>
+    <string name="publish_video_header">发布视频</string>
     <string name="video_editor_header">编辑器</string>
     <string name="generating">正在生成预览...</string>
     <string name="video_preview_header">预览</string>

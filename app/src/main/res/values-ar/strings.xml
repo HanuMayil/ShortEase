@@ -4,6 +4,7 @@
     <string name="sign_in_button">تسجيل الدخول مع Google</string>
     <string name="my_videos_header">فيديوهاتي</string>
     <string name="saved_videos_header">الفيديوهات المحفوظة</string>
+    <string name="publish_video_header">نشر الفيديوهات</string>
     <string name="video_editor_header">المحرر</string>
     <string name="generating">جارٍ توليد المعاينة...</string>
     <string name="video_preview_header">معاينة</string>

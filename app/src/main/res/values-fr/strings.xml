@@ -5,6 +5,7 @@
     <string name="my_videos_header">Mes vidéos</string>
     <string name="saved_videos_header">Vidéos enregistrées</string>
     <string name="video_editor_header">Éditeur</string>
+    <string name="publish_video_header">Publier des vidéos</string>
     <string name="generating">Génération de l\'aperçu...</string>
     <string name="video_preview_header">Aperçu</string>
     <string name="sign_out_button">Se déconnecter</string>

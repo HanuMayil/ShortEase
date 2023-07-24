@@ -129,7 +129,6 @@ fun MyVideos(
 //        thumbnailItems.add(fakeThumbnailItem)
 //        thumbnailItems.add(fakeThumbnailItem2)
 
-
     var expanded by remember { mutableStateOf(false) }
 
     Box(
@@ -153,6 +152,8 @@ fun MyVideos(
                                     stringResource(R.string.my_videos_header)
                                 } else if(selectedTab.value == R.drawable.edit){
                                     stringResource(R.string.saved_videos_header)
+                                } else if(selectedTab.value == R.drawable.share){
+                                    stringResource(R.string.publish_video_header)
                                 } else { "" },
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth(),
@@ -221,6 +222,8 @@ fun MyVideos(
                             DownloadAvailableScreen(thumbnailItems)
                         } else if (selectedTab.value == R.drawable.edit){
                             savedVideosScreen(navController)
+                        } else if (selectedTab.value == R.drawable.share){
+                            publishVideosScreen(navController)
                         }
                     }
                     Row(
@@ -519,9 +522,6 @@ fun savedVideosScreen(navController: NavController) {
     // Retrieve videos from the specified folder
     LaunchedEffect(folderPath) {
         val folder = File(folderPath)
-        Log.d("youtube init", "got into launched effect");
-        Log.d("youtube init", "${folder}");
-        Log.d("youtube init", "${folder.listFiles()}");
         if (folder.exists() && folder.isDirectory) {
             Log.d("youtube init", "got into for loop");
             val sub_folders = folder.listFiles { file ->
@@ -534,21 +534,13 @@ fun savedVideosScreen(navController: NavController) {
                 Log.d("youtube init", "Video File: ${videoFiles.size}")
                 videos.addAll(videoFiles)
             }
-
-            videos?.forEach { videoFile ->
-                Log.d("youtube init", "Video File: ${videoFile.name}")
-            }
-            sub_folders?.forEach { sub_folders ->
-                Log.d("youtube init", "Folders: ${sub_folders.name}")
-            }
-
         }
     }
 
 
     LazyColumn() {
         items(videos) { video ->
-            VideoItemDisplay(video, navController)
+            VideoItemDisplay(video, navController, "videos")
         }
     }
 
@@ -556,7 +548,39 @@ fun savedVideosScreen(navController: NavController) {
 }
 
 @Composable
-fun VideoItemDisplay(video: File, navController: NavController) {
+fun publishVideosScreen(navController: NavController) {
+    val publishedVideos = remember { mutableStateListOf<File>() }
+
+    val folderPath = "${LocalContext.current.filesDir}/output"
+
+//   val folderPath = "/data/user/0/com.example.shortease/files"
+    // Retrieve videos from the specified folder
+    LaunchedEffect(folderPath) {
+        val folder = File(folderPath)
+        Log.d("publish test", folderPath)
+        if (folder.exists() && folder.isDirectory) {
+            val sub_folders = folder.listFiles { file ->
+                file.isDirectory
+            }
+            sub_folders?.forEach { sub_folders ->
+                val videoFiles = sub_folders.listFiles { file ->
+                    file.isFile && file.extension in listOf("mp4", "mkv", "avi")
+                }
+                publishedVideos.addAll(videoFiles)
+            }
+        }
+    }
+
+
+    LazyColumn() {
+        items(publishedVideos) { video ->
+            VideoItemDisplayPublish(video, navController, "output")
+        }
+    }
+}
+
+@Composable
+fun VideoItemDisplay(video: File, navController: NavController, folderType: String) {
     // Display video item here
     // Replace with your desired representation
     // You can use libraries like ExoPlayer or Glide to handle video loading and playback
@@ -564,10 +588,10 @@ fun VideoItemDisplay(video: File, navController: NavController) {
     Log.d("youtube init","Video Item: ${video}")
     // Example: Display video file name
     val context = LocalContext.current
-    val videoId = video.toString().substringAfterLast("/videos/").substringBefore("/")
+    val videoId = video.toString().substringAfterLast("/$folderType/").substringBefore("/")
     val title =   video.toString().substringAfterLast("/").substringBeforeLast(".mp4")
     Log.d("youtube init","Video ID: ${videoId}")
-    var thumbnail_pic = File(context.filesDir, "videos/${videoId}/thumbnail.jpg");
+    var thumbnail_pic = File(context.filesDir, "$folderType/${videoId}/thumbnail.jpg");
     val showDialog = remember { mutableStateOf(false) }
     val showEditDialog = remember { mutableStateOf(false) }
 
@@ -605,7 +629,7 @@ fun VideoItemDisplay(video: File, navController: NavController) {
                 Button(
                     onClick = {
                         showDialog.value = false
-                        var fileDirectory = File(context.filesDir, "videos/${videoId}")
+                        var fileDirectory = File(context.filesDir, "$folderType/${videoId}")
                         fileDirectory.deleteRecursively()
                     },
                     colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
@@ -666,7 +690,135 @@ fun VideoItemDisplay(video: File, navController: NavController) {
                     Spacer(modifier = Modifier.width(10.dp))
                     Image(
                         painter = painterResource(R.drawable.edit),
-                        contentDescription = "Download Icon",
+                        contentDescription = "Edit Icon",
+                        colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
+                        modifier = Modifier
+                            .size(20.dp)
+                            .align(Alignment.CenterVertically)
+                            .clickable {
+                                showEditDialog.value = true
+                            }
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Divider(color = colorPalette.ShortEaseRed, thickness = 1.dp)
+    }
+}
+
+@Composable
+fun VideoItemDisplayPublish(video: File, navController: NavController, folderType: String) {
+    // Display video item here
+    // Replace with your desired representation
+    // You can use libraries like ExoPlayer or Glide to handle video loading and playback
+    Log.d("youtube init","got into video item")
+    Log.d("youtube init","Video Item: ${video}")
+    // Example: Display video file name
+    val context = LocalContext.current
+    val videoId = video.toString().substringAfterLast("/$folderType/").substringBefore("/")
+    val title =   video.toString().substringAfterLast("/").substringBeforeLast(".mp4")
+    Log.d("youtube init","Video ID: ${videoId}")
+    var thumbnail_pic = File(context.filesDir, "$folderType/${videoId}/thumbnail.jpg");
+    val showDialog = remember { mutableStateOf(false) }
+    val showEditDialog = remember { mutableStateOf(false) }
+
+    if (showEditDialog.value && !showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showEditDialog.value = false },
+            title = { Text(text = stringResource(R.string.publish_video_header))},
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showEditDialog.value = false
+                        navController.navigate(route = "preview_screen?videoId=$videoId")
+                    },
+                    colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
+                ) {
+                    Text(text = stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showEditDialog.value = false },
+                    colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
+                ) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+    // Show confirmation dialog
+    if (showDialog.value && !showEditDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text(text = stringResource(R.string.delete_video))},
+            text = { Text(text = stringResource(R.string.delete_video_prompt) + " \n \"${title}\"?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog.value = false
+                        var fileDirectory = File(context.filesDir, "$folderType/${videoId}")
+                        fileDirectory.deleteRecursively()
+                    },
+                    colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
+                ) {
+                    Text(text = stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDialog.value = false },
+                    colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
+                ) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+    if(thumbnail_pic.isFile) {
+        Column(
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
+        ) {
+            Image(
+                painter = rememberImagePainter(thumbnail_pic),
+                contentDescription = title,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(272.dp),
+            )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = title,
+                        style = TextStyle(
+                            color = colorPalette.ShortEaseRed,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Image(
+                        painter = painterResource(R.drawable.trashcan),
+                        contentDescription = "Delete Icon",
+                        colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
+                        modifier = Modifier
+                            .size(24.dp)
+                            .align(Alignment.CenterVertically)
+                            .clickable {
+                                showDialog.value = true
+                            }
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Image(
+                        painter = painterResource(R.drawable.share),
+                        contentDescription = "Edit Icon",
                         colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
                         modifier = Modifier
                             .size(20.dp)

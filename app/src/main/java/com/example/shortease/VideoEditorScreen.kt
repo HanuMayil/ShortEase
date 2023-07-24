@@ -213,7 +213,16 @@ fun VideoEditorScreen(
                                                 }
                                             )
                                             deferred.await()
-
+                                            val outputs = File(context.filesDir, "output/$videoId")
+                                            val files = outputs.listFiles()
+                                            files?.let {
+                                                for (file in it) {
+                                                    Log.d("publish test", file.name + "." + file.extension)
+                                                    if (file.isFile && (file.name) != fileName) {
+                                                        file.delete()
+                                                    }
+                                                }
+                                            }
                                             val sourceFile = File(context.filesDir, "videos/$videoId/thumbnail.jpg")
                                             val destinationFile = File(context.filesDir, "output/$videoId/thumbnail.jpg")
                                             if (sourceFile.exists()) {
@@ -536,7 +545,7 @@ private fun filterVideo(context: Context, videoId: String, fileName: String,  co
     val epVideo: EpVideo = EpVideo("${fileDir.toString()}")
     Log.d("youtube init", "name" + epVideo)
 
-    val outFile = File(context.filesDir, "output/$videoId/output-filter.mp4")
+    val outFile = File(context.filesDir, "output/$videoId/$fileName")
     val outputOption = EpEditor.OutputOption(outFile.toString())
     outputOption.frameRate = 30
     outputOption.bitRate = 10

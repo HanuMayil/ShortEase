@@ -4,6 +4,7 @@
     <string name="sign_in_button">Sign in with Google</string>
     <string name="my_videos_header">My Videos</string>
     <string name="saved_videos_header">Saved Videos</string>
+    <string name="publish_video_header">Publish Videos</string>
     <string name="video_editor_header">Editor</string>
     <string name="generating">Generating Preview...</string>
     <string name="video_preview_header">Preview</string>
