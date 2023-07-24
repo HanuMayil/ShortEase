@@ -1,5 +1,12 @@
+import android.graphics.ColorMatrix
+import android.util.Log
+import android.widget.VideoView
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -7,38 +14,67 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.shortease.R
+import com.example.shortease.Screen
+import com.example.shortease.endCropTime
+import com.example.shortease.playerView
+import com.example.shortease.startCropTime
 import com.example.shortease.ui.theme.ShortEaseTheme
 import com.example.shortease.ui.theme.colorPalette
-import android.widget.VideoView
-import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.runtime.remember
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.viewinterop.AndroidView
-import com.example.shortease.Screen
+import com.example.shortease.videoDuration
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.ui.PlayerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.attribute.BasicFileAttributes
 
+var isPlaying = false
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreviewScreen(
     navController: NavController
 ) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val context = LocalContext.current
+    val videoId = navBackStackEntry?.arguments?.getString("videoId")
+    val videoPath = "${context.filesDir}/videos/${videoId}"
+    val folder = File(videoPath)
+    val folderContents = folder.listFiles()
+    val folderContentNames = folderContents?.map { file -> file.name } ?: emptyList()
+    var finalVideoPath = "${context.filesDir}/output/${videoId}/output-filter.mp4"
+    val coroutineScope = CoroutineScope(Dispatchers.Default)
+
     Column(modifier = Modifier.fillMaxSize()) {
         Surface(color = colorPalette.ShortEaseRed
         ) {
@@ -49,31 +85,19 @@ fun PreviewScreen(
                 ),
                 title = {
                     Text(
-                        text = "Preview",
+                        text = stringResource(R.string.video_preview_header),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
                         style = TextStyle(
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.SansSerif,
-                            fontSize = 32.sp
+                            fontSize = 24.sp
                         )
                     )
                 },
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            navController.popBackStack()
-                        }
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.back_button),
-                            contentDescription = "Back",
-                        )
-                    }
-                },
                 actions = {
                     IconButton(onClick = {
-                        navController.navigate(route = Screen.HomeScreen.route)
+                        navController.navigate(route = Screen.MyVideos.route)
                     }) {
                         Image(
                             painter = painterResource(R.drawable.home_button),
@@ -89,22 +113,17 @@ fun PreviewScreen(
                 val context = LocalContext.current
                 val videoView = remember { VideoView(context) }
                 Column(modifier = Modifier.fillMaxSize()) {
-
-
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .padding(8.dp)
+                            .padding(10.dp)
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color.Black),
+                            .background(Color.Black)
+                            .fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        AndroidView(
-                            factory = { videoView },
-                            modifier = Modifier.fillMaxSize()
-                        ) { view ->
-                            view.setVideoPath("android.resource://${context.packageName}/${R.raw.shorts_example}")
-                            view.start()
+                        if(folderContentNames.getOrNull(0) != null){
+                            VideoPlayer(finalVideoPath)
                         }
                     }
 
@@ -147,6 +166,7 @@ fun PreviewScreen(
                                 contentDescription = "Upload",
                             )
                         }
+
                     }
                 }
             }
@@ -154,8 +174,92 @@ fun PreviewScreen(
     }
 }
 
+fun getMostRecentlyAddedMp4File(directoryPath: String): File? {
+    val directory = File(directoryPath)
+    if (!directory.isDirectory) {
+        throw IllegalArgumentException("The provided path is not a directory.")
+    }
+
+    val mostRecentMp4File: Path? = Files.walk(directory.toPath())
+        .filter { Files.isRegularFile(it) && it.toString().endsWith(".mp4", ignoreCase = true) }
+        .max { file1, file2 -> compareFileCreationTime(file1, file2) }
+        .orElse(null)
+
+    return mostRecentMp4File?.toFile()
+}
+
+fun compareFileCreationTime(file1: Path, file2: Path): Int {
+    val basicAttrs1: BasicFileAttributes = Files.readAttributes(file1, BasicFileAttributes::class.java)
+    val basicAttrs2: BasicFileAttributes = Files.readAttributes(file2, BasicFileAttributes::class.java)
+    return basicAttrs1.creationTime().compareTo(basicAttrs2.creationTime())
+}
+
+
 @Composable
 @Preview
 private fun PreviewScreenPreview() {
     PreviewScreen(navController = rememberNavController())
+}
+
+@Composable
+fun VideoPlayer(videoPath : String) {
+    Log.d("video to see ", videoPath)
+    val context = LocalContext.current
+    val player = SimpleExoPlayer.Builder(context).build()
+    playerView = PlayerView(context)
+    val mediaItem = MediaItem.fromUri(videoPath)
+    val playWhenReady by rememberSaveable {
+        mutableStateOf(true)
+    }
+    player.setMediaItem(mediaItem)
+    playerView.player = player
+
+    val colorMatrix = ColorMatrix().apply {
+        // Example: Increase video brightness by 50%
+        setScale(10f, 10f, 10f, 1f)
+    }
+
+    LaunchedEffect(player) {
+        player.prepare()
+        Log.d("video to see ", videoPath)
+        Log.d("time", videoPath)
+        player.addListener(object : Player.EventListener {
+            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+                super.onPlayerStateChanged(playWhenReady, playbackState)
+                if (playbackState == Player.STATE_READY) {
+                    if(videoDuration == -1f) {
+                        endCropTime = player.duration.toFloat()
+                        videoDuration = endCropTime / 1000
+                    }
+                }
+            }
+        })
+        player.playWhenReady = playWhenReady
+        while (true) {
+            if (endCropTime > 0f && (player.currentPosition.toFloat() > endCropTime)) {
+                player.pause()
+                player.seekTo(startCropTime.toLong())
+            }
+            else if(player.currentPosition.toFloat() < startCropTime) {
+                player.seekTo(startCropTime.toLong())
+            }
+            delay(100) // Adjust the delay interval as needed
+        }
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            player.clearMediaItems()
+            player.release()
+        }
+    }
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        AndroidView(
+            factory = {
+                playerView
+            }
+        )
+    }
 }
