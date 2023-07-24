@@ -39,6 +39,7 @@ class YouTubeApiClient(private val apiKey: String) {
             val regex = Regex("<meta property=\"og:image\" content=\"([^\"]+)\"")
             val matchResult = regex.find(doc)
             channelIconUrl.value = matchResult?.groupValues?.get(1).toString()
+            ChannelInfo.channelIconUrl = channelIconUrl.value
         }
 
         val thumbnailItems = mutableListOf<ThumbnailItem>()

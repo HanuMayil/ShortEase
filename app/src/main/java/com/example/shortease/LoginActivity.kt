@@ -305,6 +305,8 @@ class LoginActivity : AppCompatActivity() {
     private fun signOut() {
         // discard the authorization and token state, but retain the configuration and
         // dynamic client registration (if applicable), to save from retrieving them again.
+        ChannelInfo.thumbnailItems.clear()
+        ChannelInfo.channelIconUrl = "https://www.digitary.net/wp-content/uploads/2021/07/Generic-Profile-Image.png"
         val currentState: AuthState = mAuthStateManager!!.current
         val clearedState = AuthState(currentState.authorizationServiceConfiguration!!)
         if (currentState.lastRegistrationResponse != null) {
