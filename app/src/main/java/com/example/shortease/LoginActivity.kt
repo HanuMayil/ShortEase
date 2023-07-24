@@ -1,5 +1,6 @@
 package com.example.shortease
 
+import AccessTokenHolder
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -15,12 +16,10 @@ import androidx.navigation.compose.rememberNavController
 import com.example.shortease.auth.AuthStateManager
 import com.example.shortease.auth.Configuration
 import com.example.shortease.ui.theme.ShortEaseTheme
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.youtube.YouTube
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -139,12 +138,13 @@ class LoginActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (resultCode == RC_REAUTH) {
+            signOut()
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
         } else if(resultCode == RC_AT_SUCCESS) {
-            val accessToken = data?.getStringExtra("resultKey")
+            AccessTokenHolder.accessToken = data?.getStringExtra("resultKey")
             lifecycleScope.launch {
-                fetchYouTubeChannelId(accessToken.toString())
+                fetchYouTubeChannelId(AccessTokenHolder.accessToken)
                 navController.navigate("my_videos?channelId=$channelId")
             }
         } else {
