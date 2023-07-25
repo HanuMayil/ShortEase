@@ -68,12 +68,15 @@ fun PreviewScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val context = LocalContext.current
     val videoId = navBackStackEntry?.arguments?.getString("videoId")
-    val videoPath = "${context.filesDir}/videos/${videoId}"
+    val videoPath = "${context.filesDir}/output/${videoId}"
     val folder = File(videoPath)
     val folderContents = folder.listFiles()
-    val folderContentNames = folderContents?.map { file -> file.name } ?: emptyList()
-    var finalVideoPath = "${context.filesDir}/output/${videoId}/output-filter.mp4"
-    val coroutineScope = CoroutineScope(Dispatchers.Default)
+    val videoFiles = folderContents?.filter { it.isFile &&
+            (it.name.endsWith(".mp4") ||
+                    it.name.endsWith(".avi") ||
+                    it.name.endsWith(".mov")) }
+    val firstVideoFileName = videoFiles?.firstOrNull()?.name
+    var finalVideoPath = "${context.filesDir}/output/${videoId}/$firstVideoFileName"
 
     Column(modifier = Modifier.fillMaxSize()) {
         Surface(color = colorPalette.ShortEaseRed
@@ -122,7 +125,7 @@ fun PreviewScreen(
                             .fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        if(folderContentNames.getOrNull(0) != null){
+                        if(firstVideoFileName != null){
                             VideoPlayer(finalVideoPath)
                         }
                     }
@@ -136,7 +139,7 @@ fun PreviewScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(top = 0.dp, start = 8.dp, end = 4.dp, bottom = 8.dp)
-                                .height(64.dp),
+                                .height(50.dp),
                             shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = colorPalette.ShortEaseRed,
@@ -154,7 +157,7 @@ fun PreviewScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(top = 0.dp, start = 8.dp, end = 4.dp, bottom = 8.dp)
-                                .height(64.dp),
+                                .height(50.dp),
                             shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = colorPalette.ShortEaseRed,
@@ -213,11 +216,6 @@ fun VideoPlayer(videoPath : String) {
     }
     player.setMediaItem(mediaItem)
     playerView.player = player
-
-    val colorMatrix = ColorMatrix().apply {
-        // Example: Increase video brightness by 50%
-        setScale(10f, 10f, 10f, 1f)
-    }
 
     LaunchedEffect(player) {
         player.prepare()
