@@ -105,9 +105,43 @@ fun MyVideos(
 
     var selectedTab = remember { mutableStateOf(R.drawable.download_icon) }
     var selected by remember { mutableStateOf(R.drawable.download_icon) }
+    var query by remember { mutableStateOf("") }
 
+    var thumbnailItems = remember { mutableStateListOf<ThumbnailItem>() }
 
-    val thumbnailItems = remember { mutableStateListOf<ThumbnailItem>() }
+    if (thumbnailItems.isEmpty()) {
+        val fakeThumbnailItem: ThumbnailItem = ThumbnailItem(
+            "10 Sec Timer",
+            "https://i.ytimg.com/vi/zU9y354XAgM/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyiceF5hUqg8CSc85pQwJuvOxXkQ",
+            BigInteger("1234567890")
+        )
+
+        val fakeThumbnailItem2: ThumbnailItem = ThumbnailItem(
+            "Donkey Kong Gets Sturdy",
+            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
+            BigInteger("1234567890")
+        )
+
+        val fakeThumbnailItem3: ThumbnailItem = ThumbnailItem(
+            "Donkey Kong Gets",
+            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
+            BigInteger("1234567890")
+        )
+
+        val fakeThumbnailItem4: ThumbnailItem = ThumbnailItem(
+            "Donkey Kong",
+            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
+            BigInteger("1234567890")
+        )
+
+        val fakeThumbnailItem5: ThumbnailItem = ThumbnailItem(
+            "Donkey",
+            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
+            BigInteger("1234567890")
+        )
+
+        thumbnailItems.addAll(listOf(fakeThumbnailItem, fakeThumbnailItem2, fakeThumbnailItem3, fakeThumbnailItem4, fakeThumbnailItem5))
+    }
     //tmp image
     val channelIconUrl = remember { mutableStateOf("https://www.digitary.net/wp-content/uploads/2021/07/Generic-Profile-Image.png") }
     val youtubeDownloader = YouTubeDownloader(LocalContext.current)
@@ -125,20 +159,21 @@ fun MyVideos(
 //        }
 //    }
 
-        val fakeThumbnailItem: ThumbnailItem = ThumbnailItem(
-            "10 Sec Timer",
-            "https://i.ytimg.com/vi/zU9y354XAgM/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyiceF5hUqg8CSc85pQwJuvOxXkQ",
-            BigInteger("1234567890")
-        )
-        val fakeThumbnailItem2: ThumbnailItem = ThumbnailItem("Donkey Kong Gets Sturdy",
-            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
-            BigInteger("1234567890")
-        )
-        thumbnailItems.add(fakeThumbnailItem)
-        thumbnailItems.add(fakeThumbnailItem2)
 
+    val thumbnailItemsCopy: List<ThumbnailItem> = thumbnailItems.toList()
 
     var expanded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(query) {
+        if (query.isEmpty()) {
+            thumbnailItems.clear()
+            thumbnailItems.addAll(thumbnailItemsCopy)
+        } else {
+            val filteredItems = performSearch(query, thumbnailItemsCopy)
+            thumbnailItems.clear()
+            thumbnailItems.addAll(filteredItems)
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -176,12 +211,8 @@ fun MyVideos(
                                 modifier = Modifier
                                     .wrapContentSize(Alignment.TopStart)
                             ){
-                                var query by remember { mutableStateOf("") }
+
                                 val keyboardController = LocalSoftwareKeyboardController.current
-                                val thumbnailItemsCopy: List<ThumbnailItem> = thumbnailItems.toList()
-
-
-                                var searchResults by remember { mutableStateOf<List<ThumbnailItem>>(emptyList()) }
 
                                 Column(
                                     modifier = Modifier
@@ -189,9 +220,9 @@ fun MyVideos(
                                     SearchBar(
                                         query = query,
                                         onQueryChange = {  newQuery ->
-                                            query = newQuery
-                                            // Call performSearch to filter the data based on the query
-                                            searchResults = performSearch(query, thumbnailItems) },
+                                            query = newQuery }
+                                            // set thumbnailItems here
+                                        ,
                                         onSearchClick = {keyboardController?.show()}
                                     )
                                 }
