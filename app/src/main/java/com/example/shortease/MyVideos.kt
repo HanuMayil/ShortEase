@@ -110,39 +110,39 @@ fun MyVideos(
     var query by remember { mutableStateOf("") }
     var thumbnailItems = remember { mutableStateListOf<ThumbnailItem>() }
 
-    if (thumbnailItems.isEmpty()) {
-        val fakeThumbnailItem: ThumbnailItem = ThumbnailItem(
-            "10 Sec Timer",
-            "https://i.ytimg.com/vi/zU9y354XAgM/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyiceF5hUqg8CSc85pQwJuvOxXkQ",
-            BigInteger("1234567890")
-        )
-
-        val fakeThumbnailItem2: ThumbnailItem = ThumbnailItem(
-            "Donkey Kong Gets Sturdy",
-            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
-            BigInteger("1234567890")
-        )
-
-        val fakeThumbnailItem3: ThumbnailItem = ThumbnailItem(
-            "Donkey Kong Gets",
-            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
-            BigInteger("1234567890")
-        )
-
-        val fakeThumbnailItem4: ThumbnailItem = ThumbnailItem(
-            "Donkey Kong",
-            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
-            BigInteger("1234567890")
-        )
-
-        val fakeThumbnailItem5: ThumbnailItem = ThumbnailItem(
-            "Donkey",
-            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
-            BigInteger("1234567890")
-        )
-
-        thumbnailItems.addAll(listOf(fakeThumbnailItem, fakeThumbnailItem2, fakeThumbnailItem3, fakeThumbnailItem4, fakeThumbnailItem5))
-    }
+//    if (thumbnailItems.isEmpty()) {
+//        val fakeThumbnailItem: ThumbnailItem = ThumbnailItem(
+//            "10 Sec Timer",
+//            "https://i.ytimg.com/vi/zU9y354XAgM/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyiceF5hUqg8CSc85pQwJuvOxXkQ",
+//            BigInteger("1234567890")
+//        )
+//
+//        val fakeThumbnailItem2: ThumbnailItem = ThumbnailItem(
+//            "Donkey Kong Gets Sturdy",
+//            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
+//            BigInteger("1234567890")
+//        )
+//
+//        val fakeThumbnailItem3: ThumbnailItem = ThumbnailItem(
+//            "Donkey Kong Gets",
+//            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
+//            BigInteger("1234567890")
+//        )
+//
+//        val fakeThumbnailItem4: ThumbnailItem = ThumbnailItem(
+//            "Donkey Kong",
+//            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
+//            BigInteger("1234567890")
+//        )
+//
+//        val fakeThumbnailItem5: ThumbnailItem = ThumbnailItem(
+//            "Donkey",
+//            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
+//            BigInteger("1234567890")
+//        )
+//
+//        thumbnailItems.addAll(listOf(fakeThumbnailItem, fakeThumbnailItem2, fakeThumbnailItem3, fakeThumbnailItem4, fakeThumbnailItem5))
+//    }
     //tmp image
     val channelIconUrl = remember { mutableStateOf("https://www.digitary.net/wp-content/uploads/2021/07/Generic-Profile-Image.png") }
     val youtubeDownloader = YouTubeDownloader(LocalContext.current)
@@ -153,12 +153,12 @@ fun MyVideos(
 
     val y = YouTubeApiClient("AIzaSyCZ1aVkQw5j_ljA-AesWfHh0c6lnGQIq-A") // Replace with your API key
 
-//    LaunchedEffect(channelId) {
-//        if (!channelId.isNullOrEmpty()) {
-//            val fetchedThumbnailItems = y.fetchVideoThumbnails(channelId, channelIconUrl)
-//            thumbnailItems.addAll(fetchedThumbnailItems)
-//        }
-//    }
+    LaunchedEffect(channelId) {
+        if (!channelId.isNullOrEmpty()) {
+            val fetchedThumbnailItems = y.fetchVideoThumbnails(channelId, channelIconUrl)
+            thumbnailItems.addAll(fetchedThumbnailItems)
+        }
+    }
 
     val thumbnailItemsCopy: List<ThumbnailItem> = thumbnailItems.toList()
 
@@ -400,99 +400,90 @@ fun DownloadAvailableScreen(thumbnailItems: List<ThumbnailItem>) {
     val context = LocalContext.current
     val youtubeDownloader = YouTubeDownloader(LocalContext.current)
 
-        // Display the thumbnails in a LazyColumn
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize())
-        {
-            itemsIndexed(thumbnailItems) { _, thumbnailItem ->
-                Column(
+    // Display the thumbnails in a LazyColumn
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize())
+    {
+        itemsIndexed(thumbnailItems) { _, thumbnailItem ->
+            Column(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .fillMaxWidth()
+            ) {
+                Image(
+                    painter = rememberImagePainter(thumbnailItem.thumbnailUrl),
+                    contentDescription = thumbnailItem.title,
                     modifier = Modifier
-                        .padding(vertical = 8.dp)
                         .fillMaxWidth()
+                        .height(272.dp)
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
-                    Image(
-                        painter = rememberImagePainter(thumbnailItem.thumbnailUrl),
-                        contentDescription = thumbnailItem.title,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(272.dp)
-                    )
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = thumbnailItem.title,
+                            style = TextStyle(
+                                color = colorPalette.ShortEaseRed,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            ),
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        Text(
+                            text = "Views: ${formatViewCount(thumbnailItem.viewCount)}",
+                            style = TextStyle(color = colorPalette.ShortEaseRed, fontSize = 14.sp),
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                    }
+                    val isPopupOpen = remember { mutableStateOf(false) }
+                    var videoId = remember { mutableStateOf(extractVideoId(thumbnailItem.thumbnailUrl)) }
+                    var formats = remember { mutableStateOf(emptyList<VideoWithAudioFormat>()) }
+                    var finishedDownload = remember { mutableStateOf(false) }
+                    var videoDirExists = remember {mutableStateOf(false)}
+                    Column(
+                        verticalArrangement = Arrangement.Center,
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = thumbnailItem.title,
-                                style = TextStyle(
-                                    color = colorPalette.ShortEaseRed,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp
-                                ),
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-                            Text(
-                                text = "Views: ${formatViewCount(thumbnailItem.viewCount)}",
-                                style = TextStyle(color = colorPalette.ShortEaseRed, fontSize = 14.sp),
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-                        }
-                        val isPopupOpen = remember { mutableStateOf(false) }
-                        var videoId = remember { mutableStateOf(extractVideoId(thumbnailItem.thumbnailUrl)) }
-                        var formats = remember { mutableStateOf(emptyList<VideoWithAudioFormat>()) }
-                        var finishedDownload = remember { mutableStateOf(false) }
-                        var videoDirExists = remember {mutableStateOf(false)}
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                        ) {
-                            var videoDir = File("${context.filesDir}/videos/${videoId.value}")
-                            videoDirExists.value = videoDir.exists()
+                        var videoDir = File("${context.filesDir}/videos/${videoId.value}")
+                        videoDirExists.value = videoDir.exists()
 
-                            if(videoDirExists.value) {
-                                finishedDownload.value = File(videoDir, "thumbnail.jpg").exists()
-                                if(finishedDownload.value) {
-                                    Image(
-                                        painter = painterResource(R.drawable.check),
-                                        contentDescription = "Check Icon",
-                                        colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                                else {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier
-                                            .size(24.dp),
-                                        strokeWidth = 2.dp,
-                                        color = colorPalette.ShortEaseRed
-
-                                    )
-                                }
+                        if(videoDirExists.value) {
+                            finishedDownload.value = File(videoDir, "thumbnail.jpg").exists()
+                            if(finishedDownload.value) {
+                                Image(
+                                    painter = painterResource(R.drawable.check),
+                                    contentDescription = "Check Icon",
+                                    colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
+                                    modifier = Modifier.size(24.dp)
+                                )
                             }
                             else {
-                                val savedVideosHeaderText = stringResource(R.string.download_failed)
-                                Image(
-                                    painter = painterResource(R.drawable.download_icon),
-                                    contentDescription = "Download Icon",
-                                    colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
+                                CircularProgressIndicator(
                                     modifier = Modifier
-                                        .clickable {
-                                            if (videoId.value != "") {
-                                                formats.value =
-                                                    youtubeDownloader.requestVideoDetail(
-                                                        videoId.value
-                                                    )
-                                                if(formats.value.isNotEmpty()) {
-                                                    isPopupOpen.value = true
-                                                } else {
-                                                    Toast
-                                                        .makeText(
-                                                            context,
-                                                            savedVideosHeaderText,
-                                                            Toast.LENGTH_SHORT
-                                                        )
-                                                        .show()
-                                                }
+                                        .size(24.dp),
+                                    strokeWidth = 2.dp,
+                                    color = colorPalette.ShortEaseRed
+
+                                )
+                            }
+                        }
+                        else {
+                            val savedVideosHeaderText = stringResource(R.string.download_failed)
+                            Image(
+                                painter = painterResource(R.drawable.download_icon),
+                                contentDescription = "Download Icon",
+                                colorFilter = ColorFilter.tint(colorPalette.ShortEaseRed),
+                                modifier = Modifier
+                                    .clickable {
+                                        if (videoId.value != "") {
+                                            formats.value =
+                                                youtubeDownloader.requestVideoDetail(
+                                                    videoId.value
+                                                )
+                                            if(formats.value.isNotEmpty()) {
+                                                isPopupOpen.value = true
                                             } else {
                                                 Toast
                                                     .makeText(
@@ -502,69 +493,78 @@ fun DownloadAvailableScreen(thumbnailItems: List<ThumbnailItem>) {
                                                     )
                                                     .show()
                                             }
-                                        }
-                                        .size(24.dp)
-                                )
-                            }
-                        }
-
-                        if (isPopupOpen.value) {
-                            AlertDialog(
-                                onDismissRequest = { isPopupOpen.value = false },
-                                title = { Text(text = stringResource(R.string.select_format)) },
-                                confirmButton = {},
-                                text = {
-                                    Column {
-                                        formats.value.forEach { format ->
-                                            Button(
-                                                onClick = {
-                                                    videoDirExists.value = true
-                                                    val backgroundDispatcher: CoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
-                                                    CoroutineScope(Dispatchers.Main).launch {
-                                                        withContext(backgroundDispatcher) {
-                                                            val deferred = CompletableDeferred<Unit>()
-                                                            youtubeDownloader.downloadYouTubeVideo(
-                                                                videoId = videoId.value,
-                                                                videoTitle = thumbnailItem.title,
-                                                                format = format,
-                                                                thumbnailURL = thumbnailItem.thumbnailUrl,
-                                                                completionCallback = {
-                                                                    deferred.complete(Unit)
-                                                                }
-                                                            )
-                                                            deferred.await()
-                                                        }
-                                                    }.invokeOnCompletion {
-                                                        finishedDownload.value = true
-                                                    }
-                                                    isPopupOpen.value = false
-                                                },
-                                                modifier = Modifier
-                                                    .padding(16.dp)
-                                                    .height(64.dp)
-                                                    .fillMaxWidth(),
-                                                shape = RoundedCornerShape(8.dp),
-                                                colors = ButtonDefaults.buttonColors(
-                                                    containerColor = colorPalette.ShortEaseRed,
-                                                    contentColor = colorPalette.ShortEaseWhite
+                                        } else {
+                                            Toast
+                                                .makeText(
+                                                    context,
+                                                    savedVideosHeaderText,
+                                                    Toast.LENGTH_SHORT
                                                 )
-
-                                            ) {
-                                                Text(
-                                                    text = format.videoQuality().toString()
-                                                )
-                                            }
+                                                .show()
                                         }
                                     }
-                                }
+                                    .size(24.dp)
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Divider(color = colorPalette.ShortEaseRed, thickness = 1.dp)
+
+                    if (isPopupOpen.value) {
+                        AlertDialog(
+                            onDismissRequest = { isPopupOpen.value = false },
+                            title = { Text(text = stringResource(R.string.select_format)) },
+                            confirmButton = {},
+                            text = {
+                                Column {
+                                    formats.value.forEach { format ->
+                                        Button(
+                                            onClick = {
+                                                videoDirExists.value = true
+                                                val backgroundDispatcher: CoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+                                                CoroutineScope(Dispatchers.Main).launch {
+                                                    withContext(backgroundDispatcher) {
+                                                        val deferred = CompletableDeferred<Unit>()
+                                                        youtubeDownloader.downloadYouTubeVideo(
+                                                            videoId = videoId.value,
+                                                            videoTitle = thumbnailItem.title,
+                                                            format = format,
+                                                            thumbnailURL = thumbnailItem.thumbnailUrl,
+                                                            completionCallback = {
+                                                                deferred.complete(Unit)
+                                                            }
+                                                        )
+                                                        deferred.await()
+                                                    }
+                                                }.invokeOnCompletion {
+                                                    finishedDownload.value = true
+                                                }
+                                                isPopupOpen.value = false
+                                            },
+                                            modifier = Modifier
+                                                .padding(16.dp)
+                                                .height(64.dp)
+                                                .fillMaxWidth(),
+                                            shape = RoundedCornerShape(8.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = colorPalette.ShortEaseRed,
+                                                contentColor = colorPalette.ShortEaseWhite
+                                            )
+
+                                        ) {
+                                            Text(
+                                                text = format.videoQuality().toString()
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        )
+                    }
                 }
+                Spacer(modifier = Modifier.height(8.dp))
+                Divider(color = colorPalette.ShortEaseRed, thickness = 1.dp)
             }
         }
+    }
 }
 
 @Composable
