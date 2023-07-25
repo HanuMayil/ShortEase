@@ -1,9 +1,13 @@
 <resources>
     <string name="app_name">ShortEase</string>
     <string name="web_client_id">738134261328-sfth69n6us8muiltpb3gl4k49sdltkpv.apps.googleusercontent.com</string>
+    <string name="webscraper_endpoint" translatable="false">https://7y5r6uhwpqvwjzcwu3shuubltu0dcybg.lambda-url.us-east-2.on.aws/</string>
+    <string name="webscraper_api_key" translatable="false">iKmJ6kP87a8WJ70rRJleP4ImljweYvoW9CXUrUya</string>
     <string name="sign_in_button">Sign in with Google</string>
     <string name="my_videos_header">My Videos</string>
     <string name="saved_videos_header">Saved Videos</string>
+    <string name="search">Search</string>
+    <string name="publish_video_header">Publish Videos</string>
     <string name="video_editor_header">Editor</string>
     <string name="generating">Generating Preview...</string>
     <string name="video_preview_header">Preview</string>
@@ -32,6 +36,9 @@
     <string name="subtitle_enter_text_error">Please enter text before adding</string>
     <string name="subtitle_added">Successfully Added Subtitle</string>
     <string name="subtitle_removed">Successfully Removed Subtitle</string>
+    <string name="apply_metrics">Apply Metrics</string>
+    <string name="fetching_metrics">Fetching metrics...</string>
+    <string name="error_metrics">Most replayed not available</string>
     <string name="top">Top</string>
     <string name="middle">Middle</string>
     <string name="bottom">Bottom</string>

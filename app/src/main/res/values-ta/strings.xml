@@ -5,12 +5,17 @@
     <string name="my_videos_header">என் வீடியோக்கள்</string>
     <string name="saved_videos_header">சேமித்த வீடியோக்கள்</string>
     <string name="video_editor_header">பதிப்பாசிரியர்</string>
+    <string name="publish_video_header">வீடியோகளை வெளியிடு</string>
     <string name="generating">முன்னோட்டத்தை உருவாக்கி வருகிறது...</string>
     <string name="video_preview_header">முன்னோட்டம்</string>
     <string name="sign_out_button">வெளியேறு</string>
     <string name="download_failed">இந்த வீடியோவை பதிவிறக்க முடியவில்லை</string>
     <string name="select_format">வடிவத்தை தேர்வுசெய்யவும்</string>
+    <string name="search">தேடல்</string>
     <string name="edit_video">வீடியோவை திருத்த வேண்டுமா?</string>
+    <string name="apply_metrics">மதிப்பீடுகளை உபயோகிக்கவும்</string>
+    <string name="fetching_metrics">மதிப்பீடுகளை எடுக்கின்றது...</string>
+    <string name="error_metrics">மிகவும் மறுபடியாக கிடைக்கவில்லை</string>
     <string name="confirm">உறுதிப்படுத்தவும்</string>
     <string name="cancel">ரத்து செய்யவும்</string>
     <string name="delete_video">வீடியோவை நீக்கவா?</string>

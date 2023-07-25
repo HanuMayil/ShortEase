@@ -4,9 +4,14 @@
     <string name="sign_in_button">Iniciar sesión con Google</string>
     <string name="my_videos_header">Mis videos</string>
     <string name="saved_videos_header">Videos guardados</string>
+    <string name="publish_video_header">Publicar Videos</string>
     <string name="video_editor_header">Editor</string>
     <string name="generating">Generando vista previa...</string>
     <string name="video_preview_header">Previsualizar</string>
+    <string name="apply_metrics">Aplicar métricas</string>
+    <string name="fetching_metrics">Obteniendo métricas...</string>
+    <string name="search">Buscar</string>
+    <string name="error_metrics">Reproducido más veces no disponible</string>
     <string name="sign_out_button">Cerrar sesión</string>
     <string name="download_failed">No se puede descargar este video</string>
     <string name="select_format">Seleccionar formato</string>
