@@ -124,7 +124,9 @@ fun MyVideos(
 
     LaunchedEffect(channelId) {
         if(ChannelInfo.thumbnailItems.isNotEmpty()) {
-            thumbnailItems.addAll(ChannelInfo.thumbnailItems)
+            if(thumbnailItems.isNotEmpty()) {
+                thumbnailItems.addAll(ChannelInfo.thumbnailItems)
+            }
             channelIconUrl.value = ChannelInfo.channelIconUrl
             thumbnailItemsCopy.addAll(ChannelInfo.thumbnailItems)
         } else {
@@ -170,6 +172,8 @@ fun MyVideos(
                                     stringResource(R.string.my_videos_header)
                                 } else if(selectedTab.value == R.drawable.edit){
                                     stringResource(R.string.saved_videos_header)
+                                } else if(selectedTab.value == R.drawable.share){
+                                    stringResource(R.string.publish_video_header)
                                 } else { "" },
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth(),
