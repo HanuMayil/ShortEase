@@ -1,16 +1,27 @@
+
+import android.content.ContentValues
+import android.content.Context
 import android.graphics.ColorMatrix
+import android.media.MediaScannerConnection
+import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
+import android.widget.Toast
 import android.widget.VideoView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -20,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,8 +65,9 @@ import com.google.android.exoplayer2.ui.PlayerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.BasicFileAttributes
@@ -77,7 +90,10 @@ fun PreviewScreen(
                     it.name.endsWith(".mov")) }
     val firstVideoFileName = videoFiles?.firstOrNull()?.name
     var finalVideoPath = "${context.filesDir}/output/${videoId}/$firstVideoFileName"
-
+    val coroutineScope = CoroutineScope(Dispatchers.Default)
+    val userInput by remember { mutableStateOf("")}
+    var isSaveDialogOpen by remember { mutableStateOf(false) }
+    
     Column(modifier = Modifier.fillMaxSize()) {
         Surface(color = colorPalette.ShortEaseRed
         ) {
@@ -135,7 +151,7 @@ fun PreviewScreen(
                         horizontalArrangement = Arrangement.SpaceBetween) {
                         Button(
 
-                            onClick = { /* Handle button click */ },
+                            onClick = {  isSaveDialogOpen = true },
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(top = 0.dp, start = 8.dp, end = 4.dp, bottom = 8.dp)
@@ -153,7 +169,7 @@ fun PreviewScreen(
                             )
                         }
                         Button(
-                            onClick = { /* Handle button click */ },
+                            onClick = { /* Handle logic */},
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(top = 0.dp, start = 8.dp, end = 4.dp, bottom = 8.dp)
@@ -175,8 +191,21 @@ fun PreviewScreen(
             }
         }
     }
-}
 
+    if (isSaveDialogOpen) {
+        showSaveVideoDialog(
+            onConfirm = { fileName ->
+                if (videoId != null) {
+                    downloadVideo(context, videoId, fileName)
+                }
+                isSaveDialogOpen = false
+            },
+            onDismiss = {
+                isSaveDialogOpen = false
+            }
+        )
+    }
+}
 fun getMostRecentlyAddedMp4File(directoryPath: String): File? {
     val directory = File(directoryPath)
     if (!directory.isDirectory) {
@@ -197,11 +226,107 @@ fun compareFileCreationTime(file1: Path, file2: Path): Int {
     return basicAttrs1.creationTime().compareTo(basicAttrs2.creationTime())
 }
 
+fun downloadVideo(context: Context, videoId: String, videoName: String) {
+    // Get the source video file path
+    val sourceVideoPath = "${context.filesDir}/output/${videoId}/output-filter.mp4"
+
+    // Get the destination file name and create the file in the "ShortEase" directory
+    val destinationFileName = "ShortEase_$videoName.mp4"
+    val shortEaseDir = Environment.DIRECTORY_MOVIES + "/ShortEase"
+    val values = ContentValues().apply {
+        put(MediaStore.MediaColumns.DISPLAY_NAME, destinationFileName)
+        put(MediaStore.MediaColumns.RELATIVE_PATH, shortEaseDir)
+        put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
+    }
+
+    val resolver = context.contentResolver
+    var uri: Uri? = null
+
+    // Use MediaStore to insert the video into the gallery with the desired path
+    try {
+        uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values)
+        uri?.let {
+            val outputStream = resolver.openOutputStream(it)
+            outputStream?.use { outputStream ->
+                FileInputStream(File(sourceVideoPath)).use { inputStream ->
+                    inputStream.copyTo(outputStream)
+                }
+            }
+        }
+    } catch (e: IOException) {
+        e.printStackTrace()
+        // Handle download failure here (e.g., show an error Toast)
+        Toast.makeText(context, "Failed to download video 😔", Toast.LENGTH_SHORT).show()
+        return
+    }
+    // Notify the MediaStore about the new file
+    MediaScannerConnection.scanFile(
+        context,
+        arrayOf(destinationFileName),
+        arrayOf("video/mp4"),
+        null // No need to provide a callback
+    )
+
+    // Show Toast message when download is successful
+    Toast.makeText(context, "Video successfully downloaded 🤓", Toast.LENGTH_SHORT).show()
+}
 
 @Composable
 @Preview
 private fun PreviewScreenPreview() {
     PreviewScreen(navController = rememberNavController())
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun showSaveVideoDialog(
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var context = LocalContext.current
+    var userInput by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Save Video") },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (userInput.isNotBlank()) {
+                        onConfirm(userInput)
+                    } else {
+                        Toast.makeText(context, "Please enter a video name", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
+            ) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(colorPalette.ShortEaseRed)
+            ) {
+                Text("Cancel")
+            }
+        },
+        text = {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Please enter a name for the video:")
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = userInput,
+                    onValueChange = { userInput = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.textFieldColors(
+                        focusedIndicatorColor = colorPalette.ShortEaseRed,
+                        unfocusedIndicatorColor = colorPalette.ShortEaseBlack
+                    )
+                )
+            }
+        }
+    )
 }
 
 @Composable
