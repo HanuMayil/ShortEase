@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -27,6 +28,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -35,9 +38,12 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -48,11 +54,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -60,6 +69,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
@@ -68,6 +78,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+import com.example.shortease.ui.theme.ColorPalette
 import com.example.shortease.ui.theme.ShortEaseTheme
 import com.example.shortease.ui.theme.colorPalette
 import com.example.shortease.youtube.YouTubeDownloader
@@ -87,7 +98,7 @@ import java.util.concurrent.Executors
 
 
 @SuppressLint("SuspiciousIndentation")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun MyVideos(
     navController: NavController,
@@ -96,9 +107,11 @@ fun MyVideos(
 
     var selectedTab = remember { mutableStateOf(R.drawable.download_icon) }
     var selected by remember { mutableStateOf(R.drawable.download_icon) }
+    var query by remember { mutableStateOf("") }
+    var thumbnailItems = remember { mutableStateListOf<ThumbnailItem>() }
 
 
-    val thumbnailItems = remember { mutableStateListOf<ThumbnailItem>() }
+    //val thumbnailItems = remember { mutableStateListOf<ThumbnailItem>() }
     //tmp image
     val channelIconUrl = remember { mutableStateOf("https://www.digitary.net/wp-content/uploads/2021/07/Generic-Profile-Image.png") }
     val youtubeDownloader = YouTubeDownloader(LocalContext.current)
@@ -117,25 +130,25 @@ fun MyVideos(
             if (!channelId.isNullOrEmpty()) {
                 val fetchedThumbnailItems = y.fetchVideoThumbnails(channelId, channelIconUrl)
                 thumbnailItems.addAll(fetchedThumbnailItems)
-                ChannelInfo.thumbnailItems.addAll(fetchedThumbnailItems)
+
             }
         }
     }
 
-//        val fakeThumbnailItem: ThumbnailItem = ThumbnailItem(
-//            "10 Sec Timer",
-//            "https://i.ytimg.com/vi/zU9y354XAgM/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyiceF5hUqg8CSc85pQwJuvOxXkQ",
-//            BigInteger("1234567890")
-//        )
-//        val fakeThumbnailItem2: ThumbnailItem = ThumbnailItem(
-//            "Donkey Kong Gets Sturdy",
-//            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
-//            BigInteger("1234567890")
-//        )
-//        thumbnailItems.add(fakeThumbnailItem)
-//        thumbnailItems.add(fakeThumbnailItem2)
+    val thumbnailItemsCopy: List<ThumbnailItem> = thumbnailItems.toList()
 
     var expanded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(query) {
+        if (query.isEmpty()) {
+            thumbnailItems.clear()
+            thumbnailItems.addAll(thumbnailItemsCopy)
+        } else {
+            val filteredItems = performSearch(query, thumbnailItemsCopy)
+            thumbnailItems.clear()
+            thumbnailItems.addAll(filteredItems)
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -153,33 +166,46 @@ fun MyVideos(
                             titleContentColor = colorPalette.ShortEaseWhite,
                         ),
                         title = {
-                            Text(
-                                text = if(selectedTab.value == R.drawable.download_icon) {
-                                    stringResource(R.string.my_videos_header)
-                                } else if(selectedTab.value == R.drawable.edit){
-                                    stringResource(R.string.saved_videos_header)
-                                } else if(selectedTab.value == R.drawable.share){
-                                    stringResource(R.string.publish_video_header)
-                                } else { "" },
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth(),
-                                style = TextStyle(
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.SansSerif,
-                                    fontSize = 24.sp
+                            Box(
+                                modifier = Modifier.offset{IntOffset(480, 0)}
+                            ) {
+                                Text(
+                                    text = if (selectedTab.value == R.drawable.download_icon) {
+                                        stringResource(R.string.my_videos_header)
+                                    } else if (selectedTab.value == R.drawable.edit) {
+                                        stringResource(R.string.saved_videos_header)
+                                    } else {
+                                        ""
+                                    },
+                                    textAlign = TextAlign.Center,
+                                    style = TextStyle(
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.SansSerif,
+                                        fontSize = 24.sp
+                                    )
                                 )
-                            )
-                        },
-                        navigationIcon = {
-                            Image(
-                                painter = painterResource(R.drawable.search),
-                                contentDescription = "Search Icon",
-                                Modifier
-                                    .padding(start = 10.dp)
-                                    .size(30.dp)
-                            )
+                            }
                         },
                         actions = {
+                            Box(
+                                modifier = Modifier
+                            ){
+                                val keyboardController = LocalSoftwareKeyboardController.current
+
+                                Column(
+                                    modifier = Modifier
+                                ) {
+                                    SearchBar(
+                                        query = query,
+                                        onQueryChange = { newQuery ->
+                                            query = newQuery
+                                        },
+                                        onSearchClick = {keyboardController?.show()}
+                                    )
+                                }
+                            }
+
+
                             Box(
                                 modifier = Modifier
                                     .wrapContentSize(Alignment.TopEnd)
@@ -917,7 +943,6 @@ fun LanguagePicker(
 
 
 
-
 fun setLocale(context: Context, languageCode: String) {
     val locale = Locale(languageCode)
     Locale.setDefault(locale)
@@ -930,5 +955,44 @@ fun setLocale(context: Context, languageCode: String) {
     // Restart the activity to apply the new configuration
     if (context is Activity) {
         context.recreate()
+    }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onSearchClick: () -> Unit
+) {
+    TextField(
+        value = query,
+        onValueChange = { newValue -> onQueryChange(newValue) },
+        colors = TextFieldDefaults.textFieldColors(
+            containerColor = Color.Transparent,
+            textColor = Color.Black// Change this color to any color you want
+        ),
+        modifier = Modifier
+            .fillMaxWidth(0.5f)
+            .padding(8.dp)
+            .offset(x = (-152.dp)),
+        leadingIcon = {
+            IconButton(onClick = {
+                onSearchClick()
+            }) {
+                Icon(
+                    painter = painterResource(R.drawable.search),
+                    contentDescription = "Search",
+                    modifier= Modifier.size(24.dp),
+                    tint = colorPalette.ShortEaseWhite
+                )
+            }
+        },
+        placeholder = { Text("Search") }
+    )
+}
+
+fun performSearch(query: String, thumbnailItems: List<ThumbnailItem>): List<ThumbnailItem> {
+    return thumbnailItems.filter { thumbnailItem ->
+        thumbnailItem.title.contains(query, ignoreCase = true)
     }
 }
