@@ -53,3 +53,4 @@
 | 07/23/2023 |      |         |       |  5       |          |       | merge, clean up code, and finish editor              |
 | 07/23/2023 |      |         | 6     |          |          |       | merged to main, fixed bugs, finishing video upload   |
 | 07/24/2023 |      |         | 4     |          |          |       | fixing bugs and other tasks                          |
+| 07/24/2023 |5     |         |       |          |          |       | video download and PR review                         |
