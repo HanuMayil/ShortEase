@@ -124,13 +124,13 @@ fun MyVideos(
 
     LaunchedEffect(channelId) {
         if(ChannelInfo.thumbnailItems.isNotEmpty()) {
-            if(thumbnailItems.isNotEmpty()) {
+            if(thumbnailItems.isEmpty()) {
                 thumbnailItems.addAll(ChannelInfo.thumbnailItems)
             }
             channelIconUrl.value = ChannelInfo.channelIconUrl
             thumbnailItemsCopy.addAll(ChannelInfo.thumbnailItems)
         } else {
-            if (!channelId.isNullOrEmpty()) {
+            if (!channelId.isNullOrEmpty() && thumbnailItems.isEmpty()) {
                 val fetchedThumbnailItems = y.fetchVideoThumbnails(channelId, channelIconUrl)
                 thumbnailItems.addAll(fetchedThumbnailItems)
                 ChannelInfo.thumbnailItems.addAll(fetchedThumbnailItems)
