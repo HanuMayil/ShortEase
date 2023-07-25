@@ -7,6 +7,10 @@
     <string name="video_editor_header">संपादक</string>
     <string name="publish_video_header">वीडियो प्रकाशित करें</string>
     <string name="generating">पूर्वावलोकन उत्पन्न कर रहा है...</string>
+    <string name="apply_metrics">मापदंड लागू करें</string>
+    <string name="fetching_metrics">मापदंड प्राप्त कर रहा है...</string>
+    <string name="error_metrics">सबसे अधिक दोहराया गया उपलब्ध नहीं है</string>
+    <string name="search">खोजें</string>
     <string name="video_preview_header">पूर्वावलोकन</string>
     <string name="sign_out_button">साइन आउट करें</string>
     <string name="download_failed">इस वीडियो को डाउनलोड नहीं कर सकते</string>

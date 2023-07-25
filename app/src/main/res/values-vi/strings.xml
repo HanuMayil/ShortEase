@@ -10,7 +10,11 @@
     <string name="video_preview_header">Xem trước</string>
     <string name="sign_out_button">Đăng xuất</string>
     <string name="download_failed">Không thể tải xuống video này</string>
+    <string name="search">Tìm kiếm</string>
     <string name="select_format">Chọn Định dạng</string>
+    <string name="apply_metrics">Áp dụng số liệu</string>
+    <string name="fetching_metrics">Đang tải số liệu...</string>
+    <string name="error_metrics">Không có phần được phát lại nhiều nhất</string>
     <string name="edit_video">Chỉnh sửa Video?</string>
     <string name="confirm">Xác nhận</string>
     <string name="cancel">Hủy bỏ</string>

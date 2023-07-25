@@ -54,12 +54,12 @@ fun HomeScreen(
                         .padding(bottom = 16.dp)
                 )
                 GoogleButton(signInClicked)
-                Text(
-                    modifier = Modifier.clickable {
-                        navController.navigate(route = Screen.DebugScreen.route)
-                    },
-                    text = "Debug"
-                )
+//                Text(
+//                    modifier = Modifier.clickable {
+//                        navController.navigate(route = Screen.DebugScreen.route)
+//                    },
+//                    text = "Debug"
+//                )
             }
         }
     }

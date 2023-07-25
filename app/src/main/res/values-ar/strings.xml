@@ -7,6 +7,10 @@
     <string name="publish_video_header">نشر الفيديوهات</string>
     <string name="video_editor_header">المحرر</string>
     <string name="generating">جارٍ توليد المعاينة...</string>
+    <string name="apply_metrics">طبق المقاييس</string>
+    <string name="fetching_metrics">جلب المقاييس...</string>
+    <string name="error_metrics">الأكثر إعادة غير متاح</string>
+    <string name="search">بحث</string>
     <string name="video_preview_header">معاينة</string>
     <string name="sign_out_button">تسجيل الخروج</string>
     <string name="download_failed">لا يمكن تنزيل هذا الفيديو</string>

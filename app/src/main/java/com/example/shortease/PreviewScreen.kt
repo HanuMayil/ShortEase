@@ -139,7 +139,7 @@ fun PreviewScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(top = 0.dp, start = 8.dp, end = 4.dp, bottom = 8.dp)
-                                .height(64.dp),
+                                .height(50.dp),
                             shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = colorPalette.ShortEaseRed,
@@ -157,7 +157,7 @@ fun PreviewScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(top = 0.dp, start = 8.dp, end = 4.dp, bottom = 8.dp)
-                                .height(64.dp),
+                                .height(50.dp),
                             shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = colorPalette.ShortEaseRed,

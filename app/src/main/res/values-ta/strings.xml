@@ -11,7 +11,11 @@
     <string name="sign_out_button">வெளியேறு</string>
     <string name="download_failed">இந்த வீடியோவை பதிவிறக்க முடியவில்லை</string>
     <string name="select_format">வடிவத்தை தேர்வுசெய்யவும்</string>
+    <string name="search">தேடல்</string>
     <string name="edit_video">வீடியோவை திருத்த வேண்டுமா?</string>
+    <string name="apply_metrics">மதிப்பீடுகளை உபயோகிக்கவும்</string>
+    <string name="fetching_metrics">மதிப்பீடுகளை எடுக்கின்றது...</string>
+    <string name="error_metrics">மிகவும் மறுபடியாக கிடைக்கவில்லை</string>
     <string name="confirm">உறுதிப்படுத்தவும்</string>
     <string name="cancel">ரத்து செய்யவும்</string>
     <string name="delete_video">வீடியோவை நீக்கவா?</string>

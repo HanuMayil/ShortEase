@@ -6,7 +6,11 @@
     <string name="saved_videos_header">Vidéos enregistrées</string>
     <string name="video_editor_header">Éditeur</string>
     <string name="publish_video_header">Publier des vidéos</string>
+    <string name="apply_metrics">Appliquer les métriques</string>
+    <string name="fetching_metrics">Récupération des métriques...</string>
+    <string name="error_metrics">Le plus rejoué n\'est pas disponible</string>
     <string name="generating">Génération de l\'aperçu...</string>
+    <string name="search">Recherche</string>
     <string name="video_preview_header">Aperçu</string>
     <string name="sign_out_button">Se déconnecter</string>
     <string name="download_failed">Impossible de télécharger cette vidéo</string>

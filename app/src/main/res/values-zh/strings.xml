@@ -9,6 +9,10 @@
     <string name="generating">正在生成预览...</string>
     <string name="video_preview_header">预览</string>
     <string name="sign_out_button">登出</string>
+    <string name="apply_metrics">应用指标</string>
+    <string name="search">搜索</string>
+    <string name="fetching_metrics">获取指标中...</string>
+    <string name="error_metrics">最常重播的视频不可用</string>
     <string name="download_failed">无法下载此视频</string>
     <string name="select_format">选择格式</string>
     <string name="edit_video">编辑视频？</string>

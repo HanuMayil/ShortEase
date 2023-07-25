@@ -6,11 +6,13 @@ import VideoHandle.CmdList
 import VideoHandle.EpEditor
 import VideoHandle.EpVideo
 import VideoHandle.OnEditorListener
+import WebScraper
 import android.content.Context
 import android.graphics.ColorMatrix
 import android.graphics.Typeface
 import android.media.MediaMetadataRetriever
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,9 +28,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RangeSlider
@@ -65,6 +67,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat.getString
 import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -91,7 +94,8 @@ var endCropTime = 0f
 var audioVolume = 100f
 var subtitleList = mutableListOf<PlayerSubtitles>()
 var y = 0f
-
+var metrics: Double? = -1.0
+var apiCalled = false
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoEditorScreen(
@@ -100,6 +104,19 @@ fun VideoEditorScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val context = LocalContext.current
     val videoId = navBackStackEntry?.arguments?.getString("videoId")
+    val viewModel: WebScraper = viewModel()
+    LaunchedEffect(videoId) {
+        if (!videoId.isNullOrEmpty()) {
+            viewModel.callAPI(context = context, videoId = videoId)
+        }
+    }
+    if(metrics == -1.0 && !apiCalled) {
+        viewModel.response?.let {
+            Log.d("heatmap time", it)
+            metrics = it.toDoubleOrNull()
+            apiCalled = true
+        }
+    }
     val videoPath = "${context.filesDir}/videos/${videoId}"
     val folder = File(videoPath)
     val folderContents = folder.listFiles()
@@ -149,8 +166,9 @@ fun VideoEditorScreen(
                     navigationIcon = {
                         IconButton(
                             onClick = {
-                                navController.popBackStack()
+                                viewModel.response = null
                                 resetVariables()
+                                navController.popBackStack()
                             }
                         ) {
                             Image(
@@ -263,7 +281,7 @@ fun VideoEditorScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(150.dp)
+                    .height(170.dp)
                     .background(colorPalette.ShortEaseBlack)
             ) {
                 if (shouldRenderContent == R.drawable.scissors_icon) {
@@ -282,6 +300,45 @@ fun VideoEditorScreen(
                                 .padding(vertical = 8.dp)
                                 .align(Alignment.CenterHorizontally)
                         )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            when {
+                                metrics == null -> {
+                                    // If metrics is -1, show the message "Most replayed not available"
+                                    Toast.makeText(context, getString(context, R.string.error_metrics), Toast.LENGTH_SHORT).show()
+                                }
+
+                                metrics!! < 0 -> {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Text(
+                                        text = getString(context, R.string.fetching_metrics),
+                                        color = colorPalette.ShortEaseWhite,
+                                        modifier = Modifier.padding(start = 8.dp)
+                                    )
+                                }
+
+                                else -> {
+                                    // If metrics is >= 0, render a button
+                                    Button(onClick = {
+                                        val metricsValue = (metrics!!) * videoDuration
+                                        val adjustedStart = ((metricsValue - 10000.0).coerceAtLeast(0.0)).toFloat()
+                                        val adjustedEnd = ((metricsValue + 10000.0).coerceAtMost(videoDuration.toDouble() * 1000)).toFloat()
+
+                                        values = adjustedStart..adjustedEnd
+                                        startCropTime = values.start
+                                        endCropTime = values.endInclusive
+
+                                        playerView.player?.seekTo(startCropTime.toLong())
+                                    }) {
+                                        Text(text = getString(context, R.string.apply_metrics))
+                                    }
+                                }
+                            }
+                        }
                         CropRangeSlider(
                             range = range,
                             values = values,
@@ -289,7 +346,6 @@ fun VideoEditorScreen(
                                 values = newValues
                                 startCropTime = values.start.toFloat()
                                 endCropTime = values.endInclusive.toFloat()
-
                             })
                     }
                 }
@@ -576,8 +632,10 @@ fun resetVariables() {
     startCropTime = 0f
     endCropTime = 0f
     audioVolume = 100f
+    metrics = -1.0
     y = 0f
     subtitleList.clear()
+    apiCalled = false
 }
 
 fun processAudio(context: Context, videoId: String, completionCallback: () -> Unit) {
