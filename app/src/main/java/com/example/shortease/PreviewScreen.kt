@@ -1,7 +1,6 @@
 
 import android.content.ContentValues
 import android.content.Context
-import android.graphics.ColorMatrix
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Environment
@@ -195,8 +194,9 @@ fun PreviewScreen(
     if (isSaveDialogOpen) {
         showSaveVideoDialog(
             onConfirm = { fileName ->
+
                 if (videoId != null) {
-                    downloadVideo(context, videoId, fileName)
+                    downloadVideo(context, finalVideoPath, fileName)
                 }
                 isSaveDialogOpen = false
             },
@@ -226,10 +226,8 @@ fun compareFileCreationTime(file1: Path, file2: Path): Int {
     return basicAttrs1.creationTime().compareTo(basicAttrs2.creationTime())
 }
 
-fun downloadVideo(context: Context, videoId: String, videoName: String) {
+fun downloadVideo(context: Context, videoPath: String, videoName: String) {
     // Get the source video file path
-    val sourceVideoPath = "${context.filesDir}/output/${videoId}/output-filter.mp4"
-
     // Get the destination file name and create the file in the "ShortEase" directory
     val destinationFileName = "ShortEase_$videoName.mp4"
     val shortEaseDir = Environment.DIRECTORY_MOVIES + "/ShortEase"
@@ -248,7 +246,7 @@ fun downloadVideo(context: Context, videoId: String, videoName: String) {
         uri?.let {
             val outputStream = resolver.openOutputStream(it)
             outputStream?.use { outputStream ->
-                FileInputStream(File(sourceVideoPath)).use { inputStream ->
+                FileInputStream(File(videoPath)).use { inputStream ->
                     inputStream.copyTo(outputStream)
                 }
             }
