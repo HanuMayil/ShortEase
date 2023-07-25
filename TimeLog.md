@@ -52,3 +52,4 @@
 | 07/22/2023 |      |         | 6     |          |7         | 8     | Bug fixes + progress on video uploading              |
 | 07/23/2023 |      |         |       |  5       |          |       | merge, clean up code, and finish editor              |
 | 07/23/2023 |      |         | 6     |          |          |       | merged to main, fixed bugs, finishing video upload   |
+| 07/24/2023 |      |         |       |          | 8        |       | Implement search button and logic                    |    
