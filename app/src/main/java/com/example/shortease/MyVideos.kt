@@ -870,4 +870,3 @@ fun performSearch(query: String, thumbnailItems: List<ThumbnailItem>): List<Thum
         thumbnailItem.title.contains(query, ignoreCase = true)
     }
 }
-
