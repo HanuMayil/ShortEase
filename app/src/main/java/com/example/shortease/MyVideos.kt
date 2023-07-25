@@ -43,6 +43,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -68,6 +69,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
@@ -105,9 +107,42 @@ fun MyVideos(
 
     var selectedTab = remember { mutableStateOf(R.drawable.download_icon) }
     var selected by remember { mutableStateOf(R.drawable.download_icon) }
+    var query by remember { mutableStateOf("") }
+    var thumbnailItems = remember { mutableStateListOf<ThumbnailItem>() }
 
+    if (thumbnailItems.isEmpty()) {
+        val fakeThumbnailItem: ThumbnailItem = ThumbnailItem(
+            "10 Sec Timer",
+            "https://i.ytimg.com/vi/zU9y354XAgM/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyiceF5hUqg8CSc85pQwJuvOxXkQ",
+            BigInteger("1234567890")
+        )
 
-    val thumbnailItems = remember { mutableStateListOf<ThumbnailItem>() }
+        val fakeThumbnailItem2: ThumbnailItem = ThumbnailItem(
+            "Donkey Kong Gets Sturdy",
+            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
+            BigInteger("1234567890")
+        )
+
+        val fakeThumbnailItem3: ThumbnailItem = ThumbnailItem(
+            "Donkey Kong Gets",
+            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
+            BigInteger("1234567890")
+        )
+
+        val fakeThumbnailItem4: ThumbnailItem = ThumbnailItem(
+            "Donkey Kong",
+            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
+            BigInteger("1234567890")
+        )
+
+        val fakeThumbnailItem5: ThumbnailItem = ThumbnailItem(
+            "Donkey",
+            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
+            BigInteger("1234567890")
+        )
+
+        thumbnailItems.addAll(listOf(fakeThumbnailItem, fakeThumbnailItem2, fakeThumbnailItem3, fakeThumbnailItem4, fakeThumbnailItem5))
+    }
     //tmp image
     val channelIconUrl = remember { mutableStateOf("https://www.digitary.net/wp-content/uploads/2021/07/Generic-Profile-Image.png") }
     val youtubeDownloader = YouTubeDownloader(LocalContext.current)
@@ -125,20 +160,20 @@ fun MyVideos(
 //        }
 //    }
 
-        val fakeThumbnailItem: ThumbnailItem = ThumbnailItem(
-            "10 Sec Timer",
-            "https://i.ytimg.com/vi/zU9y354XAgM/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyiceF5hUqg8CSc85pQwJuvOxXkQ",
-            BigInteger("1234567890")
-        )
-        val fakeThumbnailItem2: ThumbnailItem = ThumbnailItem("Donkey Kong Gets Sturdy",
-            "https://i.ytimg.com/vi/KZRrrNFzL2A/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAj7qcSjXjcVtLgu7kFfPaXhohvvQ",
-            BigInteger("1234567890")
-        )
-        thumbnailItems.add(fakeThumbnailItem)
-        thumbnailItems.add(fakeThumbnailItem2)
-
+    val thumbnailItemsCopy: List<ThumbnailItem> = thumbnailItems.toList()
 
     var expanded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(query) {
+        if (query.isEmpty()) {
+            thumbnailItems.clear()
+            thumbnailItems.addAll(thumbnailItemsCopy)
+        } else {
+            val filteredItems = performSearch(query, thumbnailItemsCopy)
+            thumbnailItems.clear()
+            thumbnailItems.addAll(filteredItems)
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -156,42 +191,40 @@ fun MyVideos(
                             titleContentColor = colorPalette.ShortEaseWhite,
                         ),
                         title = {
-                            Text(
-                                text = if(selectedTab.value == R.drawable.download_icon) {
-                                    stringResource(R.string.my_videos_header)
-                                } else if(selectedTab.value == R.drawable.edit){
-                                    stringResource(R.string.saved_videos_header)
-                                } else { "" },
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth(),
-                                style = TextStyle(
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.SansSerif,
-                                    fontSize = 24.sp
+                            Box(
+                                modifier = Modifier.offset{IntOffset(480, 0)}
+                            ) {
+                                Text(
+                                    text = if (selectedTab.value == R.drawable.download_icon) {
+                                        stringResource(R.string.my_videos_header)
+                                    } else if (selectedTab.value == R.drawable.edit) {
+                                        stringResource(R.string.saved_videos_header)
+                                    } else {
+                                        ""
+                                    },
+                                    textAlign = TextAlign.Center,
+                                    style = TextStyle(
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.SansSerif,
+                                        fontSize = 24.sp
+                                    )
                                 )
-                            )
+                            }
                         },
                         actions = {
                             Box(
                                 modifier = Modifier
-                                    .wrapContentSize(Alignment.TopStart)
                             ){
-                                var query by remember { mutableStateOf("") }
                                 val keyboardController = LocalSoftwareKeyboardController.current
-                                val thumbnailItemsCopy: List<ThumbnailItem> = thumbnailItems.toList()
-
-
-                                var searchResults by remember { mutableStateOf<List<ThumbnailItem>>(emptyList()) }
 
                                 Column(
                                     modifier = Modifier
                                 ) {
                                     SearchBar(
                                         query = query,
-                                        onQueryChange = {  newQuery ->
+                                        onQueryChange = { newQuery ->
                                             query = newQuery
-                                            // Call performSearch to filter the data based on the query
-                                            searchResults = performSearch(query, thumbnailItems) },
+                                        },
                                         onSearchClick = {keyboardController?.show()}
                                     )
                                 }
@@ -808,9 +841,14 @@ fun SearchBar(
     TextField(
         value = query,
         onValueChange = { newValue -> onQueryChange(newValue) },
+        colors = TextFieldDefaults.textFieldColors(
+            containerColor = Color.Transparent,
+            textColor = Color.Black// Change this color to any color you want
+        ),
         modifier = Modifier
             .fillMaxWidth(0.5f)
-            .padding(8.dp),
+            .padding(8.dp)
+            .offset(x = (-152.dp)),
         leadingIcon = {
             IconButton(onClick = {
                 onSearchClick()
