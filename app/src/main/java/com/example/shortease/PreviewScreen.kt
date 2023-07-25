@@ -61,6 +61,10 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ui.PlayerView
+import com.google.api.client.http.FileContent
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.gson.GsonFactory
+import com.google.api.services.youtube.YouTube
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -89,10 +93,37 @@ fun PreviewScreen(
                     it.name.endsWith(".mov")) }
     val firstVideoFileName = videoFiles?.firstOrNull()?.name
     var finalVideoPath = "${context.filesDir}/output/${videoId}/$firstVideoFileName"
-    val coroutineScope = CoroutineScope(Dispatchers.Default)
-    val userInput by remember { mutableStateOf("")}
     var isSaveDialogOpen by remember { mutableStateOf(false) }
-    
+
+    val videoTitle =  remember { mutableStateOf("") }
+    val videoDescription  = remember { mutableStateOf("") }
+    val videoTags =  remember { mutableStateOf(emptyList<String>()) }
+    val showPopup = remember { mutableStateOf(false) }
+
+    if (showPopup.value) {
+        showUploadPopup(onConfirm = { title, description, tags ->
+            // Update the state variables with the data from the popup
+            videoTitle.value = title
+            videoDescription.value = description
+            videoTags.value = tags
+
+            // Close the popup
+            showPopup.value = false
+
+            // Video Metadata
+            val httpTransport = NetHttpTransport()
+            val jsonFactory = GsonFactory()
+
+            val youtube = YouTube
+                .Builder(httpTransport, jsonFactory, null)
+                .setApplicationName("YourAppName")
+                .build()
+            val videoUploadTask = VideoUploadTask(youtube, videoTitle.value, videoDescription.value, videoTags.value, FileContent("video/*", File(finalVideoPath)))
+            videoUploadTask.execute()
+            Toast.makeText(context, "Video successfully uploaded.", Toast.LENGTH_SHORT).show()
+        })
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         Surface(color = colorPalette.ShortEaseRed
         ) {
@@ -168,7 +199,7 @@ fun PreviewScreen(
                             )
                         }
                         Button(
-                            onClick = { /* Handle logic */},
+                            onClick = { showPopup.value = true },
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(top = 0.dp, start = 8.dp, end = 4.dp, bottom = 8.dp)
@@ -181,10 +212,9 @@ fun PreviewScreen(
                         ) {
                             Image(
                                 painter = painterResource(R.drawable.upload_icon),
-                                contentDescription = "Upload",
+                                contentDescription = "Upload"
                             )
                         }
-
                     }
                 }
             }
