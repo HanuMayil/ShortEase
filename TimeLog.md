@@ -55,3 +55,4 @@
 | 07/24/2023 |     |         | 4     |          |          |       | fixing bugs and other tasks                          |
 | 07/24/2023 | 5   |         |       |          |          |       | video download and PR review                         |
 | 07/24/2023 |     |         |       |          | 8        |       | Implement search button and logic                    |  
+| 07/25/2023 | 5   | 5       | 5     | 5        | 5        | 5     | final bug fixes and presentation demo               |  
