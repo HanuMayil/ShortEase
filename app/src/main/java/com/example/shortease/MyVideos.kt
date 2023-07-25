@@ -109,7 +109,7 @@ fun MyVideos(
     var selected by remember { mutableStateOf(R.drawable.download_icon) }
     var query by remember { mutableStateOf("") }
     var thumbnailItems = remember { mutableStateListOf<ThumbnailItem>() }
-
+    var thumbnailItemsCopy = remember { mutableStateListOf<ThumbnailItem>() }
 
     //val thumbnailItems = remember { mutableStateListOf<ThumbnailItem>() }
     //tmp image
@@ -126,16 +126,15 @@ fun MyVideos(
         if(ChannelInfo.thumbnailItems.isNotEmpty()) {
             thumbnailItems.addAll(ChannelInfo.thumbnailItems)
             channelIconUrl.value = ChannelInfo.channelIconUrl
+            thumbnailItemsCopy.addAll(ChannelInfo.thumbnailItems)
         } else {
             if (!channelId.isNullOrEmpty()) {
                 val fetchedThumbnailItems = y.fetchVideoThumbnails(channelId, channelIconUrl)
                 thumbnailItems.addAll(fetchedThumbnailItems)
-
+                ChannelInfo.thumbnailItems.addAll(fetchedThumbnailItems)
             }
         }
     }
-
-    val thumbnailItemsCopy: List<ThumbnailItem> = thumbnailItems.toList()
 
     var expanded by remember { mutableStateOf(false) }
 
@@ -166,46 +165,31 @@ fun MyVideos(
                             titleContentColor = colorPalette.ShortEaseWhite,
                         ),
                         title = {
-                            Box(
-                                modifier = Modifier.offset{IntOffset(480, 0)}
-                            ) {
-                                Text(
-                                    text = if (selectedTab.value == R.drawable.download_icon) {
-                                        stringResource(R.string.my_videos_header)
-                                    } else if (selectedTab.value == R.drawable.edit) {
-                                        stringResource(R.string.saved_videos_header)
-                                    } else {
-                                        ""
-                                    },
-                                    textAlign = TextAlign.Center,
-                                    style = TextStyle(
-                                        fontWeight = FontWeight.Bold,
-                                        fontFamily = FontFamily.SansSerif,
-                                        fontSize = 24.sp
-                                    )
+                            Text(
+                                text = if(selectedTab.value == R.drawable.download_icon) {
+                                    stringResource(R.string.my_videos_header)
+                                } else if(selectedTab.value == R.drawable.edit){
+                                    stringResource(R.string.saved_videos_header)
+                                } else { "" },
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth(),
+                                style = TextStyle(
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.SansSerif,
+                                    fontSize = 24.sp
                                 )
-                            }
+                            )
+                        },
+                        navigationIcon = {
+                            Image(
+                                painter = painterResource(R.drawable.search),
+                                contentDescription = "Search Icon",
+                                Modifier
+                                    .padding(start = 10.dp)
+                                    .size(30.dp)
+                            )
                         },
                         actions = {
-                            Box(
-                                modifier = Modifier
-                            ){
-                                val keyboardController = LocalSoftwareKeyboardController.current
-
-                                Column(
-                                    modifier = Modifier
-                                ) {
-                                    SearchBar(
-                                        query = query,
-                                        onQueryChange = { newQuery ->
-                                            query = newQuery
-                                        },
-                                        onSearchClick = {keyboardController?.show()}
-                                    )
-                                }
-                            }
-
-
                             Box(
                                 modifier = Modifier
                                     .wrapContentSize(Alignment.TopEnd)
@@ -973,8 +957,7 @@ fun SearchBar(
         ),
         modifier = Modifier
             .fillMaxWidth(0.5f)
-            .padding(8.dp)
-            .offset(x = (-152.dp)),
+            .padding(8.dp),
         leadingIcon = {
             IconButton(onClick = {
                 onSearchClick()
